@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { DatabaseState, DatabaseAction, Project, Table, Field } from '../types';
+import { getUsers, addUser, deleteUser, updateUser } from '../api/users';
 
 const STORAGE_KEY = 'database_state';
 
@@ -18,7 +19,12 @@ const loadInitialState = (): DatabaseState => {
 };
 
 // Initial state
-const initialState: DatabaseState = loadInitialState();
+const initialState: DatabaseState = {
+  projects: [],
+  selectedProject: null,
+  selectedTable: null,
+  users: [],
+};
 
 // Kullanıcı tipi
 export type User = {
@@ -345,6 +351,10 @@ export interface DatabaseContextType {
   state: DatabaseState;
   dispatch: React.Dispatch<DatabaseAction>;
   users: User[];
+  fetchUsers: () => Promise<void>;
+  addUserAsync: (user: User) => Promise<void>;
+  deleteUserAsync: (userId: string) => Promise<void>;
+  updateUserAsync: (userId: string, user: User) => Promise<void>;
 }
 
 const DatabaseContext = createContext<DatabaseContextType | undefined>(undefined);
@@ -352,14 +362,37 @@ const DatabaseContext = createContext<DatabaseContextType | undefined>(undefined
 // Provider component
 export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(databaseReducer, initialState);
-  
-  // Save state to localStorage whenever it changes
+
+  // Kullanıcıları backend'den çek
+  const fetchUsers = async () => {
+    const users = await getUsers();
+    dispatch({ type: 'SET_USERS', payload: users });
+  };
+
+  // Kullanıcı ekle
+  const addUserAsync = async (user: User) => {
+    await addUser(user);
+    await fetchUsers();
+  };
+
+  // Kullanıcı sil
+  const deleteUserAsync = async (userId: string) => {
+    await deleteUser(userId);
+    await fetchUsers();
+  };
+
+  // Kullanıcı güncelle
+  const updateUserAsync = async (userId: string, user: User) => {
+    await updateUser(userId, user);
+    await fetchUsers();
+  };
+
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
-  
+    fetchUsers();
+  }, []);
+
   return (
-    <DatabaseContext.Provider value={{ state, dispatch, users: state.users }}>
+    <DatabaseContext.Provider value={{ state, dispatch, users: state.users, fetchUsers, addUserAsync, deleteUserAsync, updateUserAsync }}>
       {children}
     </DatabaseContext.Provider>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDatabase } from '../context/DatabaseContext';
 import { Button, Card, CardContent, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +16,7 @@ import { paketler } from './AdminUsersFiyatlandirma';
 type RamOption = '250 MB' | '500 MB' | '1 GB' | '2 GB' | '4 GB';
 
 const AdminUsers: React.FC = () => {
-  const { users, dispatch, state } = useDatabase();
+  const { users, addUserAsync, deleteUserAsync, updateUserAsync, fetchUsers } = useDatabase();
   const safeUsers = Array.isArray(users) ? users : [];
   const navigate = useNavigate();
 
@@ -41,48 +41,52 @@ const AdminUsers: React.FC = () => {
   const [pricingOpen, setPricingOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
-  // Mevcut kullanıcının rolünü al (localStorage'dan veya context'ten)
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-  const currentUserRole = currentUser.role || 'yonetici';
-
-  const handleAddUser = (e: React.FormEvent) => {
+  // Kullanıcı ekleme
+  const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !password.trim()) return;
-    dispatch({
-      type: 'ADD_USER',
-      payload: {
-        id: Date.now().toString(),
-        name,
-        email,
-        password,
-        role,
-      },
+    await addUserAsync({
+      id: '', // backend id üretecek
+      name,
+      email,
+      password,
+      role,
     });
     setName(''); setEmail(''); setPassword(''); setRole('yonetici');
   };
+
+  // Kullanıcı silme
+  const confirmDeleteUser = async () => {
+    if (deleteUserId && deleteInput === deleteUserName) {
+      await deleteUserAsync(deleteUserId);
+      setDeleteUserId(null);
+      setDeleteUserName('');
+      setDeleteInput('');
+    }
+  };
+
+  // Kullanıcı güncelleme
+  const handleEditSave = async () => {
+    if (!editUser) return;
+    await updateUserAsync(editUser.id, {
+      ...editUser,
+      name: editName,
+      email: editEmail,
+      password: editPassword,
+      role: editRole,
+    });
+    setEditUser(null);
+  };
+
+  // Sayfa açıldığında kullanıcıları yükle (gerekirse)
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleDeleteUser = (userId: string, userName: string) => {
     setDeleteUserId(userId);
     setDeleteUserName(userName);
     setDeleteInput('');
-  };
-
-  const confirmDeleteUser = () => {
-    if (deleteUserId && deleteInput === deleteUserName) {
-      // Kullanıcıya ait projeleri de sil
-      const userProjects = state.projects.filter(p => p.userId === deleteUserId);
-      userProjects.forEach(project => {
-        dispatch({ type: 'DELETE_PROJECT', payload: { projectId: project.id } });
-      });
-      // Kullanıcıyı sil
-      dispatch({
-        type: 'SET_USERS',
-        payload: safeUsers.filter(u => u.id !== deleteUserId),
-      });
-      setDeleteUserId(null);
-      setDeleteUserName('');
-      setDeleteInput('');
-    }
   };
 
   const cancelDeleteUser = () => {
@@ -102,20 +106,6 @@ const AdminUsers: React.FC = () => {
     }
   };
 
-  const handleEditSave = () => {
-    if (!editUser) return;
-    const updatedUser = {
-      ...editUser,
-      name: editName,
-      email: editEmail,
-      password: editPassword,
-      role: editRole,
-    };
-    const updatedUsers = safeUsers.map(u => u.id === editUser.id ? updatedUser : u);
-    dispatch({ type: 'SET_USERS', payload: updatedUsers });
-    setEditUser(null);
-  };
-
   const handleEditCancel = () => {
     setEditUser(null);
   };
@@ -125,7 +115,7 @@ const AdminUsers: React.FC = () => {
     const updatedUsers = safeUsers.map(u =>
       u.id === selectedUser.id ? { ...u, selectedPackage: packageName } : u
     );
-    dispatch({ type: 'SET_USERS', payload: updatedUsers });
+    // dispatch({ type: 'SET_USERS', payload: updatedUsers });
   };
 
   return (
@@ -172,60 +162,65 @@ const AdminUsers: React.FC = () => {
         {safeUsers.length === 0 && (
           <Typography color="textSecondary">Henüz hiç kullanıcı yok. Yukarıdan yeni kullanıcı ekleyebilirsiniz.</Typography>
         )}
-        {safeUsers.map((user) => (
-          <Card key={user.id}>
-            <CardContent style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography variant="subtitle1">{user.name} <span style={{fontSize:12, color:'#888'}}>({user.role})</span></Typography>
-                <Typography variant="body2" color="textSecondary">{user.email}</Typography>
-              </Box>
-              {/* Paket özet tablosu sağda ve ortalanmış şekilde */}
-              <Box display="flex" alignItems="center" justifyContent="center" minWidth={400}>
-                {user.selectedPackage && (() => {
-                  const p = paketler.find(p => p.ad === user.selectedPackage);
-                  return p ? (
-                    <table style={{fontSize:12, fontWeight:'bold', borderCollapse:'collapse', background:'#fafbfc', borderRadius:6, boxShadow:'0 1px 4px #eee', width:'100%'}}>
-                      <thead>
-                        <tr style={{background:'#f5f5f5'}}>
-                          <th style={{padding:'4px 6px', fontSize:11}}>Paket</th>
-                          <th style={{padding:'4px 6px', fontSize:11}}>Proje</th>
-                          <th style={{padding:'4px 6px', fontSize:11}}>Tablo</th>
-                          <th style={{padding:'4px 6px', fontSize:11}}>Veri</th>
-                          <th style={{padding:'4px 6px', fontSize:11}}>API/Ay</th>
-                          <th style={{padding:'4px 6px', fontSize:11}}>Fiyat</th>
-                          <th style={{padding:'4px 6px', fontSize:11}}>Maliyet</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td style={{padding:'4px 6px', fontSize:11}}>{p.renk} {p.ad}</td>
-                          <td style={{padding:'4px 6px', fontSize:11}}>{p.proje}</td>
-                          <td style={{padding:'4px 6px', fontSize:11}}>{p.tablo}</td>
-                          <td style={{padding:'4px 6px', fontSize:11}}>{p.veri}</td>
-                          <td style={{padding:'4px 6px', fontSize:11}}>{p.api}</td>
-                          <td style={{padding:'4px 6px', fontSize:11, color:'#1976d2'}}>{p.fiyat}</td>
-                          <td style={{padding:'4px 6px', fontSize:11, color:'#888'}}>{p.maliyet}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  ) : null;
-                })()}
-              </Box>
-              <Box display="flex" gap={1}>
-                <Button variant="contained" color="primary" onClick={() => navigate(`/projects/user/${user.id}`)}>
-                  Projeleri Göster
-                </Button>
-                <Button variant="outlined" color="secondary" onClick={() => { setSelectedUser(user); setPricingOpen(true); }}>Fiyatlandırma</Button>
-                <Button variant="outlined" color="info" onClick={() => handleEditUser(user.id)} startIcon={<EditIcon />}>
-                  Düzenle
-                </Button>
-                <Button variant="outlined" color="error" onClick={() => handleDeleteUser(user.id, user.name)}>
-                  Sil
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
-        ))}
+        {safeUsers.map((user) => {
+          let paketTable: React.ReactNode = null;
+          if ('selectedPackage' in user && (user as any).selectedPackage) {
+            const p = paketler.find(p => p.ad === (user as any).selectedPackage);
+            if (p) {
+              paketTable = (
+                <table style={{fontSize:12, fontWeight:'bold', borderCollapse:'collapse', background:'#fafbfc', borderRadius:6, boxShadow:'0 1px 4px #eee', width:'100%'}}>
+                  <thead>
+                    <tr style={{background:'#f5f5f5'}}>
+                      <th style={{padding:'4px 6px', fontSize:11}}>Paket</th>
+                      <th style={{padding:'4px 6px', fontSize:11}}>Proje</th>
+                      <th style={{padding:'4px 6px', fontSize:11}}>Tablo</th>
+                      <th style={{padding:'4px 6px', fontSize:11}}>Veri</th>
+                      <th style={{padding:'4px 6px', fontSize:11}}>API/Ay</th>
+                      <th style={{padding:'4px 6px', fontSize:11}}>Fiyat</th>
+                      <th style={{padding:'4px 6px', fontSize:11}}>Maliyet</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{padding:'4px 6px'}}>{p.ad}</td>
+                      <td style={{padding:'4px 6px'}}>{p.proje}</td>
+                      <td style={{padding:'4px 6px'}}>{p.tablo}</td>
+                      <td style={{padding:'4px 6px'}}>{p.veri}</td>
+                      <td style={{padding:'4px 6px'}}>{p.api}</td>
+                      <td style={{padding:'4px 6px'}}>{p.fiyat}</td>
+                      <td style={{padding:'4px 6px'}}>{p.maliyet}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              );
+            }
+          }
+          return (
+            <Card key={user.id}>
+              <CardContent style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box>
+                  <Typography variant="subtitle1">{user.name} <span style={{fontSize:12, color:'#888'}}>({user.role})</span></Typography>
+                  <Typography variant="body2" color="textSecondary">{user.email}</Typography>
+                </Box>
+                <Box display="flex" alignItems="center" justifyContent="center" minWidth={400}>
+                  {paketTable}
+                </Box>
+                <Box display="flex" gap={1}>
+                  <Button variant="contained" color="primary" onClick={() => navigate(`/projects/user/${user.id}`)}>
+                    Projeleri Göster
+                  </Button>
+                  <Button variant="outlined" color="secondary" onClick={() => { setSelectedUser(user); setPricingOpen(true); }}>Fiyatlandırma</Button>
+                  <Button variant="outlined" color="info" onClick={() => handleEditUser(user.id)} startIcon={<EditIcon />}>
+                    Düzenle
+                  </Button>
+                  <Button variant="outlined" color="error" onClick={() => handleDeleteUser(user.id, user.name)}>
+                    Sil
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          );
+        })}
       </Box>
       {/* Silme Modalı */}
       <Dialog open={!!deleteUserId} onClose={cancelDeleteUser}>
@@ -303,7 +298,6 @@ const AdminUsers: React.FC = () => {
         onClose={() => setPricingOpen(false)}
         selectedUser={selectedUser}
         onPackageSelect={handlePackageSelect}
-        currentUserRole={currentUserRole}
       />
     </Box>
   );
