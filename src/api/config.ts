@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://coral-app-byjug.ondigitalocean.app';
 
 export interface ApiResponse<T = any> {
   data?: T;
