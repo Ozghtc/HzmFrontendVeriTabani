@@ -1,13 +1,13 @@
 import { API_BASE_URL } from './config';
 
 export async function getUsers() {
-  const response = await fetch(`${API_BASE_URL}/users`);
+  const response = await fetch(`${API_BASE_URL}/api/users`);
   if (!response.ok) throw new Error('Kullanıcılar alınamadı');
   return response.json();
 }
 
 export async function addUser(user: any) {
-  const response = await fetch(`${API_BASE_URL}/users`, {
+  const response = await fetch(`${API_BASE_URL}/api/users`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(user),
@@ -17,7 +17,7 @@ export async function addUser(user: any) {
 }
 
 export async function deleteUser(userId: string) {
-  const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
     method: 'DELETE',
   });
   if (!response.ok) throw new Error('Kullanıcı silinemedi');
@@ -25,7 +25,7 @@ export async function deleteUser(userId: string) {
 }
 
 export async function updateUser(userId: string, user: any) {
-  const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(user),
