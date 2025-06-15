@@ -20,29 +20,29 @@ import { CSS } from '@dnd-kit/utilities';
 import { Field, DatabaseState, Table } from '../../types';
 
 const dataTypes = [
-  { value: 'string', label: 'Metin (String)' },
-  { value: 'number', label: 'Sayı (Number)' },
+  { value: 'string', label: 'Text (String)' },
+  { value: 'number', label: 'Number' },
   { value: 'boolean', label: 'Boolean' },
-  { value: 'date', label: 'Tarih (Date)' },
-  { value: 'object', label: 'Nesne (Object)' },
-  { value: 'array', label: 'Dizi (Array)' },
-  { value: 'relation', label: 'İlişki (Relation)' },
-  { value: 'currency', label: 'Para (Currency)' },
-  { value: 'weight', label: 'Ağırlık (Weight)' }
+  { value: 'date', label: 'Date' },
+  { value: 'object', label: 'Object' },
+  { value: 'array', label: 'Array' },
+  { value: 'relation', label: 'Relation' },
+  { value: 'currency', label: 'Currency' },
+  { value: 'weight', label: 'Weight' }
 ];
 
 const currencies = [
-  { value: 'TRY', label: 'Türk Lirası (₺)' },
-  { value: 'USD', label: 'Amerikan Doları ($)' },
+  { value: 'TRY', label: 'Turkish Lira (₺)' },
+  { value: 'USD', label: 'US Dollar ($)' },
   { value: 'EUR', label: 'Euro (€)' },
-  { value: 'GBP', label: 'İngiliz Sterlini (£)' }
+  { value: 'GBP', label: 'British Pound (£)' }
 ];
 
 const weightUnits = [
   { value: 'g', label: 'Gram (g)' },
   { value: 'kg', label: 'Kilogram (kg)' },
   { value: 'lb', label: 'Pound (lb)' },
-  { value: 'oz', label: 'Ons (oz)' }
+  { value: 'oz', label: 'Ounce (oz)' }
 ];
 
 interface SortableFieldRowProps {
@@ -171,29 +171,29 @@ const SortableFieldRow: React.FC<SortableFieldRowProps> = ({ field, onToggleActi
 
 const regexPatternExamples = [
   {
-    name: 'E-posta',
+    name: 'Email',
     pattern: '^\\S+@\\S+\\.\\S+$',
-    description: 'Geçerli bir e-posta adresi (örn: kullanici@domain.com)'
+    description: 'Valid email address (e.g. user@domain.com)'
   },
   {
-    name: 'Barkod',
+    name: 'Barcode',
     pattern: '^[0-9]{8,13}$',
-    description: '8 ile 13 karakter arası sayısal değer'
+    description: '8-13 digit numeric value'
   },
   {
-    name: 'Telefon',
+    name: 'Phone',
     pattern: '^[0-9]{10}$',
-    description: '10 haneli telefon numarası'
+    description: '10 digit phone number'
   },
   {
-    name: 'Kullanıcı Adı',
+    name: 'Username',
     pattern: '^[a-zA-Z0-9_]{3,16}$',
-    description: '3-16 karakter arası, harf, rakam ve alt çizgi içerebilir'
+    description: '3-16 chars, letters, numbers, underscore'
   },
   {
-    name: 'Şifre',
+    name: 'Password',
     pattern: '^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$',
-    description: 'En az 8 karakter, en az 1 harf ve 1 rakam içermeli'
+    description: 'At least 8 chars, 1 letter, 1 number'
   }
 ];
 
@@ -449,12 +449,12 @@ const FieldPanel: React.FC = () => {
                   tabIndex={-1}
                 >
                   <Info size={16} />
-                  Örnekler
+                  Examples
                 </button>
                 {showPatternHelp && (
                   <div ref={patternHelpRef} className="absolute right-0 top-10 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
                     <div className="p-3">
-                      <h4 className="font-medium text-gray-900 mb-2">Yaygın Pattern Örnekleri</h4>
+                      <h4 className="font-medium text-gray-900 mb-2">Common Pattern Examples</h4>
                       <div className="space-y-2">
                         {regexPatternExamples.map((example) => (
                           <div
@@ -477,7 +477,7 @@ const FieldPanel: React.FC = () => {
                         className="mt-3 text-xs text-gray-500 hover:text-amber-600"
                         onClick={() => setShowPatternHelp(false)}
                       >
-                        Kapat
+                        Close
                       </button>
                     </div>
                   </div>
@@ -486,7 +486,7 @@ const FieldPanel: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Min/Max Uzunluk
+                Min/Max Length
               </label>
               <div className="flex gap-2">
                 <input
@@ -517,7 +517,7 @@ const FieldPanel: React.FC = () => {
         return (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Min/Max Değer
+              Min/Max Value
             </label>
             <div className="flex gap-2">
               <input
@@ -547,15 +547,15 @@ const FieldPanel: React.FC = () => {
         return (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tarih Tipi
+              Date Type
             </label>
             <select
               value={newField.dateTimeType}
               onChange={(e) => setNewField({ ...newField, dateTimeType: e.target.value as 'date' | 'datetime' })}
               className="w-full p-2 border border-gray-300 rounded-md"
             >
-              <option value="date">Sadece Tarih</option>
-              <option value="datetime">Tarih ve Saat</option>
+              <option value="date">Date Only</option>
+              <option value="datetime">Date and Time</option>
             </select>
           </div>
         );
@@ -564,7 +564,7 @@ const FieldPanel: React.FC = () => {
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Dizi Eleman Tipi
+                Array Item Type
               </label>
               <select
                 value={newField.arrayConfig.itemType}
@@ -586,7 +586,7 @@ const FieldPanel: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Min/Max Eleman Sayısı
+                Min/Max Item Count
               </label>
               <div className="flex gap-2">
                 <input
@@ -630,7 +630,7 @@ const FieldPanel: React.FC = () => {
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                İlişkili Tablo
+                Related Table
               </label>
               <select
                 value={newField.foreignKey?.tableId || ''}
@@ -651,7 +651,7 @@ const FieldPanel: React.FC = () => {
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                 disabled={isPanelDisabled}
               >
-                <option value="">İlişkilendirilecek tabloyu seçin</option>
+                <option value="">Select a table to relate</option>
                 {state.selectedProject?.tables
                   .filter(table => table.id !== state.selectedTable?.id)
                   .map(table => (
@@ -665,7 +665,7 @@ const FieldPanel: React.FC = () => {
             {newField.foreignKey?.tableId && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  İlişkili Alan
+                  Related Field
                 </label>
                 <select
                   value={newField.foreignKey.fieldId || ''}
@@ -679,7 +679,7 @@ const FieldPanel: React.FC = () => {
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   disabled={isPanelDisabled}
                 >
-                  <option value="">İlişkilendirilecek alanı seçin</option>
+                  <option value="">Select a field to relate</option>
                   {state.selectedProject?.tables
                     .find(t => t.id === newField.foreignKey?.tableId)
                     ?.fields.map(field => (
@@ -689,24 +689,24 @@ const FieldPanel: React.FC = () => {
                     ))}
                 </select>
                 <p className="mt-1 text-xs text-gray-500">
-                  İlişkili alan genellikle hedef tablonun benzersiz (unique) bir alanı olmalıdır (örn: ID).
+                  The related field should typically be a unique field in the target table (e.g: ID).
                 </p>
               </div>
             )}
 
             <div className="mt-2 p-3 bg-amber-50 rounded-md">
-              <h4 className="text-sm font-medium text-amber-800 mb-1">İlişki Bilgisi</h4>
+              <h4 className="text-sm font-medium text-amber-800 mb-1">Relation Information</h4>
               {newField.foreignKey?.tableId && newField.foreignKey?.fieldId ? (
                 <p className="text-sm text-amber-700">
-                  {state.selectedProject?.tables.find(t => t.id === newField.foreignKey?.tableId)?.name} tablosunun{' '}
+                  {state.selectedProject?.tables.find(t => t.id === newField.foreignKey?.tableId)?.name} table's{' '}
                   {state.selectedProject?.tables
                     .find(t => t.id === newField.foreignKey?.tableId)
                     ?.fields.find(f => f.id === newField.foreignKey?.fieldId)?.name}{' '}
-                  alanına bağlı
+                  field is related to
                 </p>
               ) : (
                 <p className="text-sm text-amber-700">
-                  Henüz bir ilişki tanımlanmadı. Lütfen tablo ve alan seçin.
+                  No relation has been defined yet. Please select a table and field.
                 </p>
               )}
             </div>
@@ -717,7 +717,7 @@ const FieldPanel: React.FC = () => {
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Para Birimi
+                Currency
               </label>
               <select
                 value={newField.currencyConfig?.currency}
@@ -740,7 +740,7 @@ const FieldPanel: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ondalık Basamak
+                Decimal Places
               </label>
               <input
                 type="number"
@@ -773,7 +773,7 @@ const FieldPanel: React.FC = () => {
                 className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
               />
               <label htmlFor="only-positive" className="ml-2 block text-sm text-gray-700">
-                Sadece pozitif değer
+                Only positive value
               </label>
             </div>
 
@@ -792,7 +792,7 @@ const FieldPanel: React.FC = () => {
                 className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
               />
               <label htmlFor="auto-exchange" className="ml-2 block text-sm text-gray-700">
-                Otomatik kur çevrimi (yakında)
+                Automatic currency exchange (coming soon)
               </label>
             </div>
           </div>
@@ -802,7 +802,7 @@ const FieldPanel: React.FC = () => {
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ağırlık Birimi
+                Weight Unit
               </label>
               <select
                 value={newField.weightConfig?.unit}
@@ -838,13 +838,13 @@ const FieldPanel: React.FC = () => {
                 className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
               />
               <label htmlFor="fixed-unit" className="ml-2 block text-sm text-gray-700">
-                Birimi sabitle (değiştirilemez)
+                Fix unit (cannot be changed)
               </label>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Min/Max Değer
+                Min/Max Value
               </label>
               <div className="flex gap-2">
                 <input
@@ -891,13 +891,13 @@ const FieldPanel: React.FC = () => {
               type="text"
               value={newField.defaultValue || ''}
               onChange={(e) => setNewField({ ...newField, defaultValue: e.target.value })}
-              placeholder="Varsayılan metin değeri"
+              placeholder="Default text value"
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               disabled={isPanelDisabled}
             />
             {newField.pattern && (
               <p className="text-xs text-gray-500">
-                Pattern ile uyumlu bir değer giriniz: {newField.pattern}
+                Enter a value that matches the pattern: {newField.pattern}
               </p>
             )}
           </div>
@@ -913,7 +913,7 @@ const FieldPanel: React.FC = () => {
                 const value = e.target.value ? Number(e.target.value) : null;
                 setNewField({ ...newField, defaultValue: value });
               }}
-              placeholder="Varsayılan sayısal değer"
+              placeholder="Default numeric value"
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               disabled={isPanelDisabled}
               min={newField.min}
@@ -933,7 +933,7 @@ const FieldPanel: React.FC = () => {
       case 'boolean':
         return (
           <div className="flex items-center justify-between p-2 border border-gray-300 rounded-md">
-            <span className="text-sm text-gray-700">Varsayılan Değer</span>
+            <span className="text-sm text-gray-700">Default Value</span>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
@@ -963,7 +963,7 @@ const FieldPanel: React.FC = () => {
               disabled={isPanelDisabled}
             />
             <p className="text-xs text-gray-500">
-              {newField.dateTimeType === 'datetime' ? 'Tarih ve Saat' : 'Sadece Tarih'}
+              {newField.dateTimeType === 'datetime' ? 'Date and Time' : 'Date Only'}
             </p>
           </div>
         );
@@ -1004,7 +1004,7 @@ const FieldPanel: React.FC = () => {
                         setNewField({ ...newField, defaultValue: value });
                       }
                     } catch (err) {
-                      // JSON parse hatası durumunda değeri güncelleme
+                      // JSON parse error, update value
                     }
                   }}
                   placeholder="Örn: [1, 2, 3] veya ['a', 'b', 'c']"
@@ -1015,13 +1015,13 @@ const FieldPanel: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <Info size={14} />
-              <span>Dizi değerlerini JSON formatında girin</span>
+              <span>Enter JSON array values</span>
             </div>
             {(newField.arrayConfig.minItems !== undefined || newField.arrayConfig.maxItems !== undefined) && (
               <p className="text-xs text-gray-500">
-                {newField.arrayConfig.minItems !== undefined && `Min eleman: ${newField.arrayConfig.minItems}`}
+                {newField.arrayConfig.minItems !== undefined && `Min item: ${newField.arrayConfig.minItems}`}
                 {newField.arrayConfig.minItems !== undefined && newField.arrayConfig.maxItems !== undefined && ' | '}
-                {newField.arrayConfig.maxItems !== undefined && `Max eleman: ${newField.arrayConfig.maxItems}`}
+                {newField.arrayConfig.maxItems !== undefined && `Max item: ${newField.arrayConfig.maxItems}`}
               </p>
             )}
           </div>
@@ -1039,17 +1039,17 @@ const FieldPanel: React.FC = () => {
                     setNewField({ ...newField, defaultValue: value });
                   }
                 } catch (err) {
-                  // JSON parse hatası durumunda değeri güncelleme
+                  // JSON parse error, update value
                 }
               }}
-              placeholder="Nesne değerini JSON formatında girin"
+              placeholder="Enter JSON object value"
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono text-sm"
               rows={4}
               disabled={isPanelDisabled}
             />
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <Info size={14} />
-              <span>Geçerli bir JSON nesnesi girin</span>
+              <span>Enter a valid JSON object</span>
             </div>
           </div>
         );
@@ -1058,7 +1058,7 @@ const FieldPanel: React.FC = () => {
         return (
           <div className="p-2 bg-gray-50 rounded-md">
             <p className="text-sm text-gray-500">
-              İlişkisel alanlarda varsayılan değer, bağlı tablodaki mevcut bir değer olmalıdır.
+              Default value in relation fields should be a current value in the related table.
             </p>
           </div>
         );
@@ -1089,8 +1089,8 @@ const FieldPanel: React.FC = () => {
               </select>
             </div>
             <p className="text-xs text-gray-500">
-              {newField.currencyConfig?.decimals} ondalık basamak
-              {newField.currencyConfig?.onlyPositive && ', sadece pozitif değer'}
+              {newField.currencyConfig?.decimals} decimal places
+              {newField.currencyConfig?.onlyPositive && ', only positive value'}
             </p>
           </div>
         );
@@ -1144,7 +1144,7 @@ const FieldPanel: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-amber-700 flex items-center">
           <FileText size={20} className="mr-2" />
-          Alanlar
+          Fields
           {state.selectedTable && (
             <span className="ml-2 text-sm font-normal text-gray-500">
               ({state.selectedTable.name})
@@ -1170,7 +1170,7 @@ const FieldPanel: React.FC = () => {
             }`}
           >
             <FileText size={16} className="mr-1 inline-block" />
-            Şablon Yükle
+            Load Template
           </label>
         </div>
       </div>
@@ -1179,13 +1179,13 @@ const FieldPanel: React.FC = () => {
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Alan Adı
+              Field Name
             </label>
             <input
               type="text"
               value={newField.name}
               onChange={(e) => setNewField({ ...newField, name: e.target.value })}
-              placeholder="Alan adı"
+              placeholder="Field name"
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               disabled={isPanelDisabled}
             />
@@ -1193,13 +1193,13 @@ const FieldPanel: React.FC = () => {
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Açıklama
+              Description
             </label>
             <input
               type="text"
               value={newField.description}
               onChange={(e) => setNewField({ ...newField, description: e.target.value })}
-              placeholder="Alan açıklaması"
+              placeholder="Field description"
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               disabled={isPanelDisabled}
             />
@@ -1207,7 +1207,7 @@ const FieldPanel: React.FC = () => {
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Veri Tipi
+              Data Type
             </label>
             <select
               value={newField.type}
@@ -1236,7 +1236,7 @@ const FieldPanel: React.FC = () => {
                 disabled={isPanelDisabled}
               />
               <label htmlFor="required-field" className="ml-2 block text-sm text-gray-700">
-                Zorunlu alan
+                Required field
               </label>
             </div>
             <div className="flex items-center">
@@ -1249,7 +1249,7 @@ const FieldPanel: React.FC = () => {
                 disabled={isPanelDisabled}
               />
               <label htmlFor="unique-field" className="ml-2 block text-sm text-gray-700">
-                Benzersiz
+                Unique
               </label>
             </div>
           </div>
@@ -1259,19 +1259,19 @@ const FieldPanel: React.FC = () => {
             onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
             className="text-sm text-amber-600 hover:text-amber-700 flex items-center"
           >
-            {showAdvancedSettings ? '- Gelişmiş Ayarları Gizle' : '+ Gelişmiş Ayarları Göster'}
+            {showAdvancedSettings ? '- Hide Advanced Settings' : '+ Show Advanced Settings'}
           </button>
           
           {showAdvancedSettings && (
             <div className="space-y-3 pt-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Varsayılan Değer
+                  Default Value
                 </label>
                 {renderDefaultValueInput()}
                 {(newField.type === 'array' || newField.type === 'object') && (
                   <p className="text-xs text-gray-500 mt-1">
-                    Lütfen geçerli bir JSON formatı kullanın
+                    Please enter a valid JSON format
                   </p>
                 )}
               </div>
@@ -1290,8 +1290,8 @@ const FieldPanel: React.FC = () => {
                     <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer ${
                       isPanelDisabled ? 'opacity-50' : 'peer-checked:bg-amber-600'
                     } peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all`}></div>
-                    <span className="ml-3 text-sm font-medium text-gray-700">Alan Aktif</span>
-                    <span className="ml-1 text-xs text-gray-500">({newField.active ? 'Açık' : 'Kapalı'})</span>
+                    <span className="ml-3 text-sm font-medium text-gray-700">Field Active</span>
+                    <span className="ml-1 text-xs text-gray-500">({newField.active ? 'Active' : 'Inactive'})</span>
                   </label>
                 </div>
                 <div className="flex items-center">
@@ -1301,8 +1301,8 @@ const FieldPanel: React.FC = () => {
                     className="p-2 border border-gray-300 rounded-md text-sm"
                     disabled={isPanelDisabled}
                   >
-                    <option value="all">Herkes görebilir</option>
-                    <option value="admin">Sadece admin</option>
+                    <option value="all">Everyone can see</option>
+                    <option value="admin">Only admin</option>
                   </select>
                 </div>
               </div>
@@ -1310,7 +1310,7 @@ const FieldPanel: React.FC = () => {
               {state.selectedProject && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    İlişkili Tablo
+                    Related Table
                   </label>
                   <select
                     value={newField.foreignKey?.tableId || ''}
@@ -1331,7 +1331,7 @@ const FieldPanel: React.FC = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                     disabled={isPanelDisabled}
                   >
-                    <option value="">İlişki yok</option>
+                    <option value="">No relation</option>
                     {state.selectedProject.tables
                       .filter(table => table.id !== state.selectedTable?.id)
                       .map(table => (
@@ -1346,7 +1346,7 @@ const FieldPanel: React.FC = () => {
               {newField.foreignKey?.tableId && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    İlişkili Alan
+                    Related Field
                   </label>
                   <select
                     value={newField.foreignKey.fieldId || ''}
@@ -1360,7 +1360,7 @@ const FieldPanel: React.FC = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                     disabled={isPanelDisabled}
                   >
-                    <option value="">İlişkilendirilecek alanı seçin</option>
+                    <option value="">Select a field to relate</option>
                     {state.selectedProject?.tables
                       .find(t => t.id === newField.foreignKey?.tableId)
                       ?.fields.map(field => (
@@ -1386,7 +1386,7 @@ const FieldPanel: React.FC = () => {
             disabled={isPanelDisabled}
           >
             <PlusCircle size={16} className="mr-1" />
-            Alan Ekle
+            Add Field
           </button>
         </div>
       </form>
@@ -1394,23 +1394,23 @@ const FieldPanel: React.FC = () => {
       <div className="panel-content">
         {!state.selectedProject || !state.selectedTable ? (
           <p className="text-gray-500 text-sm italic text-center py-4">
-            Lütfen önce bir tablo seçin.
+            Please select a table first.
           </p>
         ) : state.selectedTable.fields.length === 0 ? (
           <p className="text-gray-500 text-sm italic text-center py-4">
-            Bu tabloda henüz hiç alan yok. İlk alanınızı ekleyin.
+            There are no fields in this table yet. Please add the first one.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Alan Adı</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Tür</th>
-                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Zorunlu</th>
-                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Benzersiz</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">V. Değer</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İlişkili Tablo</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Field Name</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Type</th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Required</th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Unique</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Default Value</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Related Table</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
@@ -1449,7 +1449,7 @@ const FieldPanel: React.FC = () => {
           disabled={!hasFields}
         >
           <Eye size={16} className="mr-1 inline-block" />
-          Verileri Görüntüle
+          View Data
         </button>
         
         <button
@@ -1462,7 +1462,7 @@ const FieldPanel: React.FC = () => {
           disabled={!hasFields}
         >
           <Save size={16} className="mr-1 inline-block" />
-          Yapıyı JSON Olarak Kaydet
+          Export Structure as JSON
         </button>
 
         <button
@@ -1475,7 +1475,7 @@ const FieldPanel: React.FC = () => {
           disabled={!hasFields}
         >
           <Copy size={16} className="mr-1 inline-block" />
-          Şablon Olarak Kaydet
+          Save as Template
         </button>
       </div>
     </div>

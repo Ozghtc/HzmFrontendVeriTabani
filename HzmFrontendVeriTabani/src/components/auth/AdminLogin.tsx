@@ -1,41 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Mail } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    try {
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('admin_token', data.token);
-        navigate('/admin-panel-0923/dashboard');
-      } else {
-        setError(data.error || 'Giriş başarısız');
-      }
-    } catch (err) {
-      setError('Bir hata oluştu. Lütfen tekrar deneyin.');
-    } finally {
+    // Şifre ve e-posta kontrolü olmadan doğrudan giriş yap
+    setTimeout(() => {
+      localStorage.setItem('admin_token', 'dummy-token');
+      // Admin kullanıcı bilgisini de kaydet
+      localStorage.setItem('currentUser', JSON.stringify({
+        id: 'admin-1',
+        name: 'Ozgur Altintas',
+        email: email || 'admin@example.com',
+        role: 'admin'
+      }));
+      navigate('/admin-panel-0923/users');
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (
@@ -69,13 +60,22 @@ const AdminLogin: React.FC = () => {
                 <Lock className="h-5 w-5 text-gray-400" />
               </div>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm pr-10"
                 placeholder="Şifre"
               />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"
+                tabIndex={-1}
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
             </div>
           </div>
 

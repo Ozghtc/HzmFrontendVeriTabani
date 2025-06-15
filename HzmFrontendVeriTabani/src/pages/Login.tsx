@@ -18,16 +18,16 @@ const Login: React.FC = () => {
       localStorage.setItem('user', JSON.stringify({ email }));
       navigate('/projects');
     } else {
-      setError('Geçersiz e-posta veya şifre');
+      setError('Invalid email or password');
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">Giriş Yap</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">Login</h2>
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium">E-posta</label>
+          <label className="block mb-1 text-sm font-medium">Email</label>
           <input
             type="email"
             className="w-full border rounded px-3 py-2"
@@ -37,7 +37,7 @@ const Login: React.FC = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium">Şifre</label>
+          <label className="block mb-1 text-sm font-medium">Password</label>
           <input
             type="password"
             className="w-full border rounded px-3 py-2"
@@ -51,10 +51,10 @@ const Login: React.FC = () => {
           type="submit"
           className="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800 transition-colors font-semibold"
         >
-          Giriş Yap
+          Login
         </button>
         <div className="mt-4 text-xs text-gray-500 text-center">
-          Demo kullanıcı: demo@demo.com / 123456
+          Demo user: demo@demo.com / 123456
         </div>
       </form>
     </div>

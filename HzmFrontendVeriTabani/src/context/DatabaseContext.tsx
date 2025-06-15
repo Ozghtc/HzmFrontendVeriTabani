@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { DatabaseState, DatabaseAction, Project, Table, Field } from '../types';
+import { getUsers, addUser, deleteUser, updateUser } from '../api/users';
 
 const STORAGE_KEY = 'database_state';
 
@@ -13,11 +14,37 @@ const loadInitialState = (): DatabaseState => {
     projects: [],
     selectedProject: null,
     selectedTable: null,
+    users: [],
   };
 };
 
 // Initial state
-const initialState: DatabaseState = loadInitialState();
+const initialState: DatabaseState = {
+  projects: [],
+  selectedProject: null,
+  selectedTable: null,
+  users: [],
+};
+
+// Kullanıcı tipi
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: 'admin' | 'yonetici';
+};
+
+// Örnek kullanıcılar
+const initialUsers: User[] = [
+  { id: '1', name: 'Ahmet Yılmaz', email: 'ahmet@example.com', password: '123456', role: 'admin' },
+  { id: '2', name: 'Ayşe Demir', email: 'ayse@example.com', password: '123456', role: 'yonetici' },
+];
+
+// API Key üretici
+function generateApiKey() {
+  return 'vt_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 
 // Reducer
 function databaseReducer(state: DatabaseState, action: DatabaseAction): DatabaseState {
@@ -29,6 +56,8 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
         id: Date.now().toString(),
         name: action.payload.name,
         tables: [],
+        apiKey: generateApiKey(),
+        userId: action.payload.userId,
       };
       newState = {
         ...state,
@@ -297,6 +326,17 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
       };
       break;
     }
+    case 'ADD_USER':
+      return {
+        ...state,
+        users: [...(state.users || []), action.payload],
+      };
+    case 'SET_USERS':
+      newState = {
+        ...state,
+        users: action.payload,
+      };
+      break;
     default:
       return state;
   }
@@ -307,24 +347,52 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
 }
 
 // Context
-type DatabaseContextType = {
+export interface DatabaseContextType {
   state: DatabaseState;
   dispatch: React.Dispatch<DatabaseAction>;
-};
+  users: User[];
+  fetchUsers: () => Promise<void>;
+  addUserAsync: (user: User) => Promise<void>;
+  deleteUserAsync: (userId: string) => Promise<void>;
+  updateUserAsync: (userId: string, user: User) => Promise<void>;
+}
 
 const DatabaseContext = createContext<DatabaseContextType | undefined>(undefined);
 
 // Provider component
 export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(databaseReducer, initialState);
-  
-  // Save state to localStorage whenever it changes
+
+  // Kullanıcıları backend'den çek
+  const fetchUsers = async () => {
+    const users = await getUsers();
+    dispatch({ type: 'SET_USERS', payload: users });
+  };
+
+  // Kullanıcı ekle
+  const addUserAsync = async (user: User) => {
+    await addUser(user);
+    await fetchUsers();
+  };
+
+  // Kullanıcı sil
+  const deleteUserAsync = async (userId: string) => {
+    await deleteUser(userId);
+    await fetchUsers();
+  };
+
+  // Kullanıcı güncelle
+  const updateUserAsync = async (userId: string, user: User) => {
+    await updateUser(userId, user);
+    await fetchUsers();
+  };
+
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
-  
+    fetchUsers();
+  }, []);
+
   return (
-    <DatabaseContext.Provider value={{ state, dispatch }}>
+    <DatabaseContext.Provider value={{ state, dispatch, users: state.users, fetchUsers, addUserAsync, deleteUserAsync, updateUserAsync }}>
       {children}
     </DatabaseContext.Provider>
   );

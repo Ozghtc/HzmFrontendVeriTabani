@@ -7,19 +7,24 @@ import ProjectPanel from './components/panels/ProjectPanel';
 import TablePanel from './components/panels/TablePanel';
 import FieldPanel from './components/panels/FieldPanel';
 import { DatabaseProvider } from './context/DatabaseContext';
+import { BackendProvider } from './context/BackendContext';
 import Layout from './components/Layout';
 import ProjectList from './pages/ProjectList';
 import ProjectManagement from './pages/ProjectManagement';
 import ProjectDataView from './pages/ProjectDataView';
 import Login from './pages/Login';
+import AdminUsers from './pages/AdminUsers';
+import UserProjects from './pages/UserProjects';
+import BackendDemo from './components/BackendDemo';
 import './App.css';
 
 const App: React.FC = () => {
   return (
     <Router>
       <AdminAuthProvider>
-        <DatabaseProvider>
-          <Routes>
+        <BackendProvider>
+          <DatabaseProvider>
+            <Routes>
             {/* Admin Panel Routes */}
             <Route path="/admin-panel-0923/login" element={<AdminLogin />} />
             
@@ -27,11 +32,7 @@ const App: React.FC = () => {
               path="/admin-panel-0923"
               element={
                 <ProtectedRoute>
-                  <div className="min-h-screen bg-gray-100">
-                    <div className="container mx-auto px-4 py-8">
-                      <ProjectPanel />
-                    </div>
-                  </div>
+                  <Navigate to="/admin-panel-0923/users" replace />
                 </ProtectedRoute>
               }
             />
@@ -62,6 +63,27 @@ const App: React.FC = () => {
               }
             />
 
+            <Route
+              path="/admin-panel-0923/users"
+              element={
+                <ProtectedRoute>
+                  <AdminUsers />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin-panel-0923/user-projects/:userId"
+              element={
+                <ProtectedRoute>
+                  <UserProjects />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Backend Demo Route */}
+            <Route path="/backend-demo" element={<BackendDemo />} />
+
             {/* Redirect root to admin panel */}
             <Route path="/" element={<Navigate to="/admin-panel-0923" replace />} />
 
@@ -75,7 +97,7 @@ const App: React.FC = () => {
               }
             />
             <Route
-              path="/projects/:projectId"
+              path="/projects/user/:userId/:projectId"
               element={
                 <ProtectedRoute>
                   <ProjectManagement />
@@ -83,15 +105,24 @@ const App: React.FC = () => {
               }
             />
             <Route
-              path="/projects/:projectId/data"
+              path="/projects/user/:userId/:projectId/data"
               element={
                 <ProtectedRoute>
                   <ProjectDataView />
                 </ProtectedRoute>
               }
             />
-          </Routes>
-        </DatabaseProvider>
+            <Route
+              path="/projects/user/:userId"
+              element={
+                <ProtectedRoute>
+                  <ProjectList />
+                </ProtectedRoute>
+              }
+            />
+            </Routes>
+          </DatabaseProvider>
+        </BackendProvider>
       </AdminAuthProvider>
     </Router>
   );

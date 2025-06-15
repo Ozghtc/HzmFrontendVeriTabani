@@ -6,7 +6,7 @@ import TablePanel from '../components/panels/TablePanel';
 import FieldPanel from '../components/panels/FieldPanel';
 
 const ProjectManagement = () => {
-  const { projectId } = useParams();
+  const { projectId, userId } = useParams();
   const navigate = useNavigate();
   const { state, dispatch } = useDatabase();
 
@@ -28,7 +28,7 @@ const ProjectManagement = () => {
       <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
         <div className="container mx-auto flex items-center">
           <button
-            onClick={() => navigate('/projects')}
+            onClick={() => navigate(`/projects/user/${userId}`)}
             className="mr-4 hover:bg-blue-700 p-2 rounded-full transition-colors"
           >
             <ArrowLeft size={24} />

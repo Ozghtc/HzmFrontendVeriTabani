@@ -25,7 +25,7 @@ const TablePanel: React.FC = () => {
     <div className={`bg-white rounded-lg shadow-md p-4 ${isPanelDisabled ? 'opacity-70' : ''}`}>
       <h2 className="text-lg font-semibold mb-4 text-teal-700 flex items-center">
         <Table size={20} className="mr-2" />
-        Tablolar
+        Tables
         {state.selectedProject && (
           <span className="ml-2 text-sm font-normal text-gray-500">
             ({state.selectedProject.name})
@@ -39,7 +39,7 @@ const TablePanel: React.FC = () => {
             type="text"
             value={newTableName}
             onChange={(e) => setNewTableName(e.target.value)}
-            placeholder="Yeni tablo adı"
+            placeholder="New table name"
             className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
             disabled={isPanelDisabled}
           />
@@ -53,7 +53,7 @@ const TablePanel: React.FC = () => {
             disabled={isPanelDisabled}
           >
             <PlusCircle size={16} className="mr-1" />
-            Ekle
+            Add
           </button>
         </div>
       </form>
@@ -61,11 +61,11 @@ const TablePanel: React.FC = () => {
       <div className="panel-content">
         {!state.selectedProject ? (
           <p className="text-gray-500 text-sm italic text-center py-4">
-            Lütfen önce bir proje seçin.
+            Please select a project first.
           </p>
         ) : state.selectedProject.tables.length === 0 ? (
           <p className="text-gray-500 text-sm italic text-center py-4">
-            Bu projede henüz hiç tablo yok. İlk tablonuzu ekleyin.
+            There are no tables in this project yet. Please add your first table.
           </p>
         ) : (
           <div className="space-y-2">
@@ -81,7 +81,7 @@ const TablePanel: React.FC = () => {
               >
                 <div className="flex justify-between items-center">
                   <span>{table.name}</span>
-                  <span className="text-xs text-gray-500">{table.fields.length} alan</span>
+                  <span className="text-xs text-gray-500">{table.fields.length} field</span>
                 </div>
               </div>
             ))}

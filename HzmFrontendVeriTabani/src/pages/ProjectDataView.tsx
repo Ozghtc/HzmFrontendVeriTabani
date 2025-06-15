@@ -4,7 +4,7 @@ import { useDatabase } from '../context/DatabaseContext';
 import { ArrowLeft, Table, Pencil, Trash2, Check, X } from 'lucide-react';
 
 const ProjectDataView = () => {
-  const { projectId } = useParams();
+  const { projectId, userId } = useParams();
   const navigate = useNavigate();
   const { state } = useDatabase();
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
@@ -84,7 +84,7 @@ const ProjectDataView = () => {
       <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
         <div className="container mx-auto flex items-center">
           <button
-            onClick={() => navigate('/projects')}
+            onClick={() => navigate(`/projects/user/${userId}`)}
             className="mr-4 hover:bg-blue-700 p-2 rounded-full transition-colors"
           >
             <ArrowLeft size={24} />

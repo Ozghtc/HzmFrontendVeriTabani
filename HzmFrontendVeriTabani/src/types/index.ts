@@ -53,16 +53,27 @@ export interface Project {
   name: string;
   tables: Table[];
   apiKey?: string;
+  userId?: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: 'admin' | 'yonetici';
+  selectedPackage?: string;
 }
 
 export interface DatabaseState {
   projects: Project[];
   selectedProject: Project | null;
   selectedTable: Table | null;
+  users: User[];
 }
 
 export type DatabaseAction =
-  | { type: 'ADD_PROJECT'; payload: { name: string } }
+  | { type: 'ADD_PROJECT'; payload: { name: string; userId?: string } }
   | { type: 'SELECT_PROJECT'; payload: { projectId: string } }
   | { type: 'ADD_TABLE'; payload: { name: string } }
   | { type: 'SELECT_TABLE'; payload: { tableId: string } }
@@ -70,4 +81,6 @@ export type DatabaseAction =
   | { type: 'REORDER_FIELDS'; payload: { oldIndex: number; newIndex: number } }
   | { type: 'TOGGLE_FIELD_ACTIVE'; payload: { fieldId: string } }
   | { type: 'SET_TABLE_FIELDS'; payload: { tableId: string; fields: Field[] } }
-  | { type: 'DELETE_PROJECT'; payload: { projectId: string } };
+  | { type: 'DELETE_PROJECT'; payload: { projectId: string } }
+  | { type: 'ADD_USER'; payload: User }
+  | { type: 'SET_USERS'; payload: User[] };
