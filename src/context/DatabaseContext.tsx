@@ -33,6 +33,8 @@ export type User = {
   email: string;
   password: string;
   role: 'admin' | 'yonetici';
+  selectedPackage?: string;
+  selectedPackageInfo?: import('../types').PackageInfo;
 };
 
 // Örnek kullanıcılar

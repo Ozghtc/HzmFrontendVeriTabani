@@ -56,6 +56,17 @@ export interface Project {
   userId?: string;
 }
 
+export interface PackageInfo {
+  ad: string;
+  fiyat: string;
+  proje: string;
+  tablo: string;
+  veri: string;
+  api: string;
+  maliyet: string;
+  ikon?: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -63,6 +74,7 @@ export interface User {
   password: string;
   role: 'admin' | 'yonetici';
   selectedPackage?: string;
+  selectedPackageInfo?: PackageInfo;
 }
 
 export interface DatabaseState {

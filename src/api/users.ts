@@ -1,4 +1,5 @@
 import { API_BASE_URL } from './config';
+import { paketler } from '../pages/AdminUsersFiyatlandirma';
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 
@@ -14,7 +15,16 @@ export async function getUsers() {
     headers: getHeaders(),
   });
   if (!response.ok) throw new Error('Kullanıcılar alınamadı');
-  return response.json();
+  const users = await response.json();
+  return users.map((u: any) => {
+    const selectedPackage = u.selected_package;
+    const selectedPackageInfo = paketler.find(p => p.ad === selectedPackage) || null;
+    return {
+      ...u,
+      selectedPackage,
+      selectedPackageInfo,
+    };
+  });
 }
 
 export async function addUser(user: any) {

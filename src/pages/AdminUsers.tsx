@@ -25,6 +25,7 @@ const AdminUsers: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'admin' | 'yonetici'>('yonetici');
+  const [selectedPackage, setSelectedPackage] = useState<string>('');
 
   // Silme modalı için state
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
@@ -45,14 +46,17 @@ const AdminUsers: React.FC = () => {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !password.trim()) return;
+    // Eğer seçili paket yoksa varsayılan olarak ilk paketi ata
+    const packageToSend = selectedPackage || paketler[0].ad;
     await addUserAsync({
       id: '', // backend id üretecek
       name,
       email,
       password,
       role,
+      selectedPackage: packageToSend,
     });
-    setName(''); setEmail(''); setPassword(''); setRole('yonetici');
+    setName(''); setEmail(''); setPassword(''); setRole('yonetici'); setSelectedPackage('');
   };
 
   // Kullanıcı silme
@@ -74,6 +78,7 @@ const AdminUsers: React.FC = () => {
       email: editEmail,
       password: editPassword,
       role: editRole,
+      selectedPackage: editUser.selectedPackage || selectedPackage || paketler[0].ad,
     });
     setEditUser(null);
   };
@@ -110,12 +115,14 @@ const AdminUsers: React.FC = () => {
     setEditUser(null);
   };
 
-  const handlePackageSelect = (packageName: string) => {
+  const handlePackageSelect = async (packageName: string) => {
     if (!selectedUser) return;
-    const updatedUsers = safeUsers.map(u =>
-      u.id === selectedUser.id ? { ...u, selectedPackage: packageName } : u
-    );
-    // dispatch({ type: 'SET_USERS', payload: updatedUsers });
+    await updateUserAsync(selectedUser.id, {
+      ...selectedUser,
+      selectedPackage: packageName,
+    });
+    setSelectedPackage(packageName);
+    setPricingOpen(false);
   };
 
   return (
@@ -135,6 +142,7 @@ const AdminUsers: React.FC = () => {
             value={name}
             onChange={e => setName(e.target.value)}
             style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+            disabled={pricingOpen}
           />
           <input
             type="email"
@@ -142,6 +150,7 @@ const AdminUsers: React.FC = () => {
             value={email}
             onChange={e => setEmail(e.target.value)}
             style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+            disabled={pricingOpen}
           />
           <input
             type="password"
@@ -149,12 +158,13 @@ const AdminUsers: React.FC = () => {
             value={password}
             onChange={e => setPassword(e.target.value)}
             style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+            disabled={pricingOpen}
           />
-          <select value={role} onChange={e => setRole(e.target.value as 'admin' | 'yonetici')} style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }}>
+          <select value={role} onChange={e => setRole(e.target.value as 'admin' | 'yonetici')} style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }} disabled={pricingOpen}>
             <option value="yonetici">Yönetici</option>
             <option value="admin">Admin</option>
           </select>
-          <Button type="submit" variant="contained">Kullanıcı Oluştur</Button>
+          <Button type="submit" variant="contained" disabled={!name.trim() || !email.trim() || !password.trim() || pricingOpen}>Kullanıcı Oluştur</Button>
         </form>
       </Box>
       <Typography variant="h5" gutterBottom>Kullanıcılar</Typography>
@@ -163,47 +173,55 @@ const AdminUsers: React.FC = () => {
           <Typography color="textSecondary">Henüz hiç kullanıcı yok. Yukarıdan yeni kullanıcı ekleyebilirsiniz.</Typography>
         )}
         {safeUsers.map((user) => {
-          let paketTable: React.ReactNode = null;
-          if ('selectedPackage' in user && (user as any).selectedPackage) {
-            const p = paketler.find(p => p.ad === (user as any).selectedPackage);
-            if (p) {
-              paketTable = (
-                <table style={{fontSize:12, fontWeight:'bold', borderCollapse:'collapse', background:'#fafbfc', borderRadius:6, boxShadow:'0 1px 4px #eee', width:'100%'}}>
-                  <thead>
-                    <tr style={{background:'#f5f5f5'}}>
-                      <th style={{padding:'4px 6px', fontSize:11}}>Paket</th>
-                      <th style={{padding:'4px 6px', fontSize:11}}>Proje</th>
-                      <th style={{padding:'4px 6px', fontSize:11}}>Tablo</th>
-                      <th style={{padding:'4px 6px', fontSize:11}}>Veri</th>
-                      <th style={{padding:'4px 6px', fontSize:11}}>API/Ay</th>
-                      <th style={{padding:'4px 6px', fontSize:11}}>Fiyat</th>
-                      <th style={{padding:'4px 6px', fontSize:11}}>Maliyet</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td style={{padding:'4px 6px'}}>{p.ad}</td>
-                      <td style={{padding:'4px 6px'}}>{p.proje}</td>
-                      <td style={{padding:'4px 6px'}}>{p.tablo}</td>
-                      <td style={{padding:'4px 6px'}}>{p.veri}</td>
-                      <td style={{padding:'4px 6px'}}>{p.api}</td>
-                      <td style={{padding:'4px 6px'}}>{p.fiyat}</td>
-                      <td style={{padding:'4px 6px'}}>{p.maliyet}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              );
-            }
+          let paketDetay: React.ReactNode = null;
+          if (user.selectedPackageInfo) {
+            const p = user.selectedPackageInfo;
+            paketDetay = (
+              <Box mt={1} mb={1}>
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  borderRadius={2}
+                  border="1px solid #e0e0e0"
+                  bgcolor="#eaf6ff"
+                  px={2}
+                  py={1}
+                  style={{ fontSize: 13, width: 'fit-content', minWidth: 700 }}
+                >
+                  <Box display="flex" alignItems="center" fontWeight="bold" style={{ borderBottom: '1px solid #d0d0d0', paddingBottom: 2, marginBottom: 2 }}>
+                    <Box width={90}>Paket</Box>
+                    <Box width={80}>Proje</Box>
+                    <Box width={80}>Tablo</Box>
+                    <Box width={110}>Veri (Depolama)</Box>
+                    <Box width={110}>API Çağrısı / Ay</Box>
+                    <Box width={90}>Aylık Fiyat</Box>
+                    <Box width={100}>DO Maliyeti</Box>
+                  </Box>
+                  <Box display="flex" alignItems="center" fontWeight={500}>
+                    <Box width={90} display="flex" alignItems="center">
+                      {p.ikon && <span style={{ fontSize: 18, marginRight: 4 }}>{p.ikon}</span>}
+                      {p.ad}
+                    </Box>
+                    <Box width={80}>{p.proje}</Box>
+                    <Box width={80}>{p.tablo}</Box>
+                    <Box width={110}>{p.veri}</Box>
+                    <Box width={110}>{p.api}</Box>
+                    <Box width={90} color="#1976d2">{p.fiyat}</Box>
+                    <Box width={100} color="#888">{p.maliyet}</Box>
+                  </Box>
+                </Box>
+              </Box>
+            );
           }
           return (
             <Card key={user.id}>
               <CardContent style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="subtitle1">{user.name} <span style={{fontSize:12, color:'#888'}}>({user.role})</span></Typography>
-                  <Typography variant="body2" color="textSecondary">{user.email}</Typography>
-                </Box>
-                <Box display="flex" alignItems="center" justifyContent="center" minWidth={400}>
-                  {paketTable}
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Box>
+                    <Typography variant="subtitle1">{user.name} <span style={{fontSize:12, color:'#888'}}>({user.role})</span></Typography>
+                    <Typography variant="body2" color="textSecondary">{user.email}</Typography>
+                  </Box>
+                  {paketDetay}
                 </Box>
                 <Box display="flex" gap={1}>
                   <Button variant="contained" color="primary" onClick={() => navigate(`/projects/user/${user.id}`)}>
@@ -298,6 +316,7 @@ const AdminUsers: React.FC = () => {
         onClose={() => setPricingOpen(false)}
         selectedUser={selectedUser}
         onPackageSelect={handlePackageSelect}
+        currentUserRole={selectedUser?.role}
       />
     </Box>
   );
