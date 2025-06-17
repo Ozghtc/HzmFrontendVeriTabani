@@ -27,14 +27,21 @@ export async function getUsers() {
   });
 }
 
-export async function addUser(user: any) {
-  const response = await fetch(`${API_BASE_URL}/api/users`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(user),
-  });
-  if (!response.ok) throw new Error('Kullanıcı eklenemedi');
-  return response.json();
+export async function createUser(user: any) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(user),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || data.message || 'Kullanıcı eklenemedi');
+    }
+    return data;
+  } catch (error: any) {
+    throw new Error(error.message || 'Kullanıcı eklenemedi');
+  }
 }
 
 export async function deleteUser(userId: string) {

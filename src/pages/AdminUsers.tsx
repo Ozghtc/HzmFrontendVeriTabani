@@ -26,6 +26,7 @@ const AdminUsers: React.FC = () => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'admin' | 'yonetici'>('yonetici');
   const [selectedPackage, setSelectedPackage] = useState<string>('');
+  const [addUserError, setAddUserError] = useState<string>('');
 
   // Silme modalı için state
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
@@ -45,18 +46,23 @@ const AdminUsers: React.FC = () => {
   // Kullanıcı ekleme
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAddUserError('');
     if (!name.trim() || !email.trim() || !password.trim()) return;
     // Eğer seçili paket yoksa varsayılan olarak ilk paketi ata
     const packageToSend = selectedPackage || paketler[0].ad;
-    await addUserAsync({
-      id: '', // backend id üretecek
-      name,
-      email,
-      password,
-      role,
-      selectedPackage: packageToSend,
-    });
-    setName(''); setEmail(''); setPassword(''); setRole('yonetici'); setSelectedPackage('');
+    try {
+      await addUserAsync({
+        id: '', // backend id üretecek
+        name,
+        email,
+        password,
+        role,
+        selectedPackage: packageToSend,
+      });
+      setName(''); setEmail(''); setPassword(''); setRole('yonetici'); setSelectedPackage('');
+    } catch (error: any) {
+      setAddUserError(error.message || 'Kullanıcı eklenemedi. Lütfen tekrar deneyin.');
+    }
   };
 
   // Kullanıcı silme
@@ -166,6 +172,18 @@ const AdminUsers: React.FC = () => {
           </select>
           <Button type="submit" variant="contained" disabled={!name.trim() || !email.trim() || !password.trim() || pricingOpen}>Kullanıcı Oluştur</Button>
         </form>
+        {addUserError && (
+          <div style={{ color: 'red', marginTop: 8, fontWeight: 'bold' }}>
+            {addUserError}
+            <br />
+            <span style={{ fontSize: '0.95em' }}>
+              Backend veya API tarafında hata olabilir. <br />
+              <b>Backend:</b> Kullanıcı ekleme endpointini, veritabanı bağlantısını ve API Key doğrulamasını kontrol edin.<br />
+              <b>Frontend:</b> API URL ve API Key ayarlarını kontrol edin.<br />
+              <b>API:</b> Hata mesajı: {addUserError}
+            </span>
+          </div>
+        )}
       </Box>
       <Typography variant="h5" gutterBottom>Kullanıcılar</Typography>
       <Box display="flex" flexDirection="column" gap={2}>
