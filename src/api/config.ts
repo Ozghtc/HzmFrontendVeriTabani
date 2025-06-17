@@ -1,4 +1,10 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://coral-app-byjug.ondigitalocean.app';
+export const API_BASE_URL = (() => {
+  const url = import.meta.env.VITE_API_URL;
+  if (!url) {
+    throw new Error('VITE_API_URL environment variable is not set!');
+  }
+  return url;
+})();
 
 export interface ApiResponse<T = any> {
   data?: T;
