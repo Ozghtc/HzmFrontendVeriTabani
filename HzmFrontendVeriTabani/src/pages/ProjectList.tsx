@@ -4,10 +4,12 @@ import { useDatabase } from '../context/DatabaseContext';
 import { Database, ArrowLeft, Table, FileText, PlusCircle, Eye, Trash2, ClipboardCopy, ChevronDown, ChevronUp } from 'lucide-react';
 import { Grid } from '@mui/material';
 import { paketler } from './AdminUsersFiyatlandirma';
+import { User } from '../types';
 
 const ProjectList = () => {
   const { userId } = useParams();
   const { state, dispatch, users } = useDatabase();
+  const typedUsers: User[] = users;
   const navigate = useNavigate();
   const [newProjectName, setNewProjectName] = useState('');
   const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
@@ -16,7 +18,7 @@ const ProjectList = () => {
   const [packageDropdownOpen, setPackageDropdownOpen] = useState(false);
 
   // Kullanıcıyı bul
-  const user = users.find(u => u.id === userId);
+  const user: User | undefined = typedUsers.find(u => String(u.id) === String(userId));
   // Sadece bu kullanıcıya ait projeler
   const userProjects = userId ? state.projects.filter(p => p.userId === userId) : state.projects;
   
@@ -36,7 +38,7 @@ const ProjectList = () => {
   // Paket değiştirme fonksiyonu
   const handlePackageChange = (newPackageName: string) => {
     if (!user) return;
-    const updatedUsers = users.map(u =>
+    const updatedUsers = typedUsers.map(u =>
       u.id === user.id ? { ...u, selectedPackage: newPackageName } : u
     );
     dispatch({ type: 'SET_USERS', payload: updatedUsers });
@@ -114,11 +116,13 @@ const ProjectList = () => {
           {/* Kullanıcı bilgisi */}
           {user && (
             <div className="text-right">
-              <div className="font-semibold">{user.name}</div>
-              <div className="text-xs">{user.role}</div>
+              <div className="font-semibold text-lg">{user.name}</div>
+              <div className="text-xs text-gray-200 mb-1">{user.role === 'admin' ? 'Admin' : 'Yönetici'}</div>
               {userPackage && (
-                <div className="text-xs mt-1 bg-white/20 px-2 py-1 rounded">
-                  {userPackage.renk} {userPackage.ad}
+                <div className="text-xs mt-1 bg-white/20 px-2 py-1 rounded font-semibold flex items-center gap-2 justify-end">
+                  <span>{userPackage.renk}</span>
+                  <span>{userPackage.ad}</span>
+                  <span className="text-blue-100 font-bold">{userPackage.fiyat}</span>
                 </div>
               )}
             </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider, Box, Typography } from '@mui/material';
 
 interface Paket {
@@ -81,11 +81,29 @@ const AdminUsersFiyatlandirma: React.FC<AdminUsersFiyatlandirmaProps> = ({
   currentUserRole
 }) => {
   const [selected, setSelected] = React.useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (selected !== null) {
-      onPackageSelect(paketler[selected].ad);
-      onClose();
+      setLoading(true);
+      setError(null);
+      try {
+        await onPackageSelect(paketler[selected].ad);
+        setLoading(false);
+        onClose();
+      } catch (err: any) {
+        let msg = 'Fiyat/Paket güncellenemedi. ';
+        if (err && err.message) {
+          msg += 'Hata: ' + err.message;
+        } else if (typeof err === 'string') {
+          msg += err;
+        } else {
+          msg += 'Lütfen tekrar deneyin.';
+        }
+        setError(msg);
+        setLoading(false);
+      }
     }
   };
 
@@ -148,9 +166,10 @@ const AdminUsersFiyatlandirma: React.FC<AdminUsersFiyatlandirmaProps> = ({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="inherit">Kapat</Button>
-        <Button onClick={handleConfirm} color="primary" variant="contained" disabled={selected === null}>Onayla</Button>
+        <Button onClick={onClose} color="inherit" disabled={loading}>Kapat</Button>
+        <Button onClick={handleConfirm} color="primary" variant="contained" disabled={selected === null || loading}>Onayla</Button>
       </DialogActions>
+      {error && <Typography color="error" sx={{mt:2, textAlign:'center'}}>{error}</Typography>}
     </Dialog>
   );
 };

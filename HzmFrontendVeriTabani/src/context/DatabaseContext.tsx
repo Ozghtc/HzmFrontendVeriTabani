@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { DatabaseState, DatabaseAction, Project, Table, Field } from '../types';
-import { getUsers, addUser, deleteUser, updateUser } from '../api/users';
+import { getUsers, createUser, deleteUser, updateUser } from '../api/users';
 
 const STORAGE_KEY = 'database_state';
 
@@ -33,6 +33,8 @@ export type User = {
   email: string;
   password: string;
   role: 'admin' | 'yonetici';
+  selectedPackage?: string;
+  selectedPackageInfo?: import('../types').PackageInfo;
 };
 
 // Örnek kullanıcılar
@@ -371,7 +373,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
 
   // Kullanıcı ekle
   const addUserAsync = async (user: User) => {
-    await addUser(user);
+    await createUser(user);
     await fetchUsers();
   };
 
