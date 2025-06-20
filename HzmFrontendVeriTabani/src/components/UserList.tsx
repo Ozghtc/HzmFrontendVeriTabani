@@ -21,7 +21,7 @@ const UserList: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/users');
+      const response = await api.get('/api/v1/users');
       setUsers(response.data);
       setError(null);
     } catch (err: any) {

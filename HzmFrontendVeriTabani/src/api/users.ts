@@ -11,7 +11,7 @@ function getHeaders() {
 }
 
 export async function getUsers() {
-  const response = await fetch(`${API_BASE_URL}/api/users`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/users`, {
     headers: getHeaders(),
   });
   if (!response.ok) throw new Error('Kullanıcılar alınamadı');
@@ -29,7 +29,7 @@ export async function getUsers() {
 
 export async function createUser(user: any) {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/users`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/users`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(user),
@@ -45,7 +45,7 @@ export async function createUser(user: any) {
 }
 
 export async function deleteUser(userId: string) {
-  const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}`, {
     method: 'DELETE',
     headers: getHeaders(),
   });
@@ -54,7 +54,7 @@ export async function deleteUser(userId: string) {
 }
 
 export async function updateUser(userId: string, user: any) {
-  const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}`, {
     method: 'PUT',
     headers: getHeaders(),
     body: JSON.stringify(user),
