@@ -1,22 +1,18 @@
-# Render PostgreSQL Veritabanı Bilgileri
+# Railway PostgreSQL Veritabanı Bilgileri
 
-- **Hostname:** `dpg-d19bii15pdvs73e6jfhg-a`
+- **Hostname (Internal):** `postgres.railway.internal`
 - **Port:** `5432`
-- **Veritabanı Adı:** `hzmveritabanidatabase`
-- **Kullanıcı Adı:** `hzmveritabanidatabase_user`
-- **Şifre:** `cQUSBesNZUJY17vHAZrHoWKxlikSLXUe`
+- **Veritabanı Adı:** `railway`
+- **Kullanıcı Adı:** `postgres`
+- **Şifre:** `QuYdBaYimhhZySgITuTAUuYPWGjLizVt`
 
 ---
 
-## Bağlantı URL'leri
+## Bağlantı URL'si
 
 - **Internal Database URL:**
   ```
-  postgresql://hzmveritabanidatabase_user:cQUSBesNZUJY17vHAZrHoWKxlikSLXUe@dpg-d19bii15pdvs73e6jfhg-a/hzmveritabanidatabase
-  ```
-- **External Database URL:**
-  ```
-  postgresql://hzmveritabanidatabase_user:cQUSBesNZUJY17vHAZrHoWKxlikSLXUe@dpg-d19bii15pdvs73e6jfhg-a.oregon-postgres.render.com/hzmveritabanidatabase
+  postgresql://postgres:QuYdBaYimhhZySgITuTAUuYPWGjLizVt@postgres.railway.internal:5432/railway
   ```
 
 ---
@@ -24,7 +20,7 @@
 ## Komut Satırı ile Bağlantı (psql)
 
 ```
-PGPASSWORD=cQUSBesNZUJY17vHAZrHoWKxlikSLXUe psql -h dpg-d19bii15pdvs73e6jfhg-a.oregon-postgres.render.com -U hzmveritabanidatabase_user hzmveritabanidatabase
+PGPASSWORD=QuYdBaYimhhZySgITuTAUuYPWGjLizVt psql -h postgres.railway.internal -U postgres railway
 ```
 
 > **Not:** Bu dosya sadece yerel geliştirme ve kurulum için kullanılmalıdır. Şifre ve bağlantı bilgilerini kimseyle paylaşmayın!
