@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDatabase } from '../context/DatabaseContext';
+import { useApiAdminProjects } from '../hooks/useApiAdmin';
 import { 
   Database, 
   ArrowLeft, 
@@ -21,21 +22,22 @@ import { Project } from '../types';
 
 const DatabaseProjects = () => {
   const { state, getAllUsers } = useDatabase();
+  const { projects: backendProjects, loading, error, deleteProject: deleteProjectApi } = useApiAdminProjects();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterUser, setFilterUser] = useState<string>('all');
-  const [deletingProject, setDeletingProject] = useState<Project | null>(null);
+  const [deletingProject, setDeletingProject] = useState<any | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [showApiKey, setShowApiKey] = useState<Record<string, boolean>>({});
 
-  // Get all projects from localStorage
-  const allProjects: Project[] = JSON.parse(localStorage.getItem('all_projects') || '[]');
+  // Use backend projects instead of localStorage
+  const allProjects = backendProjects || [];
   const users = getAllUsers();
 
-  // Filter projects
+  // Filter projects  
   const filteredProjects = allProjects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesUser = filterUser === 'all' || project.userId === filterUser;
+    const matchesUser = filterUser === 'all' || project.userId.toString() === filterUser;
     return matchesSearch && matchesUser;
   });
 
