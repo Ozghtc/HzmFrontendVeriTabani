@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { DatabaseState, DatabaseAction, Project, Table, User, PricingPlan, Campaign, FieldValidation, FieldRelationship, ApiKey } from '../types';
 import { ApiKeyGenerator } from '../utils/apiKeyGenerator';
+import { apiClient } from '../utils/api';
 
 const STORAGE_KEY = 'database_state';
 const USERS_KEY = 'database_users';
@@ -500,6 +501,8 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
           enableWebhooks: state.user.subscriptionType !== 'free',
         },
       };
+      
+      // Note: Project created locally, will be synced with backend later
       
       // Add to all projects with duplicate check
       const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
@@ -1331,8 +1334,14 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     return loadUsers();
   };
   
+  // Save auth token for API calls
+  const saveAuthToken = (token: string) => {
+    localStorage.setItem('auth_token', token);
+    console.log('🔑 Auth token saved for API calls');
+  };
+  
   return (
-    <DatabaseContext.Provider value={{ state, dispatch, login, register, logout, getAllUsers }}>
+    <DatabaseContext.Provider value={{ state, dispatch, login, register, logout, getAllUsers, saveAuthToken }}>
       {children}
     </DatabaseContext.Provider>
   );
