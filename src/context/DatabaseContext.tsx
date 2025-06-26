@@ -1274,6 +1274,44 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   };
   
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
+    try {
+      // Try backend API register first
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production.up.railway.app/api/v1';
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, name }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const { token, user } = data;
+        
+        // Save auth token for API calls
+        localStorage.setItem('auth_token', token);
+        console.log('🔑 Backend register successful');
+        console.log('👤 Backend user data:', user);
+        console.log('🔒 JWT token saved');
+        
+        // Dispatch register with backend user data
+        dispatch({ type: 'REGISTER', payload: { user } });
+        return true;
+      } else {
+        const errorData = await response.json();
+        console.log('❌ Backend register failed:', errorData.error);
+        
+        // If user already exists on backend, return false
+        if (response.status === 400 && errorData.error?.includes('already exists')) {
+          return false;
+        }
+      }
+    } catch (error) {
+      console.log('🔄 Backend register failed, falling back to localStorage:', error);
+    }
+
+    // Fallback to localStorage for backward compatibility
     const users = loadUsers();
     const existingUser = users.find(u => u.email === email);
     
@@ -1293,7 +1331,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
       maxTables: 5,
     };
     
-    // Save user to localStorage first
+    // Save user to localStorage
     const updatedUsers = [...users, newUser];
     saveUsers(updatedUsers);
     
