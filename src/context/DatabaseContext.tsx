@@ -281,37 +281,11 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
   
   switch (action.type) {
     case 'LOGIN': {
-      // CLEAN LOAD - Remove duplicates on login
-      const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-      const cleanedProjects = cleanDuplicates(allProjects);
-      
-      // Save cleaned projects back
-      localStorage.setItem('all_projects', JSON.stringify(cleanedProjects));
-      
-      // Load user's projects
-      const userProjects = cleanedProjects.filter((p: Project) => p.userId === action.payload.user.id);
-      
       newState = {
         ...state,
         user: action.payload.user,
         isAuthenticated: true,
-        projects: cleanDuplicates(userProjects).map(project => ({
-          ...project,
-          // Ensure API key exists
-          apiKey: project.apiKey || ApiKeyGenerator.generateProjectApiKey(project.id, project.name),
-          apiKeys: project.apiKeys || [],
-          isPublic: project.isPublic || false,
-          settings: project.settings || {
-            allowApiAccess: true,
-            requireAuth: false,
-            maxRequestsPerMinute: 1000,
-            enableWebhooks: false,
-          },
-          tables: cleanDuplicates(project.tables || []).map(table => ({
-            ...table,
-            fields: cleanDuplicates(table.fields || [])
-          }))
-        })),
+        projects: [], // Will be loaded from API
         selectedProject: null,
         selectedTable: null,
       };
@@ -478,44 +452,9 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
         return state;
       }
       
-      // Create new project with unique ID and API key
-      const projectId = generateUniqueId();
-      const apiKey = ApiKeyGenerator.generateProjectApiKey(projectId, action.payload.name);
-      
-      const newProject: Project = {
-        id: projectId,
-        name: action.payload.name.trim(),
-        description: action.payload.description?.trim(),
-        tables: [],
-        userId: state.user.id,
-        createdAt: new Date().toISOString(),
-        apiKey: apiKey,
-        apiKeys: [],
-        isPublic: false,
-        settings: {
-          allowApiAccess: true,
-          requireAuth: false,
-          maxRequestsPerMinute: state.user.subscriptionType === 'free' ? 100 : 
-                                state.user.subscriptionType === 'basic' ? 1000 :
-                                state.user.subscriptionType === 'premium' ? 10000 : -1,
-          enableWebhooks: state.user.subscriptionType !== 'free',
-        },
-      };
-      
-      // Note: Project created locally, will be synced with backend later
-      
-      // Add to all projects with duplicate check
-      const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-      const cleanedProjects = cleanDuplicates([...allProjects, newProject]);
-      localStorage.setItem('all_projects', JSON.stringify(cleanedProjects));
-      
-      newState = {
-        ...state,
-        projects: cleanDuplicates([...state.projects, newProject]),
-        selectedProject: newProject,
-        selectedTable: null,
-      };
-      break;
+      // Note: Project will be created via API call, not localStorage
+      // This case will be handled by async action
+      return state;
     }
     case 'UPDATE_PROJECT': {
       if (!state.user) return state;
