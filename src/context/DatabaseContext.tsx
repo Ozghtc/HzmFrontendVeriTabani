@@ -1259,6 +1259,12 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'LOGIN', payload: { user: updatedAdminUser } });
       return true;
     }
+
+    // Special case for Hatice test user - force backend login
+    if (email === 'hatice@test.com' && password === '123456') {
+      console.log('🔄 Hatice test user detected, skipping localStorage fallback');
+      return false; // Force using backend API
+    }
     
     if (user && user.isActive) {
       dispatch({ type: 'LOGIN', payload: { user } });
