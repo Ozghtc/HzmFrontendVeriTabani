@@ -1192,6 +1192,7 @@ type DatabaseContextType = {
   register: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
   getAllUsers: () => User[];
+  saveAuthToken: (token: string) => void;
 };
 
 const DatabaseContext = createContext<DatabaseContextType | undefined>(undefined);
@@ -1201,6 +1202,34 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(databaseReducer, initialState);
   
   const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      // Try backend API login first
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production.up.railway.app/api/v1';
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const { token, user } = data;
+        
+        // Save auth token for API calls
+        localStorage.setItem('auth_token', token);
+        console.log('🔑 Backend login successful, token saved');
+        
+        // Dispatch login with backend user data
+        dispatch({ type: 'LOGIN', payload: { user } });
+        return true;
+      }
+    } catch (error) {
+      console.log('🔄 Backend login failed, falling back to localStorage');
+    }
+
+    // Fallback to localStorage for backward compatibility
     const users = loadUsers();
     
     // Find user by email
