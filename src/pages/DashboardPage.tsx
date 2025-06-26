@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDatabase } from '../context/DatabaseContext';
+import { useApiProjects } from '../hooks/useApiProjects';
 import { Database, LogOut, User, Plus, Eye, Settings, Shield } from 'lucide-react';
 
 const DashboardPage = () => {
   const { state, logout } = useDatabase();
+  const { projects, loading } = useApiProjects();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -81,8 +83,8 @@ const DashboardPage = () => {
                   Mevcut Plan: <span className="capitalize">{state.user?.subscriptionType === 'enterprise' ? 'Kurumsal' : state.user?.subscriptionType}</span>
                 </p>
                 <p className="text-xs text-blue-600">
-                  Proje Limiti: {state.user?.maxProjects === -1 ? 'Sınırsız' : `${state.projects.length}/${state.user?.maxProjects}`} | 
-                  Tablo Limiti: {state.user?.maxTables === -1 ? 'Sınırsız' : `${state.projects.reduce((total, project) => total + project.tables.length, 0)}/${state.user?.maxTables}`}
+                  Proje Limiti: {state.user?.maxProjects === -1 ? 'Sınırsız' : `${projects.length}/${state.user?.maxProjects}`} | 
+                  Tablo Limiti: {state.user?.maxTables === -1 ? 'Sınırsız' : `${projects.reduce((total, project) => total + (project.tableCount || 0), 0)}/${state.user?.maxTables}`}
                 </p>
               </div>
               {/* Show upgrade button for all users except enterprise */}
@@ -104,7 +106,7 @@ const DashboardPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Toplam Proje</p>
-                <p className="text-3xl font-bold text-blue-600">{state.projects.length}</p>
+                <p className="text-3xl font-bold text-blue-600">{loading ? '...' : projects.length}</p>
               </div>
               <Database className="text-blue-600" size={40} />
             </div>
@@ -115,7 +117,7 @@ const DashboardPage = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Toplam Tablo</p>
                 <p className="text-3xl font-bold text-green-600">
-                  {state.projects.reduce((total, project) => total + project.tables.length, 0)}
+                  {loading ? '...' : projects.reduce((total, project) => total + (project.tableCount || 0), 0)}
                 </p>
               </div>
               <Settings className="text-green-600" size={40} />
