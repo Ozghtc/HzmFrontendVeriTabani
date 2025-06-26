@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDatabase } from '../context/DatabaseContext';
+import { useApiUsers } from '../hooks/useApiAdmin';
 import { 
   Users, 
   ArrowLeft, 
@@ -19,9 +20,13 @@ import {
 import { User } from '../types';
 
 const DatabaseUsers = () => {
-  const { state, dispatch, getAllUsers, register } = useDatabase();
+  const { state, dispatch, register } = useDatabase();
+  const { users: backendUsers, loading: usersLoading, fetchUsers } = useApiUsers();
   const navigate = useNavigate();
-  const [users, setUsers] = useState<User[]>(getAllUsers());
+  
+  // Use backend users instead of localStorage
+  const users = backendUsers || [];
+  
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
@@ -55,10 +60,23 @@ const DatabaseUsers = () => {
     isActive: true
   });
 
-  // Filter users based on search and status
+  // Loading state
+  if (usersLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Kullanıcılar yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Filter users based on search and status with null safety
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!user) return false;
+    const matchesSearch = (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (user.email || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || 
                          (filterStatus === 'active' && user.isActive) ||
                          (filterStatus === 'inactive' && !user.isActive);
@@ -76,35 +94,9 @@ const DatabaseUsers = () => {
     try {
       const success = await register(newUserData.email, newUserData.password, newUserData.name);
       if (success) {
-        // Update the new user's subscription and status
-        const allUsers = getAllUsers();
-        const newUser = allUsers.find(u => u.email === newUserData.email);
+        // Refresh users from backend
+        await fetchUsers();
         
-        if (newUser) {
-          // Update subscription
-          const plan = state.pricingPlans.find(p => p.name.toLowerCase() === newUserData.subscriptionType);
-          if (plan) {
-            dispatch({
-              type: 'UPDATE_USER_SUBSCRIPTION',
-              payload: {
-                userId: newUser.id,
-                subscriptionType: newUserData.subscriptionType,
-                maxProjects: plan.maxProjects,
-                maxTables: plan.maxTables
-              }
-            });
-          }
-          
-          // Update status if needed
-          if (!newUserData.isActive) {
-            dispatch({
-              type: 'UPDATE_USER_STATUS',
-              payload: { userId: newUser.id, isActive: newUserData.isActive }
-            });
-          }
-        }
-
-        setUsers(getAllUsers());
         setShowAddUserForm(false);
         setNewUserData({
           name: '',
@@ -133,32 +125,38 @@ const DatabaseUsers = () => {
     });
   };
 
-  const handleSaveUser = (userId: string) => {
-    // Update user subscription
-    const plan = state.pricingPlans.find(p => p.name.toLowerCase() === editUserData.subscriptionType);
-    if (plan) {
-      dispatch({
-        type: 'UPDATE_USER_SUBSCRIPTION',
-        payload: {
-          userId,
-          subscriptionType: editUserData.subscriptionType,
-          maxProjects: plan.maxProjects,
-          maxTables: plan.maxTables
-        }
-      });
-    }
-    
-    // Update user status
-    const currentUser = users.find(u => u.id === userId);
-    if (currentUser && currentUser.isActive !== editUserData.isActive) {
-      dispatch({
-        type: 'UPDATE_USER_STATUS',
-        payload: { userId, isActive: editUserData.isActive }
-      });
-    }
+  const handleSaveUser = async (userId: string) => {
+    try {
+      // Update user subscription
+      const plan = state.pricingPlans.find(p => p.name.toLowerCase() === editUserData.subscriptionType);
+      if (plan) {
+        dispatch({
+          type: 'UPDATE_USER_SUBSCRIPTION',
+          payload: {
+            userId,
+            subscriptionType: editUserData.subscriptionType,
+            maxProjects: plan.maxProjects,
+            maxTables: plan.maxTables
+          }
+        });
+      }
+      
+      // Update user status
+      const currentUser = users.find(u => u.id === userId);
+      if (currentUser && currentUser.isActive !== editUserData.isActive) {
+        dispatch({
+          type: 'UPDATE_USER_STATUS',
+          payload: { userId, isActive: editUserData.isActive }
+        });
+      }
 
-    setEditingUser(null);
-    setUsers(getAllUsers());
+      // Refresh users from backend
+      await fetchUsers();
+      
+      setEditingUser(null);
+    } catch (error) {
+      alert('Kullanıcı güncellenirken bir hata oluştu.');
+    }
   };
 
   const handleCancelEdit = () => {
@@ -177,16 +175,23 @@ const DatabaseUsers = () => {
     setDeleteConfirmName('');
   };
 
-  const confirmDeleteUser = () => {
+  const confirmDeleteUser = async () => {
     if (deletingUser && deleteConfirmName === deletingUser.name) {
-      dispatch({ type: 'DELETE_USER', payload: { userId: deletingUser.id } });
-      setUsers(getAllUsers());
-      setDeletingUser(null);
-      setDeleteConfirmName('');
+      try {
+        dispatch({ type: 'DELETE_USER', payload: { userId: deletingUser.id } });
+        
+        // Refresh users from backend
+        await fetchUsers();
+        
+        setDeletingUser(null);
+        setDeleteConfirmName('');
 
-      if (state.user?.id === deletingUser.id) {
-        dispatch({ type: 'LOGOUT' });
-        navigate('/');
+        if (state.user?.id === deletingUser.id) {
+          dispatch({ type: 'LOGOUT' });
+          navigate('/');
+        }
+      } catch (error) {
+        alert('Kullanıcı silinirken bir hata oluştu.');
       }
     }
   };

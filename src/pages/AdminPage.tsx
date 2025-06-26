@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDatabase } from '../context/DatabaseContext';
-import { useApiAdminProjects } from '../hooks/useApiAdmin';
+import { useApiAdminProjects, useApiUsers } from '../hooks/useApiAdmin';
 import { 
   Users, 
   Settings, 
@@ -16,10 +16,13 @@ import {
 } from 'lucide-react';
 
 const AdminPage = () => {
-  const { state, getAllUsers } = useDatabase();
+  const { state } = useDatabase();
   const { projects: backendProjects, loading: projectsLoading } = useApiAdminProjects();
+  const { users: backendUsers, loading: usersLoading } = useApiUsers();
   const navigate = useNavigate();
-  const users = getAllUsers() || [];
+  
+  // Use backend users instead of localStorage
+  const users = backendUsers || [];
 
   // Check if user is admin
   if (!state.user?.isAdmin) {
@@ -45,7 +48,7 @@ const AdminPage = () => {
   const pricingPlans = state.pricingPlans || [];
 
   // Loading state
-  if (projectsLoading) {
+  if (projectsLoading || usersLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
