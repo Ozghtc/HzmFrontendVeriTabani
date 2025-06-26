@@ -17,9 +17,9 @@ import {
 
 const AdminPage = () => {
   const { state, getAllUsers } = useDatabase();
-  const { projects: backendProjects } = useApiAdminProjects();
+  const { projects: backendProjects, loading: projectsLoading } = useApiAdminProjects();
   const navigate = useNavigate();
-  const users = getAllUsers();
+  const users = getAllUsers() || [];
 
   // Check if user is admin
   if (!state.user?.isAdmin) {
@@ -40,8 +40,21 @@ const AdminPage = () => {
     );
   }
 
-  // Use backend projects instead of localStorage
+  // Use backend projects instead of localStorage with fallback
   const allProjects = backendProjects || [];
+  const pricingPlans = state.pricingPlans || [];
+
+  // Loading state
+  if (projectsLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+          <p className="mt-4 text-gray-600">Admin paneli yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -79,7 +92,7 @@ const AdminPage = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Aktif Kullanıcı</p>
                 <p className="text-3xl font-bold text-green-600">
-                  {users.filter(u => u.isActive).length}
+                  {users.filter(u => u?.isActive).length}
                 </p>
               </div>
               <Activity className="text-green-600" size={40} />
@@ -91,7 +104,7 @@ const AdminPage = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Premium Kullanıcı</p>
                 <p className="text-3xl font-bold text-purple-600">
-                  {users.filter(u => u.subscriptionType !== 'free').length}
+                  {users.filter(u => u?.subscriptionType !== 'free').length}
                 </p>
               </div>
               <Crown className="text-purple-600" size={40} />
@@ -102,7 +115,7 @@ const AdminPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Fiyat Planı</p>
-                <p className="text-3xl font-bold text-orange-600">{state.pricingPlans.length}</p>
+                <p className="text-3xl font-bold text-orange-600">{pricingPlans.length}</p>
               </div>
               <DollarSign className="text-orange-600" size={40} />
             </div>
@@ -124,8 +137,8 @@ const AdminPage = () => {
             </div>
             <p className="text-sm text-gray-600">Kullanıcı hesaplarını yönetin</p>
             <div className="mt-3 text-xs text-gray-500">
-              Aktif: {users.filter(u => u.isActive).length} | 
-              Pasif: {users.filter(u => !u.isActive).length}
+              Aktif: {users.filter(u => u?.isActive).length} | 
+              Pasif: {users.filter(u => !u?.isActive).length}
             </div>
           </div>
 
@@ -142,7 +155,9 @@ const AdminPage = () => {
             </div>
             <p className="text-sm text-gray-600">Tüm projeleri görüntüleyin</p>
             <div className="mt-3 text-xs text-gray-500">
-              Tablolar: {allProjects.reduce((total: number, project: any) => total + (project.tableCount || 0), 0)}
+              Tablolar: {allProjects.reduce((total: number, project: any) => {
+                return total + (project?.tableCount || 0);
+              }, 0)}
             </div>
           </div>
 
@@ -160,7 +175,7 @@ const AdminPage = () => {
                   users,
                   projects: allProjects,
                   state: state,
-                  plans: state.pricingPlans
+                  plans: pricingPlans
                 }).length / 1024).toFixed(0)}KB
               </div>
             </div>
@@ -179,11 +194,11 @@ const AdminPage = () => {
                 <DollarSign className="text-purple-600 mr-3" size={24} />
                 <h3 className="text-lg font-semibold text-gray-800">Fiyatlandırma</h3>
               </div>
-              <div className="text-2xl font-bold text-purple-600">{state.pricingPlans.length}</div>
+              <div className="text-2xl font-bold text-purple-600">{pricingPlans.length}</div>
             </div>
             <p className="text-sm text-gray-600">Fiyat planlarını yönetin</p>
             <div className="mt-3 text-xs text-gray-500">
-              Aktif: {state.pricingPlans.filter(p => p.isActive).length} plan
+              Aktif: {pricingPlans.filter(p => p?.isActive).length} plan
             </div>
           </div>
         </div>
