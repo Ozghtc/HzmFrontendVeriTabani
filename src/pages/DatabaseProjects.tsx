@@ -30,19 +30,20 @@ const DatabaseProjects = () => {
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [showApiKey, setShowApiKey] = useState<Record<string, boolean>>({});
 
-  // Use backend projects instead of localStorage
+  // Use backend projects instead of localStorage with fallback
   const allProjects = backendProjects || [];
-  const users = getAllUsers();
+  const users = getAllUsers() || [];
 
-  // Filter projects  
+  // Filter projects with null safety
   const filteredProjects = allProjects.filter(project => {
-    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesUser = filterUser === 'all' || project.userId.toString() === filterUser;
+    if (!project) return false;
+    const matchesSearch = (project.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesUser = filterUser === 'all' || project.userId?.toString() === filterUser;
     return matchesSearch && matchesUser;
   });
 
   const getUserName = (project: any) => {
-    return project.userName || 'Bilinmeyen Kullanıcı';
+    return project?.userName || 'Bilinmeyen Kullanıcı';
   };
 
   const handleDeleteProject = (project: Project) => {
@@ -52,7 +53,7 @@ const DatabaseProjects = () => {
 
   const confirmDeleteProject = () => {
     if (deletingProject && deleteConfirmName === deletingProject.name) {
-      const updatedProjects = allProjects.filter(p => p.id !== deletingProject.id);
+      const updatedProjects = allProjects.filter(p => p?.id !== deletingProject.id);
       localStorage.setItem('all_projects', JSON.stringify(updatedProjects));
       
       setDeletingProject(null);
@@ -69,12 +70,24 @@ const DatabaseProjects = () => {
   };
 
   const getTotalTables = (project: any) => {
-    return project.tableCount || 0;
+    return project?.tableCount || 0;
   };
 
   const getTotalFields = (project: any) => {
     return 0; // Backend'de field count bilgisi yok
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600"></div>
+          <p className="mt-4 text-gray-600">Projeler yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -112,7 +125,9 @@ const DatabaseProjects = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Toplam Tablo</p>
                 <p className="text-3xl font-bold text-blue-600">
-                  {allProjects.reduce((total, project) => total + (project.tableCount || 0), 0)}
+                  {allProjects.reduce((total, project) => {
+                    return total + (project?.tableCount || 0);
+                  }, 0)}
                 </p>
               </div>
               <Table className="text-blue-600" size={40} />
@@ -136,7 +151,7 @@ const DatabaseProjects = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Aktif Kullanıcı</p>
                 <p className="text-3xl font-bold text-orange-600">
-                  {new Set(allProjects.map(p => p.userId)).size}
+                  {new Set(allProjects.filter(p => p?.userId).map(p => p.userId)).size}
                 </p>
               </div>
               <User className="text-orange-600" size={40} />
@@ -177,128 +192,124 @@ const DatabaseProjects = () => {
 
         {/* Projects Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map(project => (
-            <div key={project.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <Database className="text-green-600 mr-3" size={24} />
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">{project.name}</h3>
-                      <p className="text-sm text-gray-500 flex items-center mt-1">
-                        <User size={14} className="mr-1" />
-                        {getUserName(project)}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteProject(project)}
-                    className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 flex items-center">
-                      <Table size={16} className="mr-2" />
-                      Tablolar
-                    </span>
-                    <span className="text-sm font-medium text-gray-800">{getTotalTables(project)}</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 flex items-center">
-                      <FileText size={16} className="mr-2" />
-                      Alanlar
-                    </span>
-                    <span className="text-sm font-medium text-gray-800">{getTotalFields(project)}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 flex items-center">
-                      <Calendar size={16} className="mr-2" />
-                      Oluşturulma
-                    </span>
-                    <span className="text-sm font-medium text-gray-800">
-                      {new Date(project.createdAt).toLocaleDateString('tr-TR')}
-                    </span>
-                  </div>
-                </div>
-
-                {/* API Key Section */}
-                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100 mt-2 rounded">
-                  <div className="flex items-center justify-between mb-3">
+          {filteredProjects.map(project => {
+            // Safe access to project properties
+            const projectApiKey = project?.apiKey || '';
+            
+            return (
+              <div key={project.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center">
-                      <Key className="text-green-600 mr-2" size={16} />
-                      <span className="text-sm font-medium text-gray-700">API Key</span>
+                      <Database className="text-green-600 mr-3" size={24} />
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">{project.name || 'İsimsiz Proje'}</h3>
+                        <p className="text-sm text-gray-500 flex items-center mt-1">
+                          <User size={14} className="mr-1" />
+                          {getUserName(project)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <button
-                        onClick={() => setShowApiKey(prev => ({ ...prev, [project.id]: !prev[project.id] }))}
-                        className="p-1 text-gray-500 hover:text-gray-700 rounded transition-colors"
-                        title={showApiKey?.[project.id] ? 'Gizle' : 'Göster'}
-                      >
-                        {showApiKey?.[project.id] ? <EyeOff size={14} /> : <Eye size={14} />}
-                      </button>
-                      <button
-                        onClick={() => {navigator.clipboard.writeText(project.apiKey); alert('API Key kopyalandı!')}}
-                        className="p-1 text-blue-600 hover:text-blue-700 rounded transition-colors"
-                        title="Kopyala"
-                      >
-                        <Copy size={14} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="bg-white border border-gray-200 rounded p-3 min-h-[2.5rem] flex items-center">
-                    <div className="font-mono text-xs text-gray-700 break-all leading-relaxed w-full">
-                      {showApiKey?.[project.id] ? project.apiKey : (project.apiKey ? project.apiKey.slice(0, 7) + '*'.repeat(project.apiKey.length - 11) + project.apiKey.slice(-4) : '')}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t pt-4">
-                  <div className="flex space-x-2">
                     <button
-                      onClick={() => navigate(`/projects/${project.id}/data`)}
-                      className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center text-sm"
+                      onClick={() => handleDeleteProject(project)}
+                      className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
                     >
-                      <Eye size={16} className="mr-1" />
-                      Verileri Göster
-                    </button>
-                    <button
-                      onClick={() => navigate(`/projects/${project.id}`)}
-                      className="flex-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center text-sm"
-                    >
-                      <Table size={16} className="mr-1" />
-                      Düzenle
+                      <Trash2 size={16} />
                     </button>
                   </div>
-                </div>
 
-                {/* Tables List */}
-                {project.tables.length > 0 && (
-                  <div className="mt-4 border-t pt-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Tablolar:</h4>
-                    <div className="space-y-1">
-                      {project.tables.slice(0, 3).map(table => (
-                        <div key={table.id} className="flex items-center justify-between bg-gray-50 p-2 rounded text-xs">
-                          <span className="font-medium">{table.name}</span>
-                          <span className="text-gray-500">{table.fields.length} alan</span>
-                        </div>
-                      ))}
-                      {project.tables.length > 3 && (
-                        <div className="text-xs text-gray-500 text-center py-1">
-                          +{project.tables.length - 3} tablo daha...
-                        </div>
-                      )}
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 flex items-center">
+                        <Table size={16} className="mr-2" />
+                        Tablolar
+                      </span>
+                      <span className="text-sm font-medium text-gray-800">{getTotalTables(project)}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 flex items-center">
+                        <FileText size={16} className="mr-2" />
+                        Alanlar
+                      </span>
+                      <span className="text-sm font-medium text-gray-800">{getTotalFields(project)}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 flex items-center">
+                        <Calendar size={16} className="mr-2" />
+                        Oluşturulma
+                      </span>
+                      <span className="text-sm font-medium text-gray-800">
+                        {project.createdAt ? new Date(project.createdAt).toLocaleDateString('tr-TR') : 'Bilinmeyen'}
+                      </span>
                     </div>
                   </div>
-                )}
+
+                  {/* API Key Section */}
+                  {projectApiKey && (
+                    <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100 mt-2 rounded">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <Key className="text-green-600 mr-2" size={16} />
+                          <span className="text-sm font-medium text-gray-700">API Key</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <button
+                            onClick={() => setShowApiKey(prev => ({ ...prev, [project.id]: !prev[project.id] }))}
+                            className="p-1 text-gray-500 hover:text-gray-700 rounded transition-colors"
+                            title={showApiKey?.[project.id] ? 'Gizle' : 'Göster'}
+                          >
+                            {showApiKey?.[project.id] ? <EyeOff size={14} /> : <Eye size={14} />}
+                          </button>
+                          <button
+                            onClick={() => {navigator.clipboard.writeText(projectApiKey); alert('API Key kopyalandı!')}}
+                            className="p-1 text-blue-600 hover:text-blue-700 rounded transition-colors"
+                            title="Kopyala"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded p-3 min-h-[2.5rem] flex items-center">
+                        <div className="font-mono text-xs text-gray-700 break-all leading-relaxed w-full">
+                          {showApiKey?.[project.id] ? projectApiKey : (projectApiKey.slice(0, 7) + '*'.repeat(projectApiKey.length - 11) + projectApiKey.slice(-4))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="border-t pt-4">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => navigate(`/projects/${project.id}/data`)}
+                        className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center text-sm"
+                      >
+                        <Eye size={16} className="mr-1" />
+                        Verileri Göster
+                      </button>
+                      <button
+                        onClick={() => navigate(`/projects/${project.id}`)}
+                        className="flex-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center text-sm"
+                      >
+                        <Table size={16} className="mr-1" />
+                        Düzenle
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Table count info - Backend only provides count, not actual tables */}
+                  {getTotalTables(project) > 0 && (
+                    <div className="mt-4 border-t pt-4">
+                      <div className="text-sm text-gray-600 text-center py-2 bg-gray-50 rounded">
+                        Bu projede {getTotalTables(project)} tablo bulunuyor
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {filteredProjects.length === 0 && (
@@ -321,7 +332,7 @@ const DatabaseProjects = () => {
             
             <div className="mb-6">
               <p className="text-gray-600 mb-4">
-                <strong>{deletingProject.name}</strong> projesini ve tüm tablolarını kalıcı olarak silmek istediğinizden emin misiniz?
+                <strong>{deletingProject?.name || 'Bu proje'}</strong> projesini ve tüm tablolarını kalıcı olarak silmek istediğinizden emin misiniz?
               </p>
               
               <p className="text-sm text-red-600 mb-4">
@@ -330,13 +341,13 @@ const DatabaseProjects = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Onaylamak için proje adını tam olarak yazın: <strong>{deletingProject.name}</strong>
+                  Onaylamak için proje adını tam olarak yazın: <strong>{deletingProject?.name}</strong>
                 </label>
                 <input
                   type="text"
                   value={deleteConfirmName}
                   onChange={(e) => setDeleteConfirmName(e.target.value)}
-                  placeholder={deletingProject.name}
+                  placeholder={deletingProject?.name || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
@@ -351,7 +362,7 @@ const DatabaseProjects = () => {
               </button>
               <button
                 onClick={confirmDeleteProject}
-                disabled={deleteConfirmName !== deletingProject.name}
+                disabled={deleteConfirmName !== (deletingProject?.name || '')}
                 className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
                 <Trash2 size={16} className="mr-2" />
