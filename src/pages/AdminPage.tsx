@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDatabase } from '../context/DatabaseContext';
+import { useApiAdminProjects } from '../hooks/useApiAdmin';
 import { 
   Users, 
   Settings, 
@@ -16,6 +17,7 @@ import {
 
 const AdminPage = () => {
   const { state, getAllUsers } = useDatabase();
+  const { projects: backendProjects } = useApiAdminProjects();
   const navigate = useNavigate();
   const users = getAllUsers();
 
@@ -38,8 +40,8 @@ const AdminPage = () => {
     );
   }
 
-  // Get all projects from localStorage
-  const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
+  // Use backend projects instead of localStorage
+  const allProjects = backendProjects || [];
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -140,7 +142,7 @@ const AdminPage = () => {
             </div>
             <p className="text-sm text-gray-600">Tüm projeleri görüntüleyin</p>
             <div className="mt-3 text-xs text-gray-500">
-              Tablolar: {allProjects.reduce((total: number, project: any) => total + project.tables.length, 0)}
+              Tablolar: {allProjects.reduce((total: number, project: any) => total + (project.tableCount || 0), 0)}
             </div>
           </div>
 
