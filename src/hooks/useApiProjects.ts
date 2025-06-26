@@ -22,15 +22,24 @@ export const useApiProjects = () => {
     setLoading(true);
     setError(null);
     try {
+      const token = localStorage.getItem('auth_token');
+      console.log('🔍 Fetching projects with token:', token ? 'EXISTS' : 'MISSING');
+      
       const response = await apiClient.getProjects();
+      console.log('📊 Projects API response:', response);
+      
       if (response.success && response.data) {
-        setProjects((response.data as any).projects || []);
+        const projects = (response.data as any).projects || [];
+        console.log('✅ Projects loaded:', projects.length, 'projects');
+        console.log('📋 Project details:', projects);
+        setProjects(projects);
       } else {
         setError(response.error || 'Failed to fetch projects');
+        console.error('❌ Projects API error:', response.error);
       }
     } catch (err) {
       setError('Network error');
-      console.error('Error fetching projects:', err);
+      console.error('💥 Network error fetching projects:', err);
     }
     setLoading(false);
   };
@@ -80,7 +89,31 @@ export const useApiProjects = () => {
     const token = localStorage.getItem('auth_token');
     if (token) {
       fetchProjects();
+    } else {
+      // No token means user logged out, clear projects
+      setProjects([]);
     }
+  }, []);
+
+  // Clear projects when auth token changes (login/logout)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setProjects([]);
+        console.log('🔐 Auth token removed, clearing projects');
+      } else {
+        fetchProjects();
+        console.log('🔐 Auth token detected, fetching projects');
+      }
+    };
+
+    // Listen for localStorage changes
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   return {

@@ -1219,7 +1219,9 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         
         // Save auth token for API calls
         localStorage.setItem('auth_token', token);
-        console.log('🔑 Backend login successful, token saved');
+        console.log('🔑 Backend login successful');
+        console.log('👤 Backend user data:', user);
+        console.log('🔒 JWT token saved');
         
         // Dispatch login with backend user data
         dispatch({ type: 'LOGIN', payload: { user } });
@@ -1295,6 +1297,11 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   };
   
   const logout = () => {
+    // Clear all auth-related localStorage data
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem(STORAGE_KEY);
+    console.log('🔐 Logout: Cleared auth token and user data');
+    
     dispatch({ type: 'LOGOUT' });
   };
   
