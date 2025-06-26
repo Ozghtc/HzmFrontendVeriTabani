@@ -41,9 +41,8 @@ const DatabaseProjects = () => {
     return matchesSearch && matchesUser;
   });
 
-  const getUserName = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    return user ? user.name : 'Bilinmeyen Kullanıcı';
+  const getUserName = (project: any) => {
+    return project.userName || 'Bilinmeyen Kullanıcı';
   };
 
   const handleDeleteProject = (project: Project) => {
@@ -69,12 +68,12 @@ const DatabaseProjects = () => {
     setDeleteConfirmName('');
   };
 
-  const getTotalTables = (project: Project) => {
-    return project.tables.length;
+  const getTotalTables = (project: any) => {
+    return project.tableCount || 0;
   };
 
-  const getTotalFields = (project: Project) => {
-    return project.tables.reduce((total, table) => total + table.fields.length, 0);
+  const getTotalFields = (project: any) => {
+    return 0; // Backend'de field count bilgisi yok
   };
 
   return (
@@ -113,7 +112,7 @@ const DatabaseProjects = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Toplam Tablo</p>
                 <p className="text-3xl font-bold text-blue-600">
-                  {allProjects.reduce((total, project) => total + project.tables.length, 0)}
+                  {allProjects.reduce((total, project) => total + (project.tableCount || 0), 0)}
                 </p>
               </div>
               <Table className="text-blue-600" size={40} />
@@ -125,9 +124,7 @@ const DatabaseProjects = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Toplam Alan</p>
                 <p className="text-3xl font-bold text-purple-600">
-                  {allProjects.reduce((total, project) => 
-                    total + project.tables.reduce((tableTotal, table) => tableTotal + table.fields.length, 0), 0
-                  )}
+                  0
                 </p>
               </div>
               <FileText className="text-purple-600" size={40} />
@@ -190,7 +187,7 @@ const DatabaseProjects = () => {
                       <h3 className="text-lg font-semibold text-gray-800">{project.name}</h3>
                       <p className="text-sm text-gray-500 flex items-center mt-1">
                         <User size={14} className="mr-1" />
-                        {getUserName(project.userId)}
+                        {getUserName(project)}
                       </p>
                     </div>
                   </div>
