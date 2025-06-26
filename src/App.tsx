@@ -9,7 +9,6 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
 import Layout from './components/Layout';
-import ProjectList from './pages/ProjectList';
 import ProjectManagement from './pages/ProjectManagement';
 import ProjectDataView from './pages/ProjectDataView';
 import DatabaseUsers from './pages/DatabaseUsers';
@@ -32,8 +31,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/api-test" element={<ApiTest />} />
-          <Route path="/api-projects" element={<ApiProjects />} />
-          <Route path="/migration" element={<LocalStorageMigration />} />
+
           
           {/* Protected Routes */}
           <Route path="/dashboard" element={
@@ -97,7 +95,7 @@ function App() {
           
           <Route path="/projects" element={
             <ProtectedRoute>
-              <ProjectList />
+              <ApiProjects />
             </ProtectedRoute>
           } />
           

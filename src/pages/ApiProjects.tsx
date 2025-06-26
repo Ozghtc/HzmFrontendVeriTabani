@@ -132,7 +132,7 @@ const ApiProjects = () => {
                 <ArrowLeft size={24} />
               </button>
               <Database size={28} className="mr-3" />
-              <h1 className="text-2xl font-bold">API Projeler (Backend)</h1>
+              <h1 className="text-2xl font-bold">Projeler</h1>
             </div>
             <button
               onClick={fetchProjects}
