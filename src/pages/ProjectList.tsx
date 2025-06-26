@@ -21,75 +21,63 @@ import {
 import { ApiKeyGenerator } from '../utils/apiKeyGenerator';
 
 const ProjectList = () => {
-  const { state, dispatch } = useDatabase();
+  const { state } = useDatabase();
   const navigate = useNavigate();
+  const { projects, loading, error, createProject, deleteProject, fetchProjects } = useApiProjects();
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
-  const [deletingProject, setDeletingProject] = useState<string | null>(null);
+  const [deletingProject, setDeletingProject] = useState<number | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [showApiKey, setShowApiKey] = useState<{[key: string]: boolean}>({});
+  const [creating, setCreating] = useState(false);
 
-  const handleAddProject = (e: React.FormEvent) => {
+  const handleAddProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newProjectName.trim()) {
+    if (newProjectName.trim() && !creating) {
+      setCreating(true);
+      
       // Check if project name already exists
-      const projectExists = state.projects.some(
+      const projectExists = projects.some(
         project => project.name.toLowerCase() === newProjectName.trim().toLowerCase()
       );
       
       if (projectExists) {
         alert('Bu isimde bir proje zaten mevcut. Lütfen farklı bir isim seçin.');
+        setCreating(false);
         return;
       }
       
-      dispatch({ 
-        type: 'ADD_PROJECT', 
-        payload: { 
-          name: newProjectName.trim(),
-          description: newProjectDescription.trim() || undefined
-        } 
+      const result = await createProject({
+        name: newProjectName.trim(),
+        description: newProjectDescription.trim() || undefined
       });
-      setNewProjectName('');
-      setNewProjectDescription('');
+      
+      if (result) {
+        setNewProjectName('');
+        setNewProjectDescription('');
+        alert('Proje başarıyla oluşturuldu!');
+      } else {
+        alert('Proje oluşturulurken hata oluştu. Lütfen tekrar deneyin.');
+      }
+      setCreating(false);
     }
   };
 
-  const handleDeleteProject = (projectId: string) => {
+  const handleDeleteProject = (projectId: number) => {
     setDeletingProject(projectId);
     setDeleteConfirmName('');
   };
 
-  const confirmDeleteProject = () => {
+  const confirmDeleteProject = async () => {
     if (deletingProject) {
-      const projectToDelete = state.projects.find(p => p.id === deletingProject);
+      const projectToDelete = projects.find(p => p.id === deletingProject);
       if (projectToDelete && deleteConfirmName === projectToDelete.name) {
-        // Remove from current user's projects
-        const updatedProjects = state.projects.filter(p => p.id !== deletingProject);
-        
-        // Remove from all projects in localStorage
-        const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-        const updatedAllProjects = allProjects.filter((p: any) => p.id !== deletingProject);
-        localStorage.setItem('all_projects', JSON.stringify(updatedAllProjects));
-        
-        // Remove all table data for this project
-        projectToDelete.tables.forEach(table => {
-          localStorage.removeItem(`table_data_${table.id}`);
-        });
-        
-        // Update state
-        const newState = {
-          ...state,
-          projects: updatedProjects,
-          selectedProject: state.selectedProject?.id === deletingProject ? null : state.selectedProject,
-          selectedTable: state.selectedProject?.id === deletingProject ? null : state.selectedTable,
-        };
-        
-        // Save updated state
-        localStorage.setItem('database_state', JSON.stringify(newState));
-        
-        // Force page reload to reflect changes
-        window.location.reload();
-        
+        const success = await deleteProject(deletingProject.toString());
+        if (success) {
+          alert('Proje başarıyla silindi!');
+        } else {
+          alert('Proje silinirken hata oluştu.');
+        }
         setDeletingProject(null);
         setDeleteConfirmName('');
       }
@@ -101,16 +89,14 @@ const ProjectList = () => {
     setDeleteConfirmName('');
   };
 
-  const getTotalFields = (project: any) => {
-    return project.tables.reduce((total: number, table: any) => total + table.fields.length, 0);
-  };
+
 
   const handleCopyApiKey = (apiKey: string) => {
     navigator.clipboard.writeText(apiKey);
     alert('API Key kopyalandı!');
   };
 
-  const toggleApiKeyVisibility = (projectId: string) => {
+  const toggleApiKeyVisibility = (projectId: number) => {
     setShowApiKey(prev => ({
       ...prev,
       [projectId]: !prev[projectId]
@@ -182,8 +168,28 @@ const ProjectList = () => {
             </form>
           </div>
 
+          {/* Loading and Error States */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Projeler yükleniyor...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+              <p>Hata: {error}</p>
+              <button 
+                onClick={fetchProjects}
+                className="mt-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                Tekrar Dene
+              </button>
+            </div>
+          )}
+
           {/* Projects Grid */}
-          {state.projects.length === 0 ? (
+          {!loading && projects.length === 0 ? (
             <div className="text-center py-12">
               <Database className="mx-auto text-gray-400 mb-4" size={64} />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Henüz proje bulunmuyor</h3>
@@ -191,7 +197,7 @@ const ProjectList = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {state.projects.map(project => (
+              {projects.map(project => (
                 <div key={project.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
                   {/* Project Header */}
                   <div className="p-6 border-b border-gray-100">
@@ -225,16 +231,11 @@ const ProjectList = () => {
                     </div>
                     
                     {/* Project Stats */}
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 gap-4 text-sm">
                       <div className="flex items-center text-gray-600">
                         <Table className="mr-2 text-teal-500" size={16} />
-                        <span className="font-medium">{project.tables.length}</span>
+                        <span className="font-medium">{project.tableCount || 0}</span>
                         <span className="ml-1">Tablo</span>
-                      </div>
-                      <div className="flex items-center text-gray-600">
-                        <FileText className="mr-2 text-purple-500" size={16} />
-                        <span className="font-medium">{getTotalFields(project)}</span>
-                        <span className="ml-1">Alan</span>
                       </div>
                     </div>
                   </div>
@@ -273,40 +274,13 @@ const ProjectList = () => {
                     </div>
                   </div>
                   
-                  {/* Tables List */}
+                  {/* Tables Summary */}
                   <div className="p-4">
-                    {project.tables.length === 0 ? (
-                      <div className="text-center py-4 text-gray-500">
-                        <Table className="mx-auto mb-2 text-gray-300" size={32} />
-                        <p className="text-sm">Henüz tablo eklenmemiş</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2 mb-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Tablolar:</h4>
-                        {project.tables.slice(0, 3).map(table => (
-                          <div
-                            key={table.id}
-                            className="flex items-center justify-between bg-gray-50 p-2 rounded-md hover:bg-gray-100 transition-colors"
-                          >
-                            <div className="flex items-center min-w-0 flex-1">
-                              <Table className="text-gray-400 mr-2 flex-shrink-0" size={14} />
-                              <span className="text-sm font-medium text-gray-700 truncate" title={table.name}>
-                                {table.name}
-                              </span>
-                            </div>
-                            <div className="flex items-center text-xs text-gray-500 flex-shrink-0 ml-2">
-                              <FileText className="mr-1" size={12} />
-                              {table.fields.length}
-                            </div>
-                          </div>
-                        ))}
-                        {project.tables.length > 3 && (
-                          <div className="text-xs text-gray-500 text-center py-1">
-                            +{project.tables.length - 3} tablo daha...
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    <div className="text-center py-4 text-gray-500">
+                      <Table className="mx-auto mb-2 text-gray-300" size={32} />
+                      <p className="text-sm">{project.tableCount || 0} tablo mevcut</p>
+                      <p className="text-xs text-gray-400 mt-1">Detayları görmek için "Düzenle" butonuna tıklayın</p>
+                    </div>
                   </div>
 
                   {/* Action Buttons */}
@@ -356,19 +330,18 @@ const ProjectList = () => {
             
             <div className="mb-6">
               {(() => {
-                const projectToDelete = state.projects.find(p => p.id === deletingProject);
+                const projectToDelete = projects.find(p => p.id === deletingProject);
                 return (
                   <>
                     <p className="text-gray-600 mb-4">
-                      <strong>{projectToDelete?.name}</strong> projesini ve tüm tablolarını kalıcı olarak silmek istediğinizden emin misiniz?
+                      <strong>{projectToDelete?.name}</strong> projesini kalıcı olarak silmek istediğinizden emin misiniz?
                     </p>
                     
                     <div className="bg-gray-50 p-4 rounded-md mb-4">
                       <p className="text-sm font-medium text-gray-700 mb-2">Silinecek proje bilgileri:</p>
                       <div className="text-sm text-gray-600 space-y-1">
                         <div><strong>Proje Adı:</strong> {projectToDelete?.name}</div>
-                        <div><strong>Tablo Sayısı:</strong> {projectToDelete?.tables.length}</div>
-                        <div><strong>Toplam Alan:</strong> {getTotalFields(projectToDelete)}</div>
+                        <div><strong>Tablo Sayısı:</strong> {projectToDelete?.tableCount || 0}</div>
                         <div><strong>API Key:</strong> {projectToDelete ? ApiKeyGenerator.maskApiKey(projectToDelete.apiKey) : ''}</div>
                         <div><strong>Oluşturulma:</strong> {projectToDelete ? new Date(projectToDelete.createdAt).toLocaleDateString('tr-TR') : ''}</div>
                       </div>
@@ -377,7 +350,7 @@ const ProjectList = () => {
                     <div className="bg-red-50 border border-red-200 p-3 rounded-md mb-4">
                       <p className="text-sm text-red-800 font-medium mb-1">⚠️ Dikkat!</p>
                       <p className="text-sm text-red-700">
-                        Bu işlem geri alınamaz! Projenin tüm tabloları, alanları, verileri ve API erişimi kalıcı olarak silinecektir.
+                        Bu işlem geri alınamaz! Projenin tüm verileri ve API erişimi kalıcı olarak silinecektir.
                       </p>
                     </div>
                     
@@ -408,7 +381,7 @@ const ProjectList = () => {
               <button
                 onClick={confirmDeleteProject}
                 disabled={(() => {
-                  const projectToDelete = state.projects.find(p => p.id === deletingProject);
+                  const projectToDelete = projects.find(p => p.id === deletingProject);
                   return deleteConfirmName !== projectToDelete?.name;
                 })()}
                 className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
