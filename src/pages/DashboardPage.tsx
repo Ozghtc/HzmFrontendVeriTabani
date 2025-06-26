@@ -180,7 +180,7 @@ const DashboardPage = () => {
         {/* Recent Projects */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Son Projeler</h3>
-          {state.projects.length === 0 ? (
+          {projects.length === 0 ? (
             <div className="text-center py-8">
               <Database className="mx-auto text-gray-400 mb-4" size={48} />
               <p className="text-gray-500 mb-4">Henüz hiç projeniz yok</p>
@@ -194,7 +194,7 @@ const DashboardPage = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {state.projects.slice(0, 6).map(project => (
+              {projects.slice(0, 6).map(project => (
                 <div
                   key={project.id}
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
@@ -205,7 +205,7 @@ const DashboardPage = () => {
                     <Database className="text-blue-600" size={20} />
                   </div>
                   <p className="text-sm text-gray-600 mb-2">
-                    {project.tables.length} tablo
+                    {project.tableCount || 0} tablo
                   </p>
                   <p className="text-xs text-gray-500">
                     {new Date(project.createdAt).toLocaleDateString('tr-TR')}
