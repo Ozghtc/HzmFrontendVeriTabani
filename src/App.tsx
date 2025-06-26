@@ -17,6 +17,7 @@ import DatabaseProjects from './pages/DatabaseProjects';
 import DatabaseState from './pages/DatabaseState';
 import DatabasePricing from './pages/DatabasePricing';
 import UpgradePlanPage from './pages/UpgradePlanPage';
+import ApiTest from './pages/ApiTest';
 import './App.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/api-test" element={<ApiTest />} />
           
           {/* Protected Routes */}
           <Route path="/dashboard" element={
