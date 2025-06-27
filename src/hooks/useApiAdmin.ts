@@ -65,6 +65,74 @@ export const useApiUsers = () => {
     setLoading(false);
   };
 
+  const updateUser = async (userId: string, userData: {
+    name?: string;
+    email?: string;
+    isActive?: boolean;
+    subscriptionType?: string;
+    maxProjects?: number;
+    maxTables?: number;
+  }) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      console.log('🔄 Admin updating user:', userId, userData);
+      
+      const response = await fetch(`https://hzmbackandveritabani-production.up.railway.app/api/v1/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+
+      if (response.ok) {
+        console.log('✅ Admin user updated:', userId);
+        await fetchUsers(); // Refresh list
+        return true;
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to update user');
+        console.error('❌ Admin user update error:', errorData.error);
+        return false;
+      }
+    } catch (err) {
+      setError('Network error');
+      console.error('💥 Network error updating user:', err);
+      return false;
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      console.log('🗑️ Admin deleting user:', userId);
+      
+      const response = await fetch(`https://hzmbackandveritabani-production.up.railway.app/api/v1/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        console.log('✅ Admin user deleted:', userId);
+        await fetchUsers(); // Refresh list
+        return true;
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to delete user');
+        console.error('❌ Admin user delete error:', errorData.error);
+        return false;
+      }
+    } catch (err) {
+      setError('Network error');
+      console.error('💥 Network error deleting user:', err);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
     if (token) {
@@ -77,6 +145,8 @@ export const useApiUsers = () => {
     loading,
     error,
     fetchUsers,
+    updateUser,
+    deleteUser,
   };
 };
 

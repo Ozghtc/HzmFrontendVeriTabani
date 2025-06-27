@@ -21,7 +21,7 @@ import { User } from '../types';
 
 const DatabaseUsers = () => {
   const { state, dispatch, register } = useDatabase();
-  const { users: backendUsers, loading: usersLoading, fetchUsers } = useApiUsers();
+  const { users: backendUsers, loading: usersLoading, fetchUsers, updateUser, deleteUser } = useApiUsers();
   const navigate = useNavigate();
   
   // Use backend users instead of localStorage
@@ -127,33 +127,27 @@ const DatabaseUsers = () => {
 
   const handleSaveUser = async (userId: string) => {
     try {
-      // Update user subscription
+      // Prepare user data for backend update
       const plan = state.pricingPlans.find(p => p.name.toLowerCase() === editUserData.subscriptionType);
-      if (plan) {
-        dispatch({
-          type: 'UPDATE_USER_SUBSCRIPTION',
-          payload: {
-            userId,
-            subscriptionType: editUserData.subscriptionType,
-            maxProjects: plan.maxProjects,
-            maxTables: plan.maxTables
-          }
-        });
-      }
       
-      // Update user status
-      const currentUser = users.find(u => u.id === userId);
-      if (currentUser && currentUser.isActive !== editUserData.isActive) {
-        dispatch({
-          type: 'UPDATE_USER_STATUS',
-          payload: { userId, isActive: editUserData.isActive }
-        });
-      }
+      const userData = {
+        name: editUserData.name,
+        email: editUserData.email,
+        isActive: editUserData.isActive,
+        subscriptionType: editUserData.subscriptionType,
+        maxProjects: plan ? plan.maxProjects : 2,
+        maxTables: plan ? plan.maxTables : 5
+      };
 
-      // Refresh users from backend
-      await fetchUsers();
+      // Update user via backend API
+      const success = await updateUser(userId, userData);
       
-      setEditingUser(null);
+      if (success) {
+        setEditingUser(null);
+        alert('Kullanıcı başarıyla güncellendi!');
+      } else {
+        alert('Kullanıcı güncellenirken bir hata oluştu.');
+      }
     } catch (error) {
       alert('Kullanıcı güncellenirken bir hata oluştu.');
     }
@@ -178,7 +172,7 @@ const DatabaseUsers = () => {
   const confirmDeleteUser = async () => {
     if (deletingUser && deleteConfirmName === deletingUser.name) {
       try {
-        dispatch({ type: 'DELETE_USER', payload: { userId: deletingUser.id } });
+        await deleteUser(deletingUser.id);
         
         // Refresh users from backend
         await fetchUsers();
