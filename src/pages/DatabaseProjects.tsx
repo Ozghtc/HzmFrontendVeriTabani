@@ -16,19 +16,31 @@ import {
   AlertTriangle,
   Key,
   EyeOff,
-  Copy
+  Copy,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import { Project } from '../types';
 
 const DatabaseProjects = () => {
   const { state, getAllUsers } = useDatabase();
-  const { projects: backendProjects, loading, error, deleteProject: deleteProjectApi } = useApiAdminProjects();
+  const { projects: backendProjects, loading, error, deleteProject: deleteProjectApi, fetchAllProjects } = useApiAdminProjects();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterUser, setFilterUser] = useState<string>('all');
   const [deletingProject, setDeletingProject] = useState<any | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [showApiKey, setShowApiKey] = useState<Record<string, boolean>>({});
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'info';
+    message: string;
+  } | null>(null);
+
+  // Show notification with auto-hide
+  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   // Use backend projects instead of localStorage with fallback
   const allProjects = backendProjects || [];
@@ -51,16 +63,52 @@ const DatabaseProjects = () => {
     setDeleteConfirmName('');
   };
 
-  const confirmDeleteProject = () => {
+  const confirmDeleteProject = async () => {
     if (deletingProject && deleteConfirmName === deletingProject.name) {
-      const updatedProjects = allProjects.filter(p => p?.id !== deletingProject.id);
-      localStorage.setItem('all_projects', JSON.stringify(updatedProjects));
-      
-      setDeletingProject(null);
-      setDeleteConfirmName('');
-      
-      // Refresh the page to show updated data
-      window.location.reload();
+      try {
+        console.log('🗑️ Attempting to delete project:', deletingProject.id, deletingProject.name);
+        
+        // Try backend API first
+        const success = await deleteProjectApi(deletingProject.id);
+        
+        // Always close modal first
+        setDeletingProject(null);
+        setDeleteConfirmName('');
+        
+        if (success) {
+          console.log('✅ Project deleted via backend');
+          showNotification('success', 'Proje başarıyla silindi!');
+          
+          // Refresh projects from backend
+          await fetchAllProjects();
+        } else {
+          console.log('❌ Backend delete failed, using localStorage fallback');
+          // Fallback to localStorage if backend fails
+          const updatedProjects = allProjects.filter(p => p?.id !== deletingProject.id);
+          localStorage.setItem('all_projects', JSON.stringify(updatedProjects));
+          showNotification('error', 'Proje localStorage\'dan silindi (backend hatası)');
+          
+          // Refresh page to show updated data
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error('💥 Error deleting project:', error);
+        
+        // Always close modal even on error
+        setDeletingProject(null);
+        setDeleteConfirmName('');
+        
+        // Fallback to localStorage on error
+        const updatedProjects = allProjects.filter(p => p?.id !== deletingProject.id);
+        localStorage.setItem('all_projects', JSON.stringify(updatedProjects));
+        showNotification('error', 'Network hatası - localStorage\'dan silindi');
+        
+        // Refresh page to show updated data
+        window.location.reload();
+      }
+    } else {
+      // Name doesn't match, show error but don't close modal
+      showNotification('error', 'Proje adını doğru yazmanız gerekiyor.');
     }
   };
 
@@ -91,6 +139,24 @@ const DatabaseProjects = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${
+          notification.type === 'success' ? 'bg-green-100 text-green-800' :
+          notification.type === 'error' ? 'bg-red-100 text-red-800' :
+          'bg-blue-100 text-blue-800'
+        }`}>
+          {notification.type === 'success' ? (
+            <CheckCircle size={20} className="mr-2" />
+          ) : notification.type === 'error' ? (
+            <XCircle size={20} className="mr-2" />
+          ) : (
+            <AlertTriangle size={20} className="mr-2" />
+          )}
+          {notification.message}
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-gradient-to-r from-green-600 to-green-700 text-white p-4 shadow-md">
         <div className="container mx-auto flex items-center">
