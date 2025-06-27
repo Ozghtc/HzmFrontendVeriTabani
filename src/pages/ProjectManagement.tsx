@@ -34,8 +34,8 @@ const ProjectManagement = () => {
         
         setProject(projectData);
         
-        // Also select project in state
-        dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
+        // Set selected project in state with full project data
+        dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: projectData } });
         
       } catch (error) {
         console.error('Failed to load project from backend:', error);

@@ -179,6 +179,7 @@ export type DatabaseAction =
   | { type: 'ADD_PROJECT'; payload: { name: string; description?: string } }
   | { type: 'UPDATE_PROJECT'; payload: { projectId: string; name?: string; description?: string; settings?: Partial<Project['settings']> } }
   | { type: 'SELECT_PROJECT'; payload: { projectId: string } }
+  | { type: 'SET_SELECTED_PROJECT'; payload: { project: Project } }
   | { type: 'ADD_TABLE'; payload: { name: string } }
   | { type: 'DELETE_TABLE'; payload: { tableId: string } }
   | { type: 'SELECT_TABLE'; payload: { tableId: string } }

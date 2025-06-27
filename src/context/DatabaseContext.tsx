@@ -508,6 +508,14 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
       };
       break;
     }
+    case 'SET_SELECTED_PROJECT': {
+      newState = {
+        ...state,
+        selectedProject: action.payload.project,
+        selectedTable: null,
+      };
+      break;
+    }
     case 'ADD_API_KEY': {
       if (!state.user) return state;
       
