@@ -68,11 +68,18 @@ const ProjectManagement = () => {
     loadProject();
   }, [projectId, dispatch, state.projects]);
 
-  // Proje sahibini bul (localStorage'dan)
+  // Proje sahibini bul (önce backend'den, yoksa localStorage'dan)
   let projectOwner = null;
-  if (project && project.userId) {
-    const users = JSON.parse(localStorage.getItem('database_users') || '[]');
-    projectOwner = users.find((u: any) => u.id === project.userId);
+  if (project) {
+    // Backend API'sinden gelen owner bilgisi varsa onu kullan
+    if (project.owner) {
+      projectOwner = project.owner;
+    } 
+    // Yoksa localStorage'dan ara (fallback)
+    else if (project.userId) {
+      const users = JSON.parse(localStorage.getItem('database_users') || '[]');
+      projectOwner = users.find((u: any) => u.id === project.userId);
+    }
   }
 
   if (loading) {
