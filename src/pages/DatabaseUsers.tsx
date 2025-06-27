@@ -144,7 +144,9 @@ const DatabaseUsers = () => {
       
       if (success) {
         setEditingUser(null);
-        alert('Kullanıcı başarıyla güncellendi!');
+        console.log('✅ User update completed successfully');
+        // Don't show alert to prevent UI issues
+        // alert('Kullanıcı başarıyla güncellendi!');
       } else {
         alert('Kullanıcı güncellenirken bir hata oluştu.');
       }

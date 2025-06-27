@@ -51,16 +51,25 @@ export const useApiUsers = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Admin users loaded:', data.users?.length || 0, 'users');
+        console.log('✅ Admin users loaded from backend:', data.users?.length || 0, 'users');
         setUsers(data.users || []);
       } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Failed to fetch users');
-        console.error('❌ Admin users API error:', errorData.error);
+        console.log('❌ Backend users API failed, falling back to localStorage');
+        // If backend fails, load from localStorage
+        const savedUsers = localStorage.getItem('databaseUsers');
+        const localUsers = savedUsers ? JSON.parse(savedUsers) : [];
+        console.log('✅ Admin users loaded from localStorage:', localUsers.length, 'users');
+        setUsers(localUsers);
+        setError('Using offline data (backend unavailable)');
       }
     } catch (err) {
-      setError('Network error');
-      console.error('💥 Network error fetching users:', err);
+      console.log('💥 Network error, falling back to localStorage');
+      // If network error, load from localStorage
+      const savedUsers = localStorage.getItem('databaseUsers');
+      const localUsers = savedUsers ? JSON.parse(savedUsers) : [];
+      console.log('✅ Admin users loaded from localStorage:', localUsers.length, 'users');
+      setUsers(localUsers);
+      setError('Using offline data (network error)');
     }
     setLoading(false);
   };
@@ -87,8 +96,8 @@ export const useApiUsers = () => {
       });
 
       if (response.ok) {
-        console.log('✅ Admin user updated:', userId);
-        await fetchUsers(); // Refresh list
+        console.log('✅ Admin user updated via backend:', userId);
+        await fetchUsers(); // Refresh from backend
         return true;
       } else {
         const errorData = await response.json();
@@ -150,8 +159,8 @@ export const useApiUsers = () => {
       });
 
       if (response.ok) {
-        console.log('✅ Admin user deleted:', userId);
-        await fetchUsers(); // Refresh list
+        console.log('✅ Admin user deleted via backend:', userId);
+        await fetchUsers(); // Refresh from backend
         return true;
       } else {
         const errorData = await response.json();
