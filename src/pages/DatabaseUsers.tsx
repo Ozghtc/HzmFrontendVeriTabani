@@ -188,26 +188,38 @@ const DatabaseUsers = () => {
   const confirmDeleteUser = async () => {
     if (deletingUser && deleteConfirmName === deletingUser.name) {
       try {
+        console.log('🗑️ Attempting to delete user:', deletingUser.id, deletingUser.name);
         const success = await deleteUser(deletingUser.id);
+        
+        // Always close modal first
+        setDeletingUser(null);
+        setDeleteConfirmName('');
         
         if (success) {
           // Refresh users from backend
           await fetchUsers();
-          
-          setDeletingUser(null);
-          setDeleteConfirmName('');
           showNotification('success', 'Kullanıcı başarıyla silindi!');
+          console.log('✅ User deleted successfully');
 
+          // If user deleted themselves, logout
           if (state.user?.id === deletingUser.id) {
             dispatch({ type: 'LOGOUT' });
             navigate('/');
           }
         } else {
+          console.log('❌ User delete failed');
           showNotification('error', 'Kullanıcı silinirken bir hata oluştu.');
         }
       } catch (error) {
+        console.error('💥 Error deleting user:', error);
+        // Always close modal even on error
+        setDeletingUser(null);
+        setDeleteConfirmName('');
         showNotification('error', 'Kullanıcı silinirken bir hata oluştu.');
       }
+    } else {
+      // Name doesn't match, show error but don't close modal
+      showNotification('error', 'Kullanıcı adını doğru yazmanız gerekiyor.');
     }
   };
 
