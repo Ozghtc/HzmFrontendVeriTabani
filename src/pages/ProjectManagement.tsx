@@ -114,21 +114,36 @@ const ProjectManagement = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
-        <div className="container mx-auto flex items-center">
-          <button
-            onClick={() => navigate('/projects')}
-            className="mr-4 hover:bg-blue-700 p-2 rounded-full transition-colors"
-          >
-            <ArrowLeft size={24} />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold">{project.name}</h1>
-            {projectOwner && (
-              <p className="text-blue-100 text-sm mt-1">Sahibi: {projectOwner.name} ({projectOwner.email})</p>
-            )}
-            {project.description && (
-              <p className="text-blue-100 text-sm mt-1">{project.description}</p>
-            )}
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center flex-1">
+              <button
+                onClick={() => navigate('/projects')}
+                className="mr-4 hover:bg-blue-700 p-2 rounded-full transition-colors"
+              >
+                <ArrowLeft size={24} />
+              </button>
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold">{project.name}</h1>
+                {project.description && (
+                  <p className="text-blue-100 text-sm mt-1">{project.description}</p>
+                )}
+                {projectOwner && (
+                  <p className="text-blue-100 text-xs mt-1">Sahibi: {projectOwner.name}</p>
+                )}
+              </div>
+            </div>
+            
+            {/* Current User Info */}
+            <div className="text-right">
+              <div className="text-lg font-semibold">{state.user?.name}</div>
+              <div className="text-sm text-blue-100">
+                {state.user?.email} • {state.user?.subscriptionType === 'enterprise' ? 'Kurumsal' : 
+                 state.user?.subscriptionType === 'premium' ? 'Premium' : 
+                 state.user?.subscriptionType === 'basic' ? 'Temel' : 'Ücretsiz'} Plan
+                {state.user?.isAdmin && ' • Admin'}
+              </div>
+            </div>
           </div>
         </div>
       </header>

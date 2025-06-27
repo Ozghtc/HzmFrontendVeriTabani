@@ -158,16 +158,31 @@ const ProjectList = () => {
         )}
 
         <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
-          <div className="container mx-auto flex items-center">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="mr-4 hover:bg-blue-700 p-2 rounded-full transition-colors"
-            >
-              <ArrowLeft size={24} />
-            </button>
-            <div className="flex items-center">
-              <Database size={28} className="mr-3" />
-              <h1 className="text-2xl font-bold">Kayıtlı Projeler</h1>
+          <div className="container mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="mr-4 hover:bg-blue-700 p-2 rounded-full transition-colors"
+                >
+                  <ArrowLeft size={24} />
+                </button>
+                <div className="flex items-center">
+                  <Database size={28} className="mr-3" />
+                  <h1 className="text-2xl font-bold">Kayıtlı Projeler</h1>
+                </div>
+              </div>
+              
+              {/* User Info */}
+              <div className="text-right">
+                <div className="text-lg font-semibold">{state.user?.name}</div>
+                <div className="text-sm text-blue-100">
+                  {state.user?.email} • {state.user?.subscriptionType === 'enterprise' ? 'Kurumsal' : 
+                   state.user?.subscriptionType === 'premium' ? 'Premium' : 
+                   state.user?.subscriptionType === 'basic' ? 'Temel' : 'Ücretsiz'} Plan
+                  {state.user?.isAdmin && ' • Admin'}
+                </div>
+              </div>
             </div>
           </div>
         </header>
