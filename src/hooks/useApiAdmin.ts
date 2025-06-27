@@ -124,10 +124,13 @@ export const useApiUsers = () => {
       const savedUsers = localStorage.getItem('databaseUsers');
       let users = savedUsers ? JSON.parse(savedUsers) : [];
       
-      // Update user in localStorage
+      // Update user in localStorage - Fix ID comparison (convert to string)
       users = users.map((user: any) => {
-        if (user.id === userId) {
-          return { ...user, ...userData };
+        if (user.id.toString() === userId) {
+          const updatedUser = { ...user, ...userData };
+          console.log('🔄 Updating user in localStorage:', user.id, 'with data:', userData);
+          console.log('📝 Updated user result:', updatedUser);
+          return updatedUser;
         }
         return user;
       });
@@ -135,9 +138,9 @@ export const useApiUsers = () => {
       // Save back to localStorage
       localStorage.setItem('databaseUsers', JSON.stringify(users));
       
-      // Update state
-      setUsers(users);
-      console.log('✅ User updated in localStorage:', userId);
+      // Update state immediately
+      setUsers([...users]); // Force re-render with new array reference
+      console.log('✅ User updated in localStorage and state:', userId);
       return true;
     } catch (error) {
       console.error('❌ localStorage update failed:', error);
@@ -187,15 +190,15 @@ export const useApiUsers = () => {
       const savedUsers = localStorage.getItem('databaseUsers');
       let users = savedUsers ? JSON.parse(savedUsers) : [];
       
-      // Remove user from localStorage
-      users = users.filter((user: any) => user.id !== userId);
+      // Remove user from localStorage - Fix ID comparison (convert to string)
+      users = users.filter((user: any) => user.id.toString() !== userId);
       
       // Save back to localStorage
       localStorage.setItem('databaseUsers', JSON.stringify(users));
       
-      // Update state
-      setUsers(users);
-      console.log('✅ User deleted from localStorage:', userId);
+      // Update state immediately
+      setUsers([...users]); // Force re-render with new array reference
+      console.log('✅ User deleted from localStorage and state:', userId);
       return true;
     } catch (error) {
       console.error('❌ localStorage delete failed:', error);
