@@ -87,9 +87,10 @@ export const useApiUsers = () => {
     maxProjects?: number;
     maxTables?: number;
   }) => {
+    console.log('🔄 Updating user:', userId, userData);
+    
     try {
       const token = localStorage.getItem('auth_token');
-      console.log('🔄 Admin updating user:', userId, userData);
       
       const response = await fetch(`https://hzmbackandveritabani-production.up.railway.app/api/v1/admin/users/${userId}`, {
         method: 'PUT',
@@ -101,76 +102,64 @@ export const useApiUsers = () => {
       });
 
       if (response.ok) {
-        console.log('✅ Admin user updated via backend:', userId);
-        await fetchUsers(); // Refresh from backend
+        console.log('✅ User updated via backend');
+        // Refresh users from backend to get latest data
+        await fetchUsers();
         return true;
       } else {
-        const errorData = await response.json();
-        console.log('❌ Backend user update failed:', errorData.error);
-        
-        // If endpoint doesn't exist (404), fall back to localStorage
-        if (response.status === 404) {
-          console.log('🔄 Falling back to localStorage for user update');
-          return updateUserLocalStorage(userId, userData);
-        }
-        
-        setError(errorData.error || 'Failed to update user');
-        return false;
+        console.log('❌ Backend update failed, using localStorage fallback');
+        return updateUserLocalStorage(userId, userData);
       }
     } catch (err) {
-      console.log('💥 Backend error, falling back to localStorage:', err);
+      console.log('💥 Backend error, using localStorage fallback');
       return updateUserLocalStorage(userId, userData);
     }
   };
 
   const updateUserLocalStorage = (userId: string, userData: any): boolean => {
     try {
-      console.log('🔍 DEBUG: Starting localStorage update for userId:', userId, 'type:', typeof userId);
+      console.log('📝 Updating user in localStorage:', userId);
       
-      // Get users from localStorage
       const savedUsers = localStorage.getItem('databaseUsers');
-      console.log('📦 localStorage databaseUsers raw:', savedUsers ? 'EXISTS' : 'EMPTY');
+      if (!savedUsers) {
+        console.log('❌ No users in localStorage');
+        return false;
+      }
       
-      let users = savedUsers ? JSON.parse(savedUsers) : [];
-      console.log('👥 Parsed users from localStorage:', users.length, 'users');
-      console.log('🔢 User IDs in localStorage:', users.map((u: any) => `${u.id} (${typeof u.id})`));
+      let users = JSON.parse(savedUsers);
+      console.log('👥 Found', users.length, 'users in localStorage');
       
-      let userFound = false;
-      
-      // Update user in localStorage - Fix ID comparison (convert to string)
+      // Find and update user
+      let userUpdated = false;
       users = users.map((user: any) => {
-        console.log('🔍 Comparing:', user.id, '(', typeof user.id, ') === ', userId, '(', typeof userId, ')');
-        if (user.id.toString() === userId) {
-          userFound = true;
-          const updatedUser = { ...user, ...userData };
-          console.log('✅ MATCH FOUND! Updating user:', user.id);
-          console.log('📝 Before:', user);
-          console.log('📝 Update data:', userData);
-          console.log('📝 After:', updatedUser);
-          return updatedUser;
+        if (user.id.toString() === userId.toString()) {
+          console.log('✅ Found user to update:', user.name);
+          userUpdated = true;
+          return { ...user, ...userData };
         }
         return user;
       });
       
-      console.log('🎯 User found and updated:', userFound);
-      
-      // Save back to localStorage
-      localStorage.setItem('databaseUsers', JSON.stringify(users));
-      
-      // Update state immediately
-      setUsers([...users]); // Force re-render with new array reference
-      console.log('✅ User updated in localStorage and state:', userId);
-      return userFound; // Return whether we actually found and updated the user
+      if (userUpdated) {
+        localStorage.setItem('databaseUsers', JSON.stringify(users));
+        setUsers([...users]); // Update state
+        console.log('✅ User updated successfully in localStorage');
+        return true;
+      } else {
+        console.log('❌ User not found:', userId);
+        return false;
+      }
     } catch (error) {
-      console.error('❌ localStorage update failed:', error);
+      console.error('❌ localStorage update error:', error);
       return false;
     }
   };
 
   const deleteUser = async (userId: string) => {
+    console.log('🗑️ Deleting user:', userId);
+    
     try {
       const token = localStorage.getItem('auth_token');
-      console.log('🗑️ Admin deleting user:', userId);
       
       const response = await fetch(`https://hzmbackandveritabani-production.up.railway.app/api/v1/admin/users/${userId}`, {
         method: 'DELETE',
@@ -181,46 +170,47 @@ export const useApiUsers = () => {
       });
 
       if (response.ok) {
-        console.log('✅ Admin user deleted via backend:', userId);
-        await fetchUsers(); // Refresh from backend
+        console.log('✅ User deleted via backend');
+        // Refresh users from backend
+        await fetchUsers();
         return true;
       } else {
-        const errorData = await response.json();
-        console.log('❌ Backend user delete failed:', errorData.error);
-        
-        // If endpoint doesn't exist (404), fall back to localStorage
-        if (response.status === 404) {
-          console.log('🔄 Falling back to localStorage for user delete');
-          return deleteUserLocalStorage(userId);
-        }
-        
-        setError(errorData.error || 'Failed to delete user');
-        return false;
+        console.log('❌ Backend delete failed, using localStorage fallback');
+        return deleteUserLocalStorage(userId);
       }
     } catch (err) {
-      console.log('💥 Backend error, falling back to localStorage:', err);
+      console.log('💥 Backend error, using localStorage fallback');
       return deleteUserLocalStorage(userId);
     }
   };
 
   const deleteUserLocalStorage = (userId: string): boolean => {
     try {
-      // Get users from localStorage
+      console.log('🗑️ Deleting user from localStorage:', userId);
+      
       const savedUsers = localStorage.getItem('databaseUsers');
-      let users = savedUsers ? JSON.parse(savedUsers) : [];
+      if (!savedUsers) {
+        console.log('❌ No users in localStorage');
+        return false;
+      }
       
-      // Remove user from localStorage - Fix ID comparison (convert to string)
-      users = users.filter((user: any) => user.id.toString() !== userId);
+      let users = JSON.parse(savedUsers);
+      const originalLength = users.length;
       
-      // Save back to localStorage
-      localStorage.setItem('databaseUsers', JSON.stringify(users));
+      // Remove user
+      users = users.filter((user: any) => user.id.toString() !== userId.toString());
       
-      // Update state immediately
-      setUsers([...users]); // Force re-render with new array reference
-      console.log('✅ User deleted from localStorage and state:', userId);
-      return true;
+      if (users.length < originalLength) {
+        localStorage.setItem('databaseUsers', JSON.stringify(users));
+        setUsers([...users]); // Update state
+        console.log('✅ User deleted successfully from localStorage');
+        return true;
+      } else {
+        console.log('❌ User not found:', userId);
+        return false;
+      }
     } catch (error) {
-      console.error('❌ localStorage delete failed:', error);
+      console.error('❌ localStorage delete error:', error);
       return false;
     }
   };

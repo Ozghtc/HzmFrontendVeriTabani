@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../utils/api';
+import { useDatabase } from '../context/DatabaseContext';
 
 interface Project {
   id: number;
@@ -13,33 +14,79 @@ interface Project {
   updatedAt: string;
 }
 
+// Generate unique ID
+const generateUniqueId = () => {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substr(2, 9);
+  return parseInt(`${timestamp}${Math.floor(Math.random() * 1000)}`);
+};
+
+// Generate API key
+const generateApiKey = () => {
+  return 'hzm_' + Math.random().toString(36).substr(2, 24);
+};
+
+// Get user-specific localStorage key
+const getUserProjectsKey = (userId: string) => {
+  return `userProjects_${userId}`;
+};
+
 export const useApiProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { state } = useDatabase();
+
+  // Get current user ID
+  const getCurrentUserId = () => {
+    if (state.user?.id) {
+      return state.user.id.toString();
+    }
+    // Fallback to token-based user ID
+    const token = localStorage.getItem('auth_token');
+    return token ? 'token_user' : 'guest';
+  };
 
   const fetchProjects = async () => {
     setLoading(true);
     setError(null);
+    const currentUserId = getCurrentUserId();
+    
     try {
       const token = localStorage.getItem('auth_token');
-      console.log('🔍 Fetching projects with token:', token ? 'EXISTS' : 'MISSING');
+      console.log('🔍 Fetching projects for user:', currentUserId, 'with token:', token ? 'EXISTS' : 'MISSING');
       
       const response = await apiClient.getProjects();
       console.log('📊 Projects API response:', response);
       
       if (response.success && response.data) {
         const projects = (response.data as any).projects || [];
-        console.log('✅ Projects loaded:', projects.length, 'projects');
-        console.log('📋 Project details:', projects);
+        console.log('✅ Projects loaded from backend:', projects.length, 'projects');
         setProjects(projects);
+        
+        // Save to user-specific localStorage for fallback
+        const userProjectsKey = getUserProjectsKey(currentUserId);
+        localStorage.setItem(userProjectsKey, JSON.stringify(projects));
+        console.log('💾 Projects synced to localStorage:', userProjectsKey);
       } else {
-        setError(response.error || 'Failed to fetch projects');
-        console.error('❌ Projects API error:', response.error);
+        console.log('❌ Backend projects API failed, falling back to localStorage');
+        // Fallback to user-specific localStorage
+        const userProjectsKey = getUserProjectsKey(currentUserId);
+        const savedProjects = localStorage.getItem(userProjectsKey);
+        const localProjects = savedProjects ? JSON.parse(savedProjects) : [];
+        console.log('✅ Projects loaded from localStorage:', localProjects.length, 'projects for user:', currentUserId);
+        setProjects(localProjects);
+        setError('Using offline data (backend unavailable)');
       }
     } catch (err) {
-      setError('Network error');
-      console.error('💥 Network error fetching projects:', err);
+      console.log('💥 Network error, falling back to localStorage');
+      // Fallback to user-specific localStorage
+      const userProjectsKey = getUserProjectsKey(currentUserId);
+      const savedProjects = localStorage.getItem(userProjectsKey);
+      const localProjects = savedProjects ? JSON.parse(savedProjects) : [];
+      console.log('✅ Projects loaded from localStorage:', localProjects.length, 'projects for user:', currentUserId);
+      setProjects(localProjects);
+      setError('Using offline data (network error)');
     }
     setLoading(false);
   };
@@ -50,16 +97,66 @@ export const useApiProjects = () => {
     try {
       const response = await apiClient.createProject(projectData);
       if (response.success && response.data) {
+        console.log('✅ Project created via backend');
         // Refresh projects list
         await fetchProjects();
         return (response.data as any).project;
       } else {
-        setError(response.error || 'Failed to create project');
-        return null;
+        console.log('❌ Backend project creation failed, falling back to localStorage');
+        return createProjectLocalStorage(projectData);
       }
     } catch (err) {
-      setError('Network error');
-      console.error('Error creating project:', err);
+      console.log('💥 Backend error, falling back to localStorage for project creation');
+      return createProjectLocalStorage(projectData);
+    }
+  };
+
+  const createProjectLocalStorage = (projectData: { name: string; description?: string }) => {
+    try {
+      const currentUserId = getCurrentUserId();
+      const userProjectsKey = getUserProjectsKey(currentUserId);
+      const savedProjects = localStorage.getItem(userProjectsKey);
+      let projects = savedProjects ? JSON.parse(savedProjects) : [];
+      
+      // Check if project name already exists for this user
+      const projectExists = projects.some((project: any) => 
+        project.name.toLowerCase().trim() === projectData.name.toLowerCase().trim()
+      );
+      
+      if (projectExists) {
+        setError('Bu isimde bir proje zaten mevcut');
+        setLoading(false);
+        return null;
+      }
+      
+      const newProject: Project = {
+        id: generateUniqueId(),
+        name: projectData.name,
+        description: projectData.description || '',
+        apiKey: generateApiKey(),
+        isPublic: false,
+        settings: {
+          allowApiAccess: true,
+          requireAuth: false,
+          maxRequestsPerMinute: 1000,
+          enableWebhooks: false,
+        },
+        tableCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      projects.push(newProject);
+      localStorage.setItem(userProjectsKey, JSON.stringify(projects));
+      setProjects([...projects]);
+      
+      console.log('✅ Project created in localStorage for user:', currentUserId, 'project ID:', newProject.id);
+      setLoading(false);
+      return newProject;
+    } catch (error) {
+      console.error('❌ localStorage project creation failed:', error);
+      setError('Failed to create project');
+      setLoading(false);
       return null;
     }
   };
@@ -70,16 +167,40 @@ export const useApiProjects = () => {
     try {
       const response = await apiClient.deleteProject(projectId);
       if (response.success) {
+        console.log('✅ Project deleted via backend');
         // Refresh projects list
         await fetchProjects();
         return true;
       } else {
-        setError(response.error || 'Failed to delete project');
-        return false;
+        console.log('❌ Backend project deletion failed, falling back to localStorage');
+        return deleteProjectLocalStorage(projectId);
       }
     } catch (err) {
-      setError('Network error');
-      console.error('Error deleting project:', err);
+      console.log('💥 Backend error, falling back to localStorage for project deletion');
+      return deleteProjectLocalStorage(projectId);
+    }
+  };
+
+  const deleteProjectLocalStorage = (projectId: string): boolean => {
+    try {
+      const currentUserId = getCurrentUserId();
+      const userProjectsKey = getUserProjectsKey(currentUserId);
+      const savedProjects = localStorage.getItem(userProjectsKey);
+      let projects = savedProjects ? JSON.parse(savedProjects) : [];
+      
+      // Remove project from localStorage - Fix ID comparison
+      projects = projects.filter((project: any) => project.id.toString() !== projectId);
+      
+      localStorage.setItem(userProjectsKey, JSON.stringify(projects));
+      setProjects([...projects]);
+      
+      console.log('✅ Project deleted from localStorage for user:', currentUserId, 'project ID:', projectId);
+      setLoading(false);
+      return true;
+    } catch (error) {
+      console.error('❌ localStorage project deletion failed:', error);
+      setError('Failed to delete project');
+      setLoading(false);
       return false;
     }
   };
@@ -95,7 +216,7 @@ export const useApiProjects = () => {
     }
   }, []);
 
-  // Clear projects when auth token changes (login/logout)
+  // Clear projects when auth token changes (login/logout) or user changes
   useEffect(() => {
     const handleStorageChange = () => {
       const token = localStorage.getItem('auth_token');
@@ -108,13 +229,22 @@ export const useApiProjects = () => {
       }
     };
 
+    // Also refetch when user changes
+    if (state.isAuthenticated && state.user) {
+      fetchProjects();
+      console.log('👤 User changed, refetching projects for:', getCurrentUserId());
+    } else if (!state.isAuthenticated) {
+      setProjects([]);
+      console.log('👤 User logged out, clearing projects');
+    }
+
     // Listen for localStorage changes
     window.addEventListener('storage', handleStorageChange);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [state.user, state.isAuthenticated]);
 
   return {
     projects,

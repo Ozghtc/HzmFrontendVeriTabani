@@ -15,7 +15,9 @@ import {
   Plus,
   Search,
   Filter,
-  UserPlus
+  UserPlus,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import { User } from '../types';
 
@@ -33,6 +35,10 @@ const DatabaseUsers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [showAddUserForm, setShowAddUserForm] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'info';
+    message: string;
+  } | null>(null);
   const [editUserData, setEditUserData] = useState<{
     name: string;
     email: string;
@@ -59,6 +65,12 @@ const DatabaseUsers = () => {
     subscriptionType: 'free',
     isActive: true
   });
+
+  // Show notification with auto-hide
+  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   // Loading state
   if (usersLoading) {
@@ -87,7 +99,7 @@ const DatabaseUsers = () => {
     e.preventDefault();
     
     if (!newUserData.name.trim() || !newUserData.email.trim() || !newUserData.password.trim()) {
-      alert('Lütfen tüm alanları doldurun.');
+      showNotification('error', 'Lütfen tüm alanları doldurun.');
       return;
     }
 
@@ -105,12 +117,12 @@ const DatabaseUsers = () => {
           subscriptionType: 'free',
           isActive: true
         });
-        alert('Kullanıcı başarıyla eklendi!');
+        showNotification('success', 'Kullanıcı başarıyla eklendi!');
       } else {
-        alert('Bu e-posta adresi zaten kullanılıyor.');
+        showNotification('error', 'Bu e-posta adresi zaten kullanılıyor.');
       }
     } catch (error) {
-      alert('Kullanıcı eklenirken bir hata oluştu.');
+      showNotification('error', 'Kullanıcı eklenirken bir hata oluştu.');
     }
   };
 
@@ -139,19 +151,21 @@ const DatabaseUsers = () => {
         maxTables: plan ? plan.maxTables : 5
       };
 
+      console.log('🔄 Attempting to update user:', userId, userData);
+
       // Update user via backend API
       const success = await updateUser(userId, userData);
       
       if (success) {
         setEditingUser(null);
-        console.log('✅ User update completed successfully');
-        // Don't show alert to prevent UI issues
-        // alert('Kullanıcı başarıyla güncellendi!');
+        showNotification('success', 'Kullanıcı başarıyla güncellendi!');
+        console.log('✅ User update UI completed successfully');
       } else {
-        alert('Kullanıcı güncellenirken bir hata oluştu.');
+        showNotification('error', 'Kullanıcı güncellenirken bir hata oluştu.');
       }
     } catch (error) {
-      alert('Kullanıcı güncellenirken bir hata oluştu.');
+      console.error('❌ User update error:', error);
+      showNotification('error', 'Kullanıcı güncellenirken bir hata oluştu.');
     }
   };
 
@@ -174,20 +188,25 @@ const DatabaseUsers = () => {
   const confirmDeleteUser = async () => {
     if (deletingUser && deleteConfirmName === deletingUser.name) {
       try {
-        await deleteUser(deletingUser.id);
+        const success = await deleteUser(deletingUser.id);
         
-        // Refresh users from backend
-        await fetchUsers();
-        
-        setDeletingUser(null);
-        setDeleteConfirmName('');
+        if (success) {
+          // Refresh users from backend
+          await fetchUsers();
+          
+          setDeletingUser(null);
+          setDeleteConfirmName('');
+          showNotification('success', 'Kullanıcı başarıyla silindi!');
 
-        if (state.user?.id === deletingUser.id) {
-          dispatch({ type: 'LOGOUT' });
-          navigate('/');
+          if (state.user?.id === deletingUser.id) {
+            dispatch({ type: 'LOGOUT' });
+            navigate('/');
+          }
+        } else {
+          showNotification('error', 'Kullanıcı silinirken bir hata oluştu.');
         }
       } catch (error) {
-        alert('Kullanıcı silinirken bir hata oluştu.');
+        showNotification('error', 'Kullanıcı silinirken bir hata oluştu.');
       }
     }
   };
@@ -221,6 +240,24 @@ const DatabaseUsers = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${
+          notification.type === 'success' ? 'bg-green-100 text-green-800' :
+          notification.type === 'error' ? 'bg-red-100 text-red-800' :
+          'bg-blue-100 text-blue-800'
+        }`}>
+          {notification.type === 'success' ? (
+            <CheckCircle size={20} className="mr-2" />
+          ) : notification.type === 'error' ? (
+            <XCircle size={20} className="mr-2" />
+          ) : (
+            <AlertTriangle size={20} className="mr-2" />
+          )}
+          {notification.message}
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
         <div className="container mx-auto flex items-center">
