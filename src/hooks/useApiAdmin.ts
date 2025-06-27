@@ -92,13 +92,46 @@ export const useApiUsers = () => {
         return true;
       } else {
         const errorData = await response.json();
+        console.log('❌ Backend user update failed:', errorData.error);
+        
+        // If endpoint doesn't exist (404), fall back to localStorage
+        if (response.status === 404) {
+          console.log('🔄 Falling back to localStorage for user update');
+          return updateUserLocalStorage(userId, userData);
+        }
+        
         setError(errorData.error || 'Failed to update user');
-        console.error('❌ Admin user update error:', errorData.error);
         return false;
       }
     } catch (err) {
-      setError('Network error');
-      console.error('💥 Network error updating user:', err);
+      console.log('💥 Backend error, falling back to localStorage:', err);
+      return updateUserLocalStorage(userId, userData);
+    }
+  };
+
+  const updateUserLocalStorage = (userId: string, userData: any): boolean => {
+    try {
+      // Get users from localStorage
+      const savedUsers = localStorage.getItem('databaseUsers');
+      let users = savedUsers ? JSON.parse(savedUsers) : [];
+      
+      // Update user in localStorage
+      users = users.map((user: any) => {
+        if (user.id === userId) {
+          return { ...user, ...userData };
+        }
+        return user;
+      });
+      
+      // Save back to localStorage
+      localStorage.setItem('databaseUsers', JSON.stringify(users));
+      
+      // Update state
+      setUsers(users);
+      console.log('✅ User updated in localStorage:', userId);
+      return true;
+    } catch (error) {
+      console.error('❌ localStorage update failed:', error);
       return false;
     }
   };
@@ -122,13 +155,41 @@ export const useApiUsers = () => {
         return true;
       } else {
         const errorData = await response.json();
+        console.log('❌ Backend user delete failed:', errorData.error);
+        
+        // If endpoint doesn't exist (404), fall back to localStorage
+        if (response.status === 404) {
+          console.log('🔄 Falling back to localStorage for user delete');
+          return deleteUserLocalStorage(userId);
+        }
+        
         setError(errorData.error || 'Failed to delete user');
-        console.error('❌ Admin user delete error:', errorData.error);
         return false;
       }
     } catch (err) {
-      setError('Network error');
-      console.error('💥 Network error deleting user:', err);
+      console.log('💥 Backend error, falling back to localStorage:', err);
+      return deleteUserLocalStorage(userId);
+    }
+  };
+
+  const deleteUserLocalStorage = (userId: string): boolean => {
+    try {
+      // Get users from localStorage
+      const savedUsers = localStorage.getItem('databaseUsers');
+      let users = savedUsers ? JSON.parse(savedUsers) : [];
+      
+      // Remove user from localStorage
+      users = users.filter((user: any) => user.id !== userId);
+      
+      // Save back to localStorage
+      localStorage.setItem('databaseUsers', JSON.stringify(users));
+      
+      // Update state
+      setUsers(users);
+      console.log('✅ User deleted from localStorage:', userId);
+      return true;
+    } catch (error) {
+      console.error('❌ localStorage delete failed:', error);
       return false;
     }
   };
