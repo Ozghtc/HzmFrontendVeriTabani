@@ -52,7 +52,12 @@ export const useApiUsers = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('✅ Admin users loaded from backend:', data.users?.length || 0, 'users');
-        setUsers(data.users || []);
+        const backendUsers = data.users || [];
+        setUsers(backendUsers);
+        
+        // Also save to localStorage for fallback operations
+        localStorage.setItem('databaseUsers', JSON.stringify(backendUsers));
+        console.log('💾 Users synced to localStorage for fallback');
       } else {
         console.log('❌ Backend users API failed, falling back to localStorage');
         // If backend fails, load from localStorage
@@ -120,20 +125,34 @@ export const useApiUsers = () => {
 
   const updateUserLocalStorage = (userId: string, userData: any): boolean => {
     try {
+      console.log('🔍 DEBUG: Starting localStorage update for userId:', userId, 'type:', typeof userId);
+      
       // Get users from localStorage
       const savedUsers = localStorage.getItem('databaseUsers');
+      console.log('📦 localStorage databaseUsers raw:', savedUsers ? 'EXISTS' : 'EMPTY');
+      
       let users = savedUsers ? JSON.parse(savedUsers) : [];
+      console.log('👥 Parsed users from localStorage:', users.length, 'users');
+      console.log('🔢 User IDs in localStorage:', users.map((u: any) => `${u.id} (${typeof u.id})`));
+      
+      let userFound = false;
       
       // Update user in localStorage - Fix ID comparison (convert to string)
       users = users.map((user: any) => {
+        console.log('🔍 Comparing:', user.id, '(', typeof user.id, ') === ', userId, '(', typeof userId, ')');
         if (user.id.toString() === userId) {
+          userFound = true;
           const updatedUser = { ...user, ...userData };
-          console.log('🔄 Updating user in localStorage:', user.id, 'with data:', userData);
-          console.log('📝 Updated user result:', updatedUser);
+          console.log('✅ MATCH FOUND! Updating user:', user.id);
+          console.log('📝 Before:', user);
+          console.log('📝 Update data:', userData);
+          console.log('📝 After:', updatedUser);
           return updatedUser;
         }
         return user;
       });
+      
+      console.log('🎯 User found and updated:', userFound);
       
       // Save back to localStorage
       localStorage.setItem('databaseUsers', JSON.stringify(users));
@@ -141,7 +160,7 @@ export const useApiUsers = () => {
       // Update state immediately
       setUsers([...users]); // Force re-render with new array reference
       console.log('✅ User updated in localStorage and state:', userId);
-      return true;
+      return userFound; // Return whether we actually found and updated the user
     } catch (error) {
       console.error('❌ localStorage update failed:', error);
       return false;
