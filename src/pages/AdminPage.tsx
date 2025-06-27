@@ -3,17 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useDatabase } from '../context/DatabaseContext';
 import { useApiAdminProjects, useApiUsers } from '../hooks/useApiAdmin';
 import { 
-  Users, 
-  Settings, 
-  DollarSign, 
-  ArrowLeft, 
-  Shield, 
-  Database,
-  HardDrive,
-  FileText,
-  Crown,
-  Activity
-} from 'lucide-react';
+  FaUsers, 
+  FaCog, 
+  FaDollarSign, 
+  FaArrowLeft, 
+  FaShieldAlt, 
+  FaDatabase,
+  FaHdd,
+  FaCrown,
+  FaChartLine
+} from 'react-icons/fa';
 
 const AdminPage = () => {
   const { state } = useDatabase();
@@ -29,7 +28,7 @@ const AdminPage = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <Shield className="mx-auto text-red-500 mb-4" size={64} />
+          <FaShieldAlt className="mx-auto text-red-500 mb-4" size={64} />
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Erişim Reddedildi</h1>
           <p className="text-gray-600 mb-4">Bu sayfaya erişim yetkiniz bulunmamaktadır.</p>
           <button
@@ -68,10 +67,10 @@ const AdminPage = () => {
             onClick={() => navigate('/dashboard')}
             className="mr-4 hover:bg-purple-700 p-2 rounded-full transition-colors"
           >
-            <ArrowLeft size={24} />
+            <FaArrowLeft size={24} />
           </button>
           <div className="flex items-center">
-            <Shield size={28} className="mr-3" />
+            <FaShieldAlt size={28} className="mr-3" />
             <h1 className="text-2xl font-bold">Admin Paneli</h1>
           </div>
         </div>
@@ -86,7 +85,7 @@ const AdminPage = () => {
                 <p className="text-sm font-medium text-gray-600">Toplam Kullanıcı</p>
                 <p className="text-3xl font-bold text-blue-600">{users.length}</p>
               </div>
-              <Users className="text-blue-600" size={40} />
+              <FaUsers className="text-blue-600" size={40} />
             </div>
           </div>
 
@@ -98,7 +97,7 @@ const AdminPage = () => {
                   {users.filter(u => u?.isActive).length}
                 </p>
               </div>
-              <Activity className="text-green-600" size={40} />
+              <FaChartLine className="text-green-600" size={40} />
             </div>
           </div>
 
@@ -110,7 +109,7 @@ const AdminPage = () => {
                   {users.filter(u => u?.subscriptionType !== 'free').length}
                 </p>
               </div>
-              <Crown className="text-purple-600" size={40} />
+              <FaCrown className="text-purple-600" size={40} />
             </div>
           </div>
 
@@ -120,7 +119,7 @@ const AdminPage = () => {
                 <p className="text-sm font-medium text-gray-600">Fiyat Planı</p>
                 <p className="text-3xl font-bold text-orange-600">{pricingPlans.length}</p>
               </div>
-              <DollarSign className="text-orange-600" size={40} />
+              <FaDollarSign className="text-orange-600" size={40} />
             </div>
           </div>
         </div>
@@ -133,7 +132,7 @@ const AdminPage = () => {
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <Users className="text-blue-600 mr-3" size={24} />
+                <FaUsers className="text-blue-600 mr-3" size={24} />
                 <h3 className="text-lg font-semibold text-gray-800">Kullanıcılar</h3>
               </div>
               <div className="text-2xl font-bold text-blue-600">{users.length}</div>
@@ -151,7 +150,7 @@ const AdminPage = () => {
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <Database className="text-green-600 mr-3" size={24} />
+                <FaDatabase className="text-green-600 mr-3" size={24} />
                 <h3 className="text-lg font-semibold text-gray-800">Projeler</h3>
               </div>
               <div className="text-2xl font-bold text-green-600">{allProjects.length}</div>
@@ -170,7 +169,7 @@ const AdminPage = () => {
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <HardDrive className="text-indigo-600 mr-3" size={24} />
+                <FaHdd className="text-indigo-600 mr-3" size={24} />
                 <h3 className="text-lg font-semibold text-gray-800">Sistem Durumu</h3>
               </div>
               <div className="text-2xl font-bold text-indigo-600">
@@ -194,7 +193,7 @@ const AdminPage = () => {
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <DollarSign className="text-purple-600 mr-3" size={24} />
+                <FaDollarSign className="text-purple-600 mr-3" size={24} />
                 <h3 className="text-lg font-semibold text-gray-800">Fiyatlandırma</h3>
               </div>
               <div className="text-2xl font-bold text-purple-600">{pricingPlans.length}</div>
@@ -214,28 +213,28 @@ const AdminPage = () => {
               onClick={() => navigate('/database/users')}
               className="flex items-center justify-center px-4 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
             >
-              <Users size={20} className="mr-2" />
+              <FaUsers size={20} className="mr-2" />
               Kullanıcı Ekle
             </button>
             <button
               onClick={() => navigate('/database/projects')}
               className="flex items-center justify-center px-4 py-3 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
             >
-              <Database size={20} className="mr-2" />
+              <FaDatabase size={20} className="mr-2" />
               Projeleri Görüntüle
             </button>
             <button
               onClick={() => navigate('/database/pricing')}
               className="flex items-center justify-center px-4 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
             >
-              <DollarSign size={20} className="mr-2" />
+              <FaDollarSign size={20} className="mr-2" />
               Plan Ekle
             </button>
             <button
               onClick={() => navigate('/database/state')}
               className="flex items-center justify-center px-4 py-3 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
             >
-              <Settings size={20} className="mr-2" />
+              <FaCog size={20} className="mr-2" />
               Sistem Ayarları
             </button>
           </div>
