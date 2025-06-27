@@ -1,43 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDatabase } from '../context/DatabaseContext';
-import { ArrowLeft, Key, Settings, Database as DatabaseIcon } from 'lucide-react';
+import { ArrowLeft, Key, Settings, Database } from 'lucide-react';
 import TablePanel from '../components/panels/TablePanel';
 import FieldPanel from '../components/panels/FieldPanel';
 import ApiKeyDisplay from '../components/ApiKeyDisplay';
+import { apiClient } from '../utils/api';
 
 const ProjectManagement = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { state, dispatch } = useDatabase();
   const [activeTab, setActiveTab] = useState<'tables' | 'api' | 'settings'>('tables');
+  const [project, setProject] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Find the project and select it
-  React.useEffect(() => {
-    if (projectId) {
-      dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
-    }
-  }, [projectId, dispatch]);
+  // Load project from backend API
+  useEffect(() => {
+    const loadProject = async () => {
+      if (!projectId) {
+        setLoading(false);
+        return;
+      }
 
-  // Projeyi bul (önce state, yoksa localStorage)
-  let project = state.projects.find(p => p.id === projectId);
-  if (!project) {
-    const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-    project = allProjects.find((p: any) => p.id === projectId);
-  }
+      try {
+        setLoading(true);
+        setError(null);
 
-  // Proje sahibini bul
+        // Try to get project from backend API first
+        const projectData = await apiClient.getProject(projectId);
+        console.log('Backend project data:', projectData);
+        
+        setProject(projectData);
+        
+        // Also select project in state
+        dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
+        
+      } catch (error) {
+        console.error('Failed to load project from backend:', error);
+        
+        // Fallback to localStorage
+        console.log('Falling back to localStorage...');
+        
+        // Try to find in state.projects first
+        let localProject = state.projects.find(p => p.id === projectId);
+        
+        // If not found, try all_projects localStorage
+        if (!localProject) {
+          const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
+          localProject = allProjects.find((p: any) => p.id === projectId);
+        }
+        
+        if (localProject) {
+          console.log('Found project in localStorage:', localProject);
+          setProject(localProject);
+          dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
+        } else {
+          console.log('Project not found in localStorage either');
+          setError('Proje bulunamadı');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProject();
+  }, [projectId, dispatch, state.projects]);
+
+  // Proje sahibini bul (localStorage'dan)
   let projectOwner = null;
   if (project && project.userId) {
     const users = JSON.parse(localStorage.getItem('database_users') || '[]');
     projectOwner = users.find((u: any) => u.id === project.userId);
   }
 
-  if (!project) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <DatabaseIcon className="mx-auto text-gray-400 mb-4" size={64} />
+          <Database className="mx-auto text-gray-400 mb-4 animate-spin" size={64} />
+          <p className="text-gray-600">Proje yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !project) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <Database className="mx-auto text-gray-400 mb-4" size={64} />
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Proje Bulunamadı</h2>
           <p className="text-gray-600 mb-4">Belirtilen proje mevcut değil.</p>
           <button
@@ -85,7 +138,7 @@ const ProjectManagement = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              <DatabaseIcon size={16} className="inline mr-2" />
+              <Database size={16} className="inline mr-2" />
               Tablolar & Alanlar
             </button>
             {state.user?.isAdmin && (
