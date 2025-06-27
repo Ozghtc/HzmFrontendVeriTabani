@@ -16,7 +16,9 @@ import {
   Key,
   Copy,
   EyeOff,
-  Code
+  Code,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import { ApiKeyGenerator } from '../utils/apiKeyGenerator';
 
@@ -30,6 +32,16 @@ const ProjectList = () => {
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [showApiKey, setShowApiKey] = useState<{[key: string]: boolean}>({});
   const [creating, setCreating] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'info';
+    message: string;
+  } | null>(null);
+
+  // Show notification with auto-hide
+  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const handleAddProject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +54,7 @@ const ProjectList = () => {
       );
       
       if (projectExists) {
-        alert('Bu isimde bir proje zaten mevcut. Lütfen farklı bir isim seçin.');
+        showNotification('error', 'Bu isimde bir proje zaten mevcut. Lütfen farklı bir isim seçin.');
         setCreating(false);
         return;
       }
@@ -55,9 +67,9 @@ const ProjectList = () => {
       if (result) {
         setNewProjectName('');
         setNewProjectDescription('');
-        alert('Proje başarıyla oluşturuldu!');
+        showNotification('success', 'Proje başarıyla oluşturuldu!');
       } else {
-        alert('Proje oluşturulurken hata oluştu. Lütfen tekrar deneyin.');
+        showNotification('error', 'Proje oluşturulurken hata oluştu. Lütfen tekrar deneyin.');
       }
       setCreating(false);
     }
@@ -72,14 +84,37 @@ const ProjectList = () => {
     if (deletingProject) {
       const projectToDelete = projects.find(p => p.id === deletingProject);
       if (projectToDelete && deleteConfirmName === projectToDelete.name) {
-        const success = await deleteProject(deletingProject.toString());
-        if (success) {
-          alert('Proje başarıyla silindi!');
-        } else {
-          alert('Proje silinirken hata oluştu.');
+        try {
+          console.log('🗑️ Attempting to delete project:', deletingProject, projectToDelete.name);
+          
+          // Try to delete via API
+          const success = await deleteProject(deletingProject.toString());
+          
+          // Always close modal first
+          setDeletingProject(null);
+          setDeleteConfirmName('');
+          
+          if (success) {
+            console.log('✅ Project deleted successfully');
+            showNotification('success', 'Proje başarıyla silindi!');
+            
+            // Refresh projects from backend
+            await fetchProjects();
+          } else {
+            console.log('❌ Project delete failed');
+            showNotification('error', 'Proje silinirken hata oluştu.');
+          }
+        } catch (error) {
+          console.error('💥 Error deleting project:', error);
+          
+          // Always close modal even on error
+          setDeletingProject(null);
+          setDeleteConfirmName('');
+          showNotification('error', 'Network hatası - proje silinemedi.');
         }
-        setDeletingProject(null);
-        setDeleteConfirmName('');
+      } else {
+        // Name doesn't match, show error but don't close modal
+        showNotification('error', 'Proje adını doğru yazmanız gerekiyor.');
       }
     }
   };
@@ -89,11 +124,9 @@ const ProjectList = () => {
     setDeleteConfirmName('');
   };
 
-
-
   const handleCopyApiKey = (apiKey: string) => {
     navigator.clipboard.writeText(apiKey);
-    alert('API Key kopyalandı!');
+    showNotification('success', 'API Key kopyalandı!');
   };
 
   const toggleApiKeyVisibility = (projectId: number) => {
@@ -106,6 +139,24 @@ const ProjectList = () => {
   return (
     <>
       <div className="min-h-screen bg-slate-50">
+        {/* Notification */}
+        {notification && (
+          <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${
+            notification.type === 'success' ? 'bg-green-100 text-green-800' :
+            notification.type === 'error' ? 'bg-red-100 text-red-800' :
+            'bg-blue-100 text-blue-800'
+          }`}>
+            {notification.type === 'success' ? (
+              <CheckCircle size={20} className="mr-2" />
+            ) : notification.type === 'error' ? (
+              <XCircle size={20} className="mr-2" />
+            ) : (
+              <AlertTriangle size={20} className="mr-2" />
+            )}
+            {notification.message}
+          </div>
+        )}
+
         <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
           <div className="container mx-auto flex items-center">
             <button
