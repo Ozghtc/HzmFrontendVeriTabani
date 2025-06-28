@@ -12,7 +12,7 @@ const ProjectManagement = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { state, dispatch } = useDatabase();
-  const { projects } = useApiProjects();
+  const { projects, loading: projectsLoading } = useApiProjects();
   const [activeTab, setActiveTab] = useState<'tables' | 'api' | 'settings'>('tables');
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -49,6 +49,10 @@ const ProjectManagement = () => {
             console.log('✅ Found project in frontend list:', frontendProject);
             setProject(frontendProject);
             dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
+          } else if (projectsLoading) {
+            console.log('⏳ Projects still loading, waiting...');
+            // Don't set error yet, wait for projects to load
+            return;
           } else {
             setError(response.error || 'Failed to fetch project from backend');
           }
@@ -63,6 +67,10 @@ const ProjectManagement = () => {
           console.log('✅ Found project in frontend list:', frontendProject);
           setProject(frontendProject);
           dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
+        } else if (projectsLoading) {
+          console.log('⏳ Projects still loading, waiting...');
+          // Don't set error yet, wait for projects to load
+          return;
         } else {
           setError(error.message || 'Network error - could not connect to backend');
         }
@@ -72,7 +80,7 @@ const ProjectManagement = () => {
     };
 
     loadProject();
-  }, [projectId, dispatch, state.projects]);
+  }, [projectId, dispatch, state.projects, projects]);
 
   // Proje sahibini bul (önce backend'den, yoksa localStorage'dan)
   let projectOwner = null;
