@@ -264,7 +264,12 @@ const ProjectList = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map(project => {
-                console.log('🔍 Rendering project:', { id: project.id, name: project.name, type: typeof project.id });
+                console.log('🔍 Rendering project:', { 
+                  id: project.id, 
+                  name: project.name, 
+                  type: typeof project.id,
+                  fullProject: project 
+                });
                 return (
                 <div key={project.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
                   {/* Project Header */}

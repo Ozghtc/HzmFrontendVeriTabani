@@ -14,11 +14,12 @@ interface Project {
   updatedAt: string;
 }
 
-// Generate unique ID
+// Generate unique ID (smaller for compatibility)
 const generateUniqueId = () => {
-  const timestamp = Date.now();
-  const random = Math.random().toString(36).substr(2, 9);
-  return parseInt(`${timestamp}${Math.floor(Math.random() * 1000)}`);
+  // Use smaller number to avoid conflict with backend SERIAL
+  const timestamp = Date.now() % 100000; // Last 5 digits of timestamp
+  const random = Math.floor(Math.random() * 1000);
+  return 999000 + timestamp + random; // Start from 999000 to avoid conflict with backend
 };
 
 // Generate API key
@@ -47,10 +48,36 @@ export const useApiProjects = () => {
     return token ? 'token_user' : 'guest';
   };
 
+  // Clean up localStorage with invalid large IDs
+  const cleanupLocalStorage = () => {
+    const currentUserId = getCurrentUserId();
+    const userProjectsKey = getUserProjectsKey(currentUserId);
+    const savedProjects = localStorage.getItem(userProjectsKey);
+    
+    if (savedProjects) {
+      try {
+        const projects = JSON.parse(savedProjects);
+        // Filter out projects with extremely large IDs (timestamp-based)
+        const validProjects = projects.filter((p: any) => p.id < 900000000000);
+        
+        if (validProjects.length !== projects.length) {
+          console.log('🧹 Cleaning up', projects.length - validProjects.length, 'projects with invalid IDs');
+          localStorage.setItem(userProjectsKey, JSON.stringify(validProjects));
+        }
+      } catch (e) {
+        console.log('🧹 Clearing corrupted localStorage');
+        localStorage.removeItem(userProjectsKey);
+      }
+    }
+  };
+
   const fetchProjects = async () => {
     setLoading(true);
     setError(null);
     const currentUserId = getCurrentUserId();
+    
+    // Clean up localStorage first
+    cleanupLocalStorage();
     
     try {
       const token = localStorage.getItem('auth_token');
@@ -62,6 +89,7 @@ export const useApiProjects = () => {
       if (response.success && response.data) {
         const projects = (response.data as any).projects || [];
         console.log('✅ Projects loaded from backend:', projects.length, 'projects');
+        console.log('🔍 Backend project IDs:', projects.map((p: any) => ({ id: p.id, name: p.name, type: typeof p.id })));
         setProjects(projects);
         
         // Save to user-specific localStorage for fallback
