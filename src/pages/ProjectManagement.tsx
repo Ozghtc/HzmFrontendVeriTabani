@@ -18,7 +18,7 @@ const ProjectManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load project from backend API
+  // Load project with optimistic frontend-first approach
   useEffect(() => {
     const loadProject = async () => {
       if (!projectId) {
@@ -30,57 +30,63 @@ const ProjectManagement = () => {
         setLoading(true);
         setError(null);
 
-        // Try to get project from backend API first
-        const response = await apiClient.getProject(projectId);
-        console.log('Backend project response:', response);
-        
-        if (response.success && response.data) {
-          console.log('✅ Project loaded successfully:', response.data);
-          setProject(response.data);
-          
-          // Set selected project in state with full project data
-          dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: response.data } });
-        } else {
-          console.error('❌ Backend project fetch failed:', response.error, response);
-          // Fallback: Use project from frontend projects list
-          console.log('🔄 Falling back to frontend projects list...');
-          const frontendProject = projects.find(p => p.id.toString() === projectId);
-          if (frontendProject) {
-            console.log('✅ Found project in frontend list:', frontendProject);
-            setProject(frontendProject);
-            dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
-          } else if (projectsLoading) {
-            console.log('⏳ Projects still loading, waiting...');
-            // Don't set error yet, wait for projects to load
-            return;
-          } else {
-            setError(response.error || 'Failed to fetch project from backend');
-          }
-        }
-        
-      } catch (error: any) {
-        console.error('Failed to load project from backend:', error);
-        // Fallback: Use project from frontend projects list
-        console.log('🔄 Network error, falling back to frontend projects list...');
+        // 1. First: Try to get project from frontend projects list (fast)
+        console.log('🚀 Looking for project in frontend list first...');
         const frontendProject = projects.find(p => p.id.toString() === projectId);
+        
         if (frontendProject) {
           console.log('✅ Found project in frontend list:', frontendProject);
           setProject(frontendProject);
           dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
-        } else if (projectsLoading) {
-          console.log('⏳ Projects still loading, waiting...');
-          // Don't set error yet, wait for projects to load
+          setLoading(false); // Show page immediately
+          
+          // 2. Then: Try to get updated data from backend (background update)
+          console.log('🔄 Getting updated data from backend...');
+          try {
+            const response = await apiClient.getProject(projectId);
+            if (response.success && response.data) {
+              console.log('✅ Backend data received, updating...');
+              setProject(response.data);
+              dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: response.data } });
+            } else {
+              console.log('ℹ️ Backend failed, keeping frontend data');
+            }
+          } catch (backendError) {
+            console.log('ℹ️ Backend error, keeping frontend data:', backendError);
+          }
           return;
-        } else {
-          setError(error.message || 'Network error - could not connect to backend');
         }
+
+        // 3. If not in frontend list, wait for projects to load or try backend only
+        if (projectsLoading) {
+          console.log('⏳ Projects still loading, waiting...');
+          setLoading(false);
+          return;
+        }
+
+        // 4. Last resort: Try backend only
+        console.log('🔄 Project not in frontend list, trying backend only...');
+        const response = await apiClient.getProject(projectId);
+        
+        if (response.success && response.data) {
+          console.log('✅ Project loaded from backend only:', response.data);
+          setProject(response.data);
+          dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: response.data } });
+        } else {
+          console.error('❌ Project not found anywhere');
+          setError(response.error || 'Project not found');
+        }
+        
+      } catch (error: any) {
+        console.error('Failed to load project:', error);
+        setError(error.message || 'Failed to load project');
       } finally {
         setLoading(false);
       }
     };
 
     loadProject();
-  }, [projectId, dispatch, state.projects, projects]);
+  }, [projectId, dispatch, state.projects, projects, projectsLoading]);
 
   // Proje sahibini bul (önce backend'den, yoksa localStorage'dan)
   let projectOwner = null;
