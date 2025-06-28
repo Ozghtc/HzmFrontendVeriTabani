@@ -270,6 +270,17 @@ const ProjectList = () => {
                   type: typeof project.id,
                   fullProject: project 
                 });
+                console.log('🎯 Düzenle button will navigate to:', `/projects/${project.id}`);
+                
+                // Emergency alert for debugging
+                if (project.name === 'ttttt') {
+                  console.log('🚨 FOUND TTTTT PROJECT - ID:', project.id, 'Type:', typeof project.id);
+                  // Show alert with real ID
+                  setTimeout(() => {
+                    alert(`TTTTT Projesi ID: ${project.id} (${typeof project.id})`);
+                  }, 1000);
+                }
+                
                 return (
                 <div key={project.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
                   {/* Project Header */}
