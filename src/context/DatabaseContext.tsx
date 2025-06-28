@@ -1211,7 +1211,9 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Try backend API login first
+      console.log('🔑 Attempting backend login for:', email);
+      
+      // Only use backend API - no localStorage fallback
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
@@ -1227,63 +1229,29 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         
         // Save auth token for API calls
         localStorage.setItem('auth_token', token);
-        console.log('🔑 Backend login successful');
+        console.log('✅ Backend login successful');
         console.log('👤 Backend user data:', user);
         console.log('🔒 JWT token saved');
         
         // Dispatch login with backend user data
         dispatch({ type: 'LOGIN', payload: { user } });
         return true;
+      } else {
+        const errorData = await response.json();
+        console.log('❌ Backend login failed:', errorData.error);
+        return false;
       }
-    } catch (error) {
-      console.log('🔄 Backend login failed, falling back to localStorage');
+    } catch (error: any) {
+      console.log('💥 Backend login error:', error.message);
+      return false;
     }
-
-    // Fallback to localStorage for backward compatibility
-    const users = loadUsers();
-    
-    // Find user by email
-    const user = users.find(u => u.email === email);
-    
-    // Special case for admin user
-    if (email === 'ozgurhzm@gmail.com' && password === '123456') {
-      const adminUser = user || defaultAdminUser;
-      // Ensure admin user has correct properties
-      const updatedAdminUser = {
-        ...adminUser,
-        isAdmin: true,
-        subscriptionType: 'enterprise' as const,
-        maxProjects: -1,
-        maxTables: -1,
-      };
-      
-      // Update admin user in storage if needed
-      if (!user || !user.isAdmin) {
-        const updatedUsers = users.filter(u => u.email !== 'ozgurhzm@gmail.com');
-        updatedUsers.push(updatedAdminUser);
-        saveUsers(updatedUsers);
-      }
-      
-      dispatch({ type: 'LOGIN', payload: { user: updatedAdminUser } });
-      return true;
-    }
-
-    // Special case for Hatice test user - force backend login
-    if (email === 'hatice@test.com' && password === '123456') {
-      console.log('🔄 Hatice test user detected, skipping localStorage fallback');
-      return false; // Force using backend API
-    }
-    
-    if (user && user.isActive) {
-      dispatch({ type: 'LOGIN', payload: { user } });
-      return true;
-    }
-    return false;
   };
   
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
     try {
-      // Try backend API register first
+      console.log('📝 Attempting backend registration for:', email);
+      
+      // Only use backend API - no localStorage fallback
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -1299,7 +1267,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         
         // Save auth token for API calls
         localStorage.setItem('auth_token', token);
-        console.log('🔑 Backend register successful');
+        console.log('✅ Backend registration successful');
         console.log('👤 Backend user data:', user);
         console.log('🔒 JWT token saved');
         
@@ -1308,51 +1276,31 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         return true;
       } else {
         const errorData = await response.json();
-        console.log('❌ Backend register failed:', errorData.error);
-        
-        // If user already exists on backend, return false
-        if (response.status === 400 && errorData.error?.includes('already exists')) {
-          return false;
-        }
+        console.log('❌ Backend registration failed:', errorData.error);
+        return false;
       }
-    } catch (error) {
-      console.log('🔄 Backend register failed, falling back to localStorage:', error);
+    } catch (error: any) {
+      console.log('💥 Backend registration error:', error.message);
+      return false;
     }
-
-    // Fallback to localStorage for backward compatibility
-    const users = loadUsers();
-    const existingUser = users.find(u => u.email === email);
-    
-    if (existingUser) {
-      return false; // User already exists
-    }
-    
-    const newUser: User = {
-      id: generateUniqueId(),
-      email,
-      name,
-      createdAt: new Date().toISOString(),
-      isActive: true,
-      isAdmin: false,
-      subscriptionType: 'free',
-      maxProjects: 2,
-      maxTables: 5,
-    };
-    
-    // Save user to localStorage
-    const updatedUsers = [...users, newUser];
-    saveUsers(updatedUsers);
-    
-    // Then dispatch to update state
-    dispatch({ type: 'REGISTER', payload: { user: newUser } });
-    return true;
   };
   
   const logout = () => {
-    // Clear all auth-related localStorage data
+    // Clear ALL localStorage data to prevent fallback issues
     localStorage.removeItem('auth_token');
     localStorage.removeItem(STORAGE_KEY);
-    console.log('🔐 Logout: Cleared auth token and user data');
+    localStorage.removeItem(USERS_KEY);
+    localStorage.removeItem('all_projects');
+    
+    // Clear any user-specific project data
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('userProjects_') || key.startsWith('table_data_')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    console.log('🧹 Logout: Cleared all localStorage data including fallbacks');
     
     dispatch({ type: 'LOGOUT' });
   };
