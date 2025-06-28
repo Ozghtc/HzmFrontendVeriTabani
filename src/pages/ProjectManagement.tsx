@@ -38,6 +38,7 @@ const ProjectManagement = () => {
           console.log('✅ Found project in frontend list:', frontendProject);
           setProject(frontendProject);
           dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
+          dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: frontendProject } });
           setLoading(false); // Show page immediately
           
           // 2. Then: Try to get updated data from backend (background update)
@@ -71,6 +72,7 @@ const ProjectManagement = () => {
         if (response.success && response.data) {
           console.log('✅ Project loaded from backend only:', response.data);
           setProject(response.data);
+          dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
           dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: response.data } });
         } else {
           console.error('❌ Project not found anywhere');
