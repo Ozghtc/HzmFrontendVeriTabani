@@ -35,41 +35,17 @@ const ProjectManagement = () => {
         if (response.success && response.data) {
           console.log('✅ Project loaded successfully:', response.data);
           setProject(response.data);
+          
+          // Set selected project in state with full project data
+          dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: response.data } });
         } else {
           console.error('❌ Backend project fetch failed:', response.error, response);
-          throw new Error(response.error || 'Failed to fetch project');
+          setError(response.error || 'Failed to fetch project from backend');
         }
         
-        // Set selected project in state with full project data
-        dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: response.data } });
-        
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to load project from backend:', error);
-        
-        // Fallback to localStorage
-        console.log('Falling back to localStorage...');
-        console.log('Looking for project ID:', projectId, '(type:', typeof projectId, ')');
-        console.log('Available projects in state:', state.projects.map(p => ({ id: p.id, name: p.name, type: typeof p.id })));
-        
-        // Try to find in state.projects first (check both string and number versions)
-        let localProject = state.projects.find(p => p.id === projectId || p.id === parseInt(projectId) || p.id.toString() === projectId);
-        
-        // If not found, try all_projects localStorage
-        if (!localProject) {
-          const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-          console.log('Checking localStorage projects:', allProjects.map((p: any) => ({ id: p.id, name: p.name, type: typeof p.id })));
-          localProject = allProjects.find((p: any) => p.id === projectId || p.id === parseInt(projectId) || p.id.toString() === projectId);
-        }
-        
-        if (localProject) {
-          console.log('✅ Found project in localStorage:', localProject);
-          setProject(localProject);
-          dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
-        } else {
-          console.log('❌ Project not found anywhere. Requested ID:', projectId);
-          console.log('Available IDs:', state.projects.map(p => p.id));
-          setError(`Proje bulunamadı (ID: ${projectId})`);
-        }
+        setError(error.message || 'Network error - could not connect to backend');
       } finally {
         setLoading(false);
       }
