@@ -311,7 +311,7 @@ class ApiClient {
     description?: string;
   }) {
     console.log('🔧 Adding field to table:', tableId, 'in project:', projectId);
-    const result = await this.request(`/tables/${projectId}/tables/${tableId}/fields`, {
+    const result = await this.request(`/tables/${projectId}/${tableId}/fields`, {
       method: 'POST',
       body: JSON.stringify(fieldData),
     });
