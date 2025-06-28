@@ -1,28 +1,103 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDatabase } from '../../context/DatabaseContext';
 import { PlusCircle, Table, Trash2, AlertTriangle } from 'lucide-react';
+import { apiClient } from '../../utils/api';
 
 const TablePanel: React.FC = () => {
   const { state, dispatch } = useDatabase();
   const [newTableName, setNewTableName] = useState('');
   const [deletingTable, setDeletingTable] = useState<string | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [tables, setTables] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
   
-  const handleAddTable = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newTableName.trim() && state.selectedProject) {
-      // Check if table name already exists
-      const tableExists = state.selectedProject.tables.some(
-        table => table.name.toLowerCase() === newTableName.trim().toLowerCase()
-      );
+  // Load tables when project changes
+  useEffect(() => {
+    if (state.selectedProject?.id) {
+      loadTables();
+    } else {
+      setTables([]);
+    }
+  }, [state.selectedProject?.id]);
+
+  const loadTables = async () => {
+    if (!state.selectedProject?.id) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
       
-      if (tableExists) {
-        alert('Bu isimde bir tablo zaten mevcut. Lütfen farklı bir isim seçin.');
-        return;
+      console.log('📋 Loading tables for project:', state.selectedProject.id);
+      
+      const response = await apiClient.getTables(state.selectedProject.id.toString());
+      
+      if (response.success && response.data?.tables) {
+        console.log('✅ Tables loaded:', response.data.tables);
+        setTables(response.data.tables);
+      } else {
+        console.error('❌ Failed to load tables:', response.error);
+        setError(response.error || 'Failed to load tables');
+        setTables([]);
       }
+    } catch (error) {
+      console.error('💥 Error loading tables:', error);
+      setError('Network error while loading tables');
+      setTables([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleAddTable = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTableName.trim() || !state.selectedProject?.id || loading) return;
+    
+    // Check if table name already exists (client-side check)
+    const tableExists = tables.some(
+      table => table.name.toLowerCase() === newTableName.trim().toLowerCase()
+    );
+    
+    if (tableExists) {
+      alert('Bu isimde bir tablo zaten mevcut. Lütfen farklı bir isim seçin.');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError(null);
       
-      dispatch({ type: 'ADD_TABLE', payload: { name: newTableName.trim() } });
-      setNewTableName('');
+      console.log('📝 Creating table:', newTableName, 'for project:', state.selectedProject.id);
+      
+      const response = await apiClient.createTable(state.selectedProject.id.toString(), {
+        name: newTableName.trim(),
+        fields: []
+      });
+      
+      if (response.success && response.data?.table) {
+        console.log('✅ Table created:', response.data.table);
+        setNewTableName('');
+        
+        // Reload tables to get fresh data
+        await loadTables();
+        
+        // Update local state for immediate UI response
+        dispatch({ 
+          type: 'ADD_TABLE', 
+          payload: { 
+            name: response.data.table.name,
+            id: response.data.table.id 
+          } 
+        });
+      } else {
+        console.error('❌ Failed to create table:', response.error);
+        alert(response.error || 'Failed to create table');
+      }
+    } catch (error) {
+      console.error('💥 Error creating table:', error);
+      alert('Network error while creating table');
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -35,14 +110,43 @@ const TablePanel: React.FC = () => {
     setDeleteConfirmName('');
   };
 
-  const confirmDeleteTable = () => {
-    if (deletingTable && state.selectedProject) {
-      const tableToDelete = state.selectedProject.tables.find(t => t.id === deletingTable);
-      if (tableToDelete && deleteConfirmName === tableToDelete.name) {
+  const confirmDeleteTable = async () => {
+    if (!deletingTable || !state.selectedProject?.id || loading) return;
+    
+    const tableToDelete = tables.find(t => t.id.toString() === deletingTable);
+    if (!tableToDelete || deleteConfirmName !== tableToDelete.name) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('🗑️ Deleting table:', deletingTable, 'from project:', state.selectedProject.id);
+      
+      const response = await apiClient.deleteTable(
+        state.selectedProject.id.toString(), 
+        deletingTable
+      );
+      
+      if (response.success) {
+        console.log('✅ Table deleted:', response.data);
+        
+        // Update local state
         dispatch({ type: 'DELETE_TABLE', payload: { tableId: deletingTable } });
+        
+        // Reload tables
+        await loadTables();
+        
         setDeletingTable(null);
         setDeleteConfirmName('');
+      } else {
+        console.error('❌ Failed to delete table:', response.error);
+        alert(response.error || 'Failed to delete table');
       }
+    } catch (error) {
+      console.error('💥 Error deleting table:', error);
+      alert('Network error while deleting table');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,7 +156,7 @@ const TablePanel: React.FC = () => {
   };
   
   // Determine if the panel should be disabled
-  const isPanelDisabled = !state.selectedProject;
+  const isPanelDisabled = !state.selectedProject || loading;
   
   return (
     <>
@@ -65,7 +169,22 @@ const TablePanel: React.FC = () => {
               ({state.selectedProject.name})
             </span>
           )}
+          {loading && (
+            <div className="ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
+          )}
         </h2>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            <p className="text-sm">{error}</p>
+            <button 
+              onClick={loadTables}
+              className="mt-2 text-sm underline hover:no-underline"
+            >
+              Tekrar Dene
+            </button>
+          </div>
+        )}
         
         <form onSubmit={handleAddTable} className="mb-4">
           <div className="flex gap-2">
@@ -87,7 +206,7 @@ const TablePanel: React.FC = () => {
               disabled={isPanelDisabled}
             >
               <PlusCircle size={16} className="mr-1" />
-              Ekle
+              {loading ? 'Ekliyor...' : 'Ekle'}
             </button>
           </div>
         </form>
@@ -97,17 +216,21 @@ const TablePanel: React.FC = () => {
             <p className="text-gray-500 text-sm italic text-center py-4">
               Lütfen önce bir proje seçin.
             </p>
-          ) : state.selectedProject.tables.length === 0 ? (
+          ) : loading && tables.length === 0 ? (
+            <p className="text-gray-500 text-sm italic text-center py-4">
+              Tablolar yükleniyor...
+            </p>
+          ) : tables.length === 0 ? (
             <p className="text-gray-500 text-sm italic text-center py-4">
               Bu projede henüz hiç tablo yok. İlk tablonuzu ekleyin.
             </p>
           ) : (
             <div className="space-y-2">
-              {state.selectedProject.tables.map((table) => (
+              {tables.map((table) => (
                 <div
                   key={table.id}
                   className={`panel-item p-3 rounded-md border border-gray-100 hover:border-teal-200 hover:bg-teal-50 group ${
-                    state.selectedTable?.id === table.id
+                    state.selectedTable?.id === table.id.toString()
                       ? 'selected bg-teal-100 border-teal-300 font-medium'
                       : ''
                   }`}
@@ -115,20 +238,21 @@ const TablePanel: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <div 
                       className="flex-1 cursor-pointer"
-                      onClick={() => handleSelectTable(table.id)}
+                      onClick={() => handleSelectTable(table.id.toString())}
                     >
                       <div className="flex justify-between items-center">
                         <span>{table.name}</span>
-                        <span className="text-xs text-gray-500">{table.fields.length} alan</span>
+                        <span className="text-xs text-gray-500">{table.fields?.length || 0} alan</span>
                       </div>
                     </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteTable(table.id, table.name);
+                        handleDeleteTable(table.id.toString(), table.name);
                       }}
                       className="ml-2 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                       title="Tabloyu Sil"
+                      disabled={loading}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -151,7 +275,7 @@ const TablePanel: React.FC = () => {
             
             <div className="mb-6">
               {(() => {
-                const tableToDelete = state.selectedProject?.tables.find(t => t.id === deletingTable);
+                const tableToDelete = tables.find(t => t.id.toString() === deletingTable);
                 return (
                   <>
                     <p className="text-gray-600 mb-4">
@@ -162,8 +286,8 @@ const TablePanel: React.FC = () => {
                       <p className="text-sm font-medium text-gray-700 mb-2">Silinecek tablo bilgileri:</p>
                       <div className="text-sm text-gray-600">
                         <div><strong>Tablo Adı:</strong> {tableToDelete?.name}</div>
-                        <div><strong>Alan Sayısı:</strong> {tableToDelete?.fields.length}</div>
-                        <div><strong>Alanlar:</strong> {tableToDelete?.fields.map(f => f.name).join(', ') || 'Henüz alan yok'}</div>
+                        <div><strong>Alan Sayısı:</strong> {tableToDelete?.fields?.length || 0}</div>
+                        <div><strong>Alanlar:</strong> {tableToDelete?.fields?.map((f: any) => f.name).join(', ') || 'Henüz alan yok'}</div>
                       </div>
                     </div>
                     
@@ -181,6 +305,7 @@ const TablePanel: React.FC = () => {
                         onChange={(e) => setDeleteConfirmName(e.target.value)}
                         placeholder={tableToDelete?.name}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                        disabled={loading}
                       />
                     </div>
                   </>
@@ -192,19 +317,20 @@ const TablePanel: React.FC = () => {
               <button
                 onClick={cancelDeleteTable}
                 className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                disabled={loading}
               >
                 İptal
               </button>
               <button
                 onClick={confirmDeleteTable}
                 disabled={(() => {
-                  const tableToDelete = state.selectedProject?.tables.find(t => t.id === deletingTable);
-                  return deleteConfirmName !== tableToDelete?.name;
+                  const tableToDelete = tables.find(t => t.id.toString() === deletingTable);
+                  return deleteConfirmName !== tableToDelete?.name || loading;
                 })()}
                 className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
                 <Trash2 size={16} className="mr-2" />
-                Tabloyu Sil
+                {loading ? 'Siliniyor...' : 'Tabloyu Sil'}
               </button>
             </div>
           </div>

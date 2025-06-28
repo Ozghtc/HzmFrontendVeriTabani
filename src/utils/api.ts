@@ -279,13 +279,26 @@ class ApiClient {
 
   // Table endpoints
   async getTables(projectId: string) {
-    return this.request(`/projects/${projectId}/tables`);
+    return this.request(`/tables/${projectId}`);
   }
 
   async createTable(projectId: string, tableData: any) {
-    return this.request(`/projects/${projectId}/tables`, {
+    return this.request(`/tables/${projectId}`, {
       method: 'POST',
       body: JSON.stringify(tableData),
+    });
+  }
+
+  async updateTable(projectId: string, tableId: string, tableData: any) {
+    return this.request(`/tables/${projectId}/${tableId}`, {
+      method: 'PUT',
+      body: JSON.stringify(tableData),
+    });
+  }
+
+  async deleteTable(projectId: string, tableId: string) {
+    return this.request(`/tables/${projectId}/${tableId}`, {
+      method: 'DELETE',
     });
   }
 
