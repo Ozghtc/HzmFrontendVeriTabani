@@ -71,6 +71,20 @@ export const useApiProjects = () => {
     }
   };
 
+  // Clean up localStorage to only keep backend-verified projects
+  const syncLocalStorageWithBackend = (backendProjects: Project[]) => {
+    const currentUserId = getCurrentUserId();
+    const userProjectsKey = getUserProjectsKey(currentUserId);
+    
+    try {
+      // Only store projects that exist in backend
+      localStorage.setItem(userProjectsKey, JSON.stringify(backendProjects));
+      console.log('💾 LocalStorage synced with backend projects only');
+    } catch (e) {
+      console.log('❌ Failed to sync localStorage with backend');
+    }
+  };
+
   const fetchProjects = async () => {
     setLoading(true);
     setError(null);
@@ -92,10 +106,9 @@ export const useApiProjects = () => {
         console.log('🔍 Backend project IDs:', projects.map((p: any) => ({ id: p.id, name: p.name, type: typeof p.id })));
         setProjects(projects);
         
-        // Save to user-specific localStorage for fallback
-        const userProjectsKey = getUserProjectsKey(currentUserId);
-        localStorage.setItem(userProjectsKey, JSON.stringify(projects));
-        console.log('💾 Projects synced to localStorage:', userProjectsKey);
+        // Sync localStorage with backend projects only (removes non-backend projects)
+        syncLocalStorageWithBackend(projects);
+        console.log('💾 Projects synced to localStorage:', getUserProjectsKey(currentUserId));
       } else {
         console.log('❌ Backend projects API failed, falling back to localStorage');
         // Fallback to user-specific localStorage
@@ -235,12 +248,19 @@ export const useApiProjects = () => {
 
   // Auto-fetch on mount if user is authenticated
   useEffect(() => {
+    // Clean up any old project data on mount
+    cleanupLocalStorage();
+    
     const token = localStorage.getItem('auth_token');
     if (token) {
       fetchProjects();
     } else {
-      // No token means user logged out, clear projects
+      // No token means user logged out, clear projects and localStorage
       setProjects([]);
+      const currentUserId = getCurrentUserId();
+      const userProjectsKey = getUserProjectsKey(currentUserId);
+      localStorage.removeItem(userProjectsKey);
+      console.log('🧹 Cleared localStorage on logout');
     }
   }, []);
 
