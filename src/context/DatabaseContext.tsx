@@ -516,6 +516,29 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
       };
       break;
     }
+    case 'SET_PROJECT_TABLES': {
+      if (!state.selectedProject || state.selectedProject.id !== action.payload.projectId) {
+        return state;
+      }
+      
+      const updatedSelectedProject = {
+        ...state.selectedProject,
+        tables: action.payload.tables
+      };
+      
+      const updatedProjects = state.projects.map(project => 
+        project.id === action.payload.projectId 
+          ? updatedSelectedProject
+          : project
+      );
+      
+      newState = {
+        ...state,
+        projects: updatedProjects,
+        selectedProject: updatedSelectedProject,
+      };
+      break;
+    }
     case 'ADD_API_KEY': {
       if (!state.user) return state;
       
@@ -626,7 +649,7 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
       }
       
       const newTable: Table = {
-        id: generateUniqueId(),
+        id: action.payload.id || generateUniqueId(),
         name: action.payload.name.trim(),
         fields: [],
       };
@@ -662,7 +685,6 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
         ...state,
         projects: cleanDuplicates(updatedProjects),
         selectedProject: updatedSelectedProject,
-        selectedTable: newTable,
       };
       break;
     }

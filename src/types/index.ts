@@ -180,7 +180,8 @@ export type DatabaseAction =
   | { type: 'UPDATE_PROJECT'; payload: { projectId: string; name?: string; description?: string; settings?: Partial<Project['settings']> } }
   | { type: 'SELECT_PROJECT'; payload: { projectId: string } }
   | { type: 'SET_SELECTED_PROJECT'; payload: { project: Project } }
-  | { type: 'ADD_TABLE'; payload: { name: string } }
+  | { type: 'SET_PROJECT_TABLES'; payload: { projectId: string; tables: Table[] } }
+  | { type: 'ADD_TABLE'; payload: { name: string; id?: string } }
   | { type: 'DELETE_TABLE'; payload: { tableId: string } }
   | { type: 'SELECT_TABLE'; payload: { tableId: string } }
   | { type: 'ADD_FIELD'; payload: { name: string; type: string; required: boolean; validation?: FieldValidation; description?: string } }

@@ -9,15 +9,12 @@ const TablePanel: React.FC = () => {
   const [deletingTable, setDeletingTable] = useState<string | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [tables, setTables] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   
   // Load tables when project changes
   useEffect(() => {
     if (state.selectedProject?.id) {
       loadTables();
-    } else {
-      setTables([]);
     }
   }, [state.selectedProject?.id]);
 
@@ -34,16 +31,26 @@ const TablePanel: React.FC = () => {
       
       if (response.success && response.data?.tables) {
         console.log('✅ Tables loaded:', response.data.tables);
-        setTables(response.data.tables);
+        
+        // Update DatabaseContext with tables from backend
+        dispatch({ 
+          type: 'SET_PROJECT_TABLES', 
+          payload: { 
+            projectId: state.selectedProject.id,
+            tables: response.data.tables.map((table: any) => ({
+              id: table.id.toString(),
+              name: table.name,
+              fields: table.fields || []
+            }))
+          } 
+        });
       } else {
         console.error('❌ Failed to load tables:', response.error);
         setError(response.error || 'Failed to load tables');
-        setTables([]);
       }
     } catch (error) {
       console.error('💥 Error loading tables:', error);
       setError('Network error while loading tables');
-      setTables([]);
     } finally {
       setLoading(false);
     }
@@ -54,7 +61,7 @@ const TablePanel: React.FC = () => {
     if (!newTableName.trim() || !state.selectedProject?.id || loading) return;
     
     // Check if table name already exists (client-side check)
-    const tableExists = tables.some(
+    const tableExists = (state.selectedProject.tables || []).some(
       table => table.name.toLowerCase() === newTableName.trim().toLowerCase()
     );
     
@@ -78,17 +85,17 @@ const TablePanel: React.FC = () => {
         console.log('✅ Table created:', response.data.table);
         setNewTableName('');
         
-        // Reload tables to get fresh data
-        await loadTables();
-        
-        // Update local state for immediate UI response
+        // Update local state with backend response
         dispatch({ 
           type: 'ADD_TABLE', 
           payload: { 
             name: response.data.table.name,
-            id: response.data.table.id 
+            id: response.data.table.id.toString()
           } 
         });
+        
+        // Reload tables to get fresh data
+        await loadTables();
       } else {
         console.error('❌ Failed to create table:', response.error);
         alert(response.error || 'Failed to create table');
@@ -102,6 +109,7 @@ const TablePanel: React.FC = () => {
   };
   
   const handleSelectTable = (tableId: string) => {
+    console.log('🎯 Selecting table:', tableId);
     dispatch({ type: 'SELECT_TABLE', payload: { tableId } });
   };
 
@@ -113,6 +121,7 @@ const TablePanel: React.FC = () => {
   const confirmDeleteTable = async () => {
     if (!deletingTable || !state.selectedProject?.id || loading) return;
     
+    const tables = state.selectedProject.tables || [];
     const tableToDelete = tables.find(t => t.id.toString() === deletingTable);
     if (!tableToDelete || deleteConfirmName !== tableToDelete.name) return;
     
@@ -157,6 +166,9 @@ const TablePanel: React.FC = () => {
   
   // Determine if the panel should be disabled
   const isPanelDisabled = !state.selectedProject || loading;
+  
+  // Get tables from context
+  const tables = state.selectedProject?.tables || [];
   
   return (
     <>
@@ -295,24 +307,23 @@ const TablePanel: React.FC = () => {
                       ⚠️ Bu işlem geri alınamaz! Tablonun tüm alanları ve verileri silinecektir.
                     </p>
                     
-                    <div>
+                    <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Onaylamak için tablo adını tam olarak yazın: <strong>{tableToDelete?.name}</strong>
+                        Silmek için tablo adını yazın: <strong>{tableToDelete?.name}</strong>
                       </label>
                       <input
                         type="text"
                         value={deleteConfirmName}
                         onChange={(e) => setDeleteConfirmName(e.target.value)}
-                        placeholder={tableToDelete?.name}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                        disabled={loading}
+                        placeholder="Tablo adını buraya yazın"
+                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                       />
                     </div>
                   </>
                 );
               })()}
             </div>
-
+            
             <div className="flex justify-end space-x-3">
               <button
                 onClick={cancelDeleteTable}
@@ -323,13 +334,13 @@ const TablePanel: React.FC = () => {
               </button>
               <button
                 onClick={confirmDeleteTable}
-                disabled={(() => {
-                  const tableToDelete = tables.find(t => t.id.toString() === deletingTable);
-                  return deleteConfirmName !== tableToDelete?.name || loading;
-                })()}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                className={`px-4 py-2 rounded-md ${
+                  deleteConfirmName === tables.find(t => t.id.toString() === deletingTable)?.name && !loading
+                    ? 'bg-red-600 text-white hover:bg-red-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                disabled={deleteConfirmName !== tables.find(t => t.id.toString() === deletingTable)?.name || loading}
               >
-                <Trash2 size={16} className="mr-2" />
                 {loading ? 'Siliniyor...' : 'Tabloyu Sil'}
               </button>
             </div>

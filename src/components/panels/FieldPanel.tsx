@@ -902,7 +902,7 @@ const FieldPanel: React.FC = () => {
   };
   
   const isPanelDisabled = !state.selectedProject || !state.selectedTable;
-  const hasFields = state.selectedTable?.fields.length > 0;
+  const hasFields = (state.selectedTable?.fields?.length || 0) > 0;
   
   return (
     <>
@@ -912,7 +912,7 @@ const FieldPanel: React.FC = () => {
           Alanlar
           {state.selectedTable && (
             <span className="ml-2 text-sm font-normal text-gray-500">
-              ({state.selectedTable.name})
+              ({state.selectedTable?.name || 'Bilinmeyen Tablo'})
             </span>
           )}
         </h2>
@@ -1013,7 +1013,7 @@ const FieldPanel: React.FC = () => {
             <p className="text-gray-500 text-sm italic text-center py-4">
               Lütfen önce bir tablo seçin.
             </p>
-          ) : state.selectedTable.fields.length === 0 ? (
+          ) : (state.selectedTable?.fields?.length || 0) === 0 ? (
             <p className="text-gray-500 text-sm italic text-center py-4">
               Bu tabloda henüz hiç alan yok. İlk alanınızı ekleyin.
             </p>
