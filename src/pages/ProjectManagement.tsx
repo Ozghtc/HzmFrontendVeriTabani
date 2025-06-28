@@ -33,8 +33,10 @@ const ProjectManagement = () => {
         console.log('Backend project response:', response);
         
         if (response.success && response.data) {
+          console.log('✅ Project loaded successfully:', response.data);
           setProject(response.data);
         } else {
+          console.error('❌ Backend project fetch failed:', response.error, response);
           throw new Error(response.error || 'Failed to fetch project');
         }
         
@@ -46,23 +48,27 @@ const ProjectManagement = () => {
         
         // Fallback to localStorage
         console.log('Falling back to localStorage...');
+        console.log('Looking for project ID:', projectId, '(type:', typeof projectId, ')');
+        console.log('Available projects in state:', state.projects.map(p => ({ id: p.id, name: p.name, type: typeof p.id })));
         
-        // Try to find in state.projects first
-        let localProject = state.projects.find(p => p.id === projectId);
+        // Try to find in state.projects first (check both string and number versions)
+        let localProject = state.projects.find(p => p.id === projectId || p.id === parseInt(projectId) || p.id.toString() === projectId);
         
         // If not found, try all_projects localStorage
         if (!localProject) {
           const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-          localProject = allProjects.find((p: any) => p.id === projectId);
+          console.log('Checking localStorage projects:', allProjects.map((p: any) => ({ id: p.id, name: p.name, type: typeof p.id })));
+          localProject = allProjects.find((p: any) => p.id === projectId || p.id === parseInt(projectId) || p.id.toString() === projectId);
         }
         
         if (localProject) {
-          console.log('Found project in localStorage:', localProject);
+          console.log('✅ Found project in localStorage:', localProject);
           setProject(localProject);
           dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
         } else {
-          console.log('Project not found in localStorage either');
-          setError('Proje bulunamadı');
+          console.log('❌ Project not found anywhere. Requested ID:', projectId);
+          console.log('Available IDs:', state.projects.map(p => p.id));
+          setError(`Proje bulunamadı (ID: ${projectId})`);
         }
       } finally {
         setLoading(false);
