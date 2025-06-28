@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDatabase } from '../context/DatabaseContext';
+import { useApiProjects } from '../hooks/useApiProjects';
 import { ArrowLeft, Key, Settings, Database } from 'lucide-react';
 import TablePanel from '../components/panels/TablePanel';
 import FieldPanel from '../components/panels/FieldPanel';
@@ -11,6 +12,7 @@ const ProjectManagement = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { state, dispatch } = useDatabase();
+  const { projects } = useApiProjects();
   const [activeTab, setActiveTab] = useState<'tables' | 'api' | 'settings'>('tables');
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -40,12 +42,30 @@ const ProjectManagement = () => {
           dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: response.data } });
         } else {
           console.error('❌ Backend project fetch failed:', response.error, response);
-          setError(response.error || 'Failed to fetch project from backend');
+          // Fallback: Use project from frontend projects list
+          console.log('🔄 Falling back to frontend projects list...');
+          const frontendProject = projects.find(p => p.id.toString() === projectId);
+          if (frontendProject) {
+            console.log('✅ Found project in frontend list:', frontendProject);
+            setProject(frontendProject);
+            dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
+          } else {
+            setError(response.error || 'Failed to fetch project from backend');
+          }
         }
         
       } catch (error: any) {
         console.error('Failed to load project from backend:', error);
-        setError(error.message || 'Network error - could not connect to backend');
+        // Fallback: Use project from frontend projects list
+        console.log('🔄 Network error, falling back to frontend projects list...');
+        const frontendProject = projects.find(p => p.id.toString() === projectId);
+        if (frontendProject) {
+          console.log('✅ Found project in frontend list:', frontendProject);
+          setProject(frontendProject);
+          dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
+        } else {
+          setError(error.message || 'Network error - could not connect to backend');
+        }
       } finally {
         setLoading(false);
       }
