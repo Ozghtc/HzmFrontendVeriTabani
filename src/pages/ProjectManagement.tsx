@@ -29,13 +29,17 @@ const ProjectManagement = () => {
         setError(null);
 
         // Try to get project from backend API first
-        const projectData = await apiClient.getProject(projectId);
-        console.log('Backend project data:', projectData);
+        const response = await apiClient.getProject(projectId);
+        console.log('Backend project response:', response);
         
-        setProject(projectData);
+        if (response.success && response.data) {
+          setProject(response.data);
+        } else {
+          throw new Error(response.error || 'Failed to fetch project');
+        }
         
         // Set selected project in state with full project data
-        dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: projectData } });
+        dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: response.data } });
         
       } catch (error) {
         console.error('Failed to load project from backend:', error);
@@ -262,7 +266,7 @@ const ProjectManagement = () => {
                       </div>
                       <input
                         type="checkbox"
-                        checked={project.settings.allowApiAccess}
+                        checked={project.settings?.allowApiAccess || false}
                         onChange={(e) => {
                           dispatch({
                             type: 'UPDATE_PROJECT',
@@ -283,7 +287,7 @@ const ProjectManagement = () => {
                       </div>
                       <input
                         type="checkbox"
-                        checked={project.settings.requireAuth}
+                        checked={project.settings?.requireAuth || false}
                         onChange={(e) => {
                           dispatch({
                             type: 'UPDATE_PROJECT',
@@ -303,7 +307,7 @@ const ProjectManagement = () => {
                       </label>
                       <input
                         type="number"
-                        value={project.settings.maxRequestsPerMinute}
+                        value={project.settings?.maxRequestsPerMinute || 100}
                         onChange={(e) => {
                           dispatch({
                             type: 'UPDATE_PROJECT',
@@ -326,7 +330,7 @@ const ProjectManagement = () => {
                       </div>
                       <input
                         type="checkbox"
-                        checked={project.settings.enableWebhooks}
+                        checked={project.settings?.enableWebhooks || false}
                         onChange={(e) => {
                           dispatch({
                             type: 'UPDATE_PROJECT',
@@ -340,14 +344,14 @@ const ProjectManagement = () => {
                       />
                     </div>
 
-                    {project.settings.enableWebhooks && (
+                    {project.settings?.enableWebhooks && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Webhook URL
                         </label>
                         <input
                           type="url"
-                          value={project.settings.webhookUrl || ''}
+                          value={project.settings?.webhookUrl || ''}
                           onChange={(e) => {
                             dispatch({
                               type: 'UPDATE_PROJECT',
@@ -378,12 +382,12 @@ const ProjectManagement = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Tablo Sayısı:</span>
-                      <span className="text-gray-800">{project.tables.length}</span>
+                      <span className="text-gray-800">{project.tables?.length || project.tableCount || 0}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Toplam Alan:</span>
                       <span className="text-gray-800">
-                        {project.tables.reduce((total, table) => total + table.fields.length, 0)}
+                        {project.tables?.reduce((total: number, table: any) => total + (table.fields?.length || 0), 0) || 0}
                       </span>
                     </div>
                   </div>
