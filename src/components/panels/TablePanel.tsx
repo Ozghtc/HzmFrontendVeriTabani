@@ -11,12 +11,13 @@ const TablePanel: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Load tables when project changes
+  // Load tables when project changes - with better dependency control
   useEffect(() => {
     if (state.selectedProject?.id) {
+      console.log('🔄 TablePanel: Project changed, loading tables for:', state.selectedProject.id);
       loadTables();
     }
-  }, [state.selectedProject?.id]);
+  }, [state.selectedProject?.id]); // Keep this dependency but make it more specific
 
   const loadTables = async () => {
     if (!state.selectedProject?.id) return;

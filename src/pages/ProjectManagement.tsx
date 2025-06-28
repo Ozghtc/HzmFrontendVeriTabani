@@ -88,7 +88,7 @@ const ProjectManagement = () => {
     };
 
     loadProject();
-  }, [projectId, dispatch, state.projects, projects, projectsLoading]);
+  }, [projectId]); // ONLY projectId dependency to prevent infinite loop
 
   // Proje sahibini bul (önce backend'den, yoksa localStorage'dan)
   let projectOwner = null;

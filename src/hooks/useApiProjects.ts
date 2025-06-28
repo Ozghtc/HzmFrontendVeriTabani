@@ -125,9 +125,9 @@ export const useApiProjects = () => {
       setProjects([]);
       console.log('🔐 No auth token, clearing projects');
     }
-  }, []);
+  }, []); // Empty dependency array - only run on mount
 
-  // Clear projects when auth token changes (login/logout) or user changes
+  // Clear projects when auth token changes (login/logout)
   useEffect(() => {
     const handleStorageChange = () => {
       const token = localStorage.getItem('auth_token');
@@ -140,22 +140,13 @@ export const useApiProjects = () => {
       }
     };
 
-    // Also refetch when user changes
-    if (state.isAuthenticated && state.user) {
-      fetchProjects();
-      console.log('👤 User changed, refetching projects');
-    } else if (!state.isAuthenticated) {
-      setProjects([]);
-      console.log('👤 User logged out, clearing projects');
-    }
-
     // Listen for localStorage changes
     window.addEventListener('storage', handleStorageChange);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [state.user, state.isAuthenticated]);
+  }, []); // Empty dependency array - only setup listener once
 
   return {
     projects,
