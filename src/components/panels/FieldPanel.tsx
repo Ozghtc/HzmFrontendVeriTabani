@@ -35,6 +35,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FieldValidation, FieldRelationship, Field } from '../../types';
+import { apiClient } from '../../utils/api';
 
 const dataTypes = [
   { value: 'string', label: 'Metin (String)', icon: '📝' },
@@ -716,6 +717,8 @@ const FieldPanel: React.FC = () => {
     relationshipType: 'one-to-many' as 'one-to-one' | 'one-to-many' | 'many-to-many',
     cascadeDelete: false,
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -741,27 +744,65 @@ const FieldPanel: React.FC = () => {
     }
   };
   
-  const handleAddField = (e: React.FormEvent) => {
+  const handleAddField = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newField.name.trim() && state.selectedProject && state.selectedTable) {
-      dispatch({
-        type: 'ADD_FIELD',
-        payload: {
-          name: newField.name,
-          type: newField.type,
-          required: newField.required,
-          validation: Object.keys(validation).length > 0 ? validation : undefined,
-          description: newField.description.trim() || undefined,
-        },
-      });
-      setNewField({
-        name: '',
-        type: 'string',
-        required: false,
-        description: '',
-      });
-      setValidation({});
-      setShowAdvanced(false);
+    if (!newField.name.trim() || !state.selectedProject || !state.selectedTable) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('🔧 Adding field to backend:', newField.name);
+      
+      const fieldData = {
+        name: newField.name.trim(),
+        type: newField.type,
+        required: newField.required,
+        validation: Object.keys(validation).length > 0 ? validation : undefined,
+        description: newField.description.trim() || undefined,
+      };
+      
+      const response = await apiClient.addField(
+        state.selectedProject.id, 
+        state.selectedTable.id, 
+        fieldData
+      );
+      
+      if (response.success) {
+        console.log('✅ Field added to backend successfully');
+        
+        // Update local state with the field data we sent
+        dispatch({
+          type: 'ADD_FIELD',
+          payload: {
+            name: fieldData.name,
+            type: fieldData.type,
+            required: fieldData.required,
+            validation: fieldData.validation,
+            description: fieldData.description,
+          },
+        });
+        
+        // Reset form
+        setNewField({
+          name: '',
+          type: 'string',
+          required: false,
+          description: '',
+        });
+        setValidation({});
+        setShowAdvanced(false);
+        
+      } else {
+        console.error('❌ Failed to add field:', response.error);
+        setError(response.error || 'Failed to add field');
+      }
+      
+    } catch (error) {
+      console.error('💥 Error adding field:', error);
+      setError('Network error while adding field');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -901,7 +942,7 @@ const FieldPanel: React.FC = () => {
     }
   };
   
-  const isPanelDisabled = !state.selectedProject || !state.selectedTable;
+  const isPanelDisabled = !state.selectedProject || !state.selectedTable || loading;
   const hasFields = (state.selectedTable?.fields?.length || 0) > 0;
   
   return (
@@ -916,6 +957,18 @@ const FieldPanel: React.FC = () => {
             </span>
           )}
         </h2>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            <p className="text-sm">{error}</p>
+            <button 
+              onClick={() => setError(null)}
+              className="mt-2 text-sm underline hover:no-underline"
+            >
+              Kapat
+            </button>
+          </div>
+        )}
         
         <form onSubmit={handleAddField} className="mb-4 space-y-3">
           <div>
@@ -996,14 +1049,14 @@ const FieldPanel: React.FC = () => {
             <button
               type="submit"
               className={`w-full py-2 px-4 rounded-md transition-colors flex items-center justify-center ${
-                isPanelDisabled
+                isPanelDisabled || loading
                   ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                   : 'bg-amber-600 text-white hover:bg-amber-700'
               }`}
-              disabled={isPanelDisabled}
+              disabled={isPanelDisabled || loading}
             >
               <PlusCircle size={16} className="mr-1" />
-              Alan Ekle
+              {loading ? 'Ekleniyor...' : 'Alan Ekle'}
             </button>
           </div>
         </form>

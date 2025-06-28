@@ -306,6 +306,121 @@ router.post('/:projectId/tables/api', validateUUID('projectId'), authenticateApi
   }
 });
 
+// Add field to existing table
+router.post('/:projectId/tables/:tableId/fields', validateUUID('projectId'), validateUUID('tableId'), authenticateToken, async (req, res) => {
+  try {
+    const { projectId, tableId } = req.params;
+    const { name, type, required = false, validation, description } = req.body;
+
+    // Check if project exists and belongs to user
+    const projectResult = await pool.query(
+      'SELECT id FROM projects WHERE id = $1 AND user_id = $2',
+      [projectId, req.user.id]
+    );
+
+    if (projectResult.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND'
+      });
+    }
+
+    // Get table
+    const tableResult = await pool.query(
+      'SELECT * FROM project_tables WHERE id = $1 AND project_id = $2',
+      [tableId, projectId]
+    );
+
+    if (tableResult.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Table not found',
+        code: 'TABLE_NOT_FOUND'
+      });
+    }
+
+    const table = tableResult.rows[0];
+    const currentFields = table.schema_definition.fields || [];
+    
+    // Check if field name already exists
+    const fieldExists = currentFields.some(
+      field => field.name.toLowerCase() === name.toLowerCase()
+    );
+    
+    if (fieldExists) {
+      return res.status(409).json({
+        error: 'Field name already exists in this table',
+        code: 'FIELD_NAME_EXISTS'
+      });
+    }
+
+    // Create new field
+    const newField = {
+      id: Date.now().toString(),
+      name: name.trim(),
+      type,
+      required,
+      validation: validation || undefined,
+      description: description || undefined,
+    };
+
+    // Add field to schema
+    const updatedFields = [...currentFields, newField];
+    const updatedSchema = {
+      ...table.schema_definition,
+      fields: updatedFields
+    };
+
+    const client = await pool.connect();
+    
+    try {
+      await client.query('BEGIN');
+
+      // Update table metadata
+      const result = await client.query(
+        'UPDATE project_tables SET schema_definition = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+        [JSON.stringify(updatedSchema), tableId]
+      );
+
+      // Add physical column if table has physical representation
+      try {
+        await TableManager.addColumn(projectId, table.name, newField);
+      } catch (columnError) {
+        console.warn('Could not add physical column:', columnError.message);
+        // Continue anyway, as metadata is more important
+      }
+
+      await client.query('COMMIT');
+
+      const updatedTable = result.rows[0];
+
+      res.status(201).json({
+        message: 'Field added successfully',
+        field: newField,
+        table: {
+          id: updatedTable.id,
+          name: updatedTable.name,
+          fields: updatedTable.schema_definition.fields || [],
+          createdAt: updatedTable.created_at,
+          updatedAt: updatedTable.updated_at
+        }
+      });
+
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+
+  } catch (error) {
+    console.error('Add field error:', error);
+    res.status(500).json({
+      error: 'Failed to add field',
+      code: 'ADD_FIELD_ERROR'
+    });
+  }
+});
+
 // Update table (add/remove fields)
 router.put('/:projectId/tables/:tableId', validateUUID('projectId'), validateUUID('tableId'), authenticateToken, async (req, res) => {
   try {

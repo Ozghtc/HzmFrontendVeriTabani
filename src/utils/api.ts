@@ -302,6 +302,29 @@ class ApiClient {
     });
   }
 
+  // Field endpoints
+  async addField(projectId: string, tableId: string, fieldData: {
+    name: string;
+    type: string;
+    required?: boolean;
+    validation?: any;
+    description?: string;
+  }) {
+    console.log('🔧 Adding field to table:', tableId, 'in project:', projectId);
+    const result = await this.request(`/tables/${projectId}/tables/${tableId}/fields`, {
+      method: 'POST',
+      body: JSON.stringify(fieldData),
+    });
+    
+    if (result.success) {
+      console.log('✅ Field added successfully');
+    } else {
+      console.log('❌ Field addition failed:', result.error);
+    }
+    
+    return result;
+  }
+
   // Data endpoints
   async getTableData(projectId: string, tableName: string, page = 1, limit = 50) {
     return this.request(`/projects/${projectId}/tables/${tableName}/data?page=${page}&limit=${limit}`);
