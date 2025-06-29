@@ -32,7 +32,15 @@ const ProjectManagement = () => {
 
         // 1. First: Try to get project from frontend projects list (fast)
         console.log('🚀 Looking for project in frontend list first...');
-        const frontendProject = projects.find(p => p.id.toString() === projectId);
+        console.log('🔍 Searching for projectId:', projectId, 'type:', typeof projectId);
+        console.log('📋 Available project IDs:', projects.map(p => ({ id: p.id, type: typeof p.id, name: p.name })));
+        
+        // Safe ID comparison - handle both string and number types
+        const parsedProjectId = Number(projectId);
+        const frontendProject = projects.find(p => {
+          // Try both numeric comparison and string comparison
+          return p.id === parsedProjectId || p.id.toString() === projectId;
+        });
         
         if (frontendProject) {
           console.log('✅ Found project in frontend list:', frontendProject);
