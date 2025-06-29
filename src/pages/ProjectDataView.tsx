@@ -30,12 +30,14 @@ const ProjectDataView = () => {
   const [editData, setEditData] = useState<{[key: string]: any}>({});
   const [newRowData, setNewRowData] = useState<{[key: string]: any}>({});
 
-  let project = state.projects.find(p => p.id === projectId);
+  // Safe ID comparison - handle both string and number types
+  const parsedProjectId = Number(projectId);
+  let project = state.projects.find(p => p.id === parsedProjectId);
 
   // Eğer admin ise ve proje bulunamazsa localStorage'dan ara
   if (!project && state.user?.isAdmin) {
     const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-    project = allProjects.find((p: any) => p.id === projectId);
+    project = allProjects.find((p: any) => p.id === parsedProjectId);
   }
 
   const currentTable = project?.tables.find(t => t.id === selectedTable);
