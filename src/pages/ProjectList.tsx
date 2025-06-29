@@ -369,11 +369,34 @@ const ProjectList = () => {
                         Veriler
                       </button>
                       <button
-                        onClick={() => navigate(`/projects/${project.id}`)}
-                        className="bg-teal-600 text-white px-3 py-2 rounded-md hover:bg-teal-700 transition-colors flex items-center justify-center text-sm font-medium"
+                        onClick={() => {
+                          console.log('🎯 Düzenle button clicked for project:', project.id);
+                          console.log('📊 Current state - projects count:', projects.length, 'loading:', loading);
+                          
+                          if (loading) {
+                            console.warn('⏳ Projects still loading, please wait...');
+                            showNotification('info', 'Projeler henüz yükleniyor, lütfen bekleyin...');
+                            return;
+                          }
+                          
+                          if (projects.length === 0) {
+                            console.warn('📭 No projects loaded yet, cannot navigate');
+                            showNotification('error', 'Projeler henüz yüklenmedi, lütfen sayfayı yenileyin.');
+                            return;
+                          }
+                          
+                          console.log('✅ Navigating to project:', project.id);
+                          navigate(`/projects/${project.id}`);
+                        }}
+                        disabled={loading || projects.length === 0}
+                        className={`px-3 py-2 rounded-md transition-colors flex items-center justify-center text-sm font-medium ${
+                          loading || projects.length === 0 
+                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                            : 'bg-teal-600 text-white hover:bg-teal-700'
+                        }`}
                       >
                         <Settings size={14} className="mr-1" />
-                        Düzenle
+                        {loading ? 'Yükleniyor...' : 'Düzenle'}
                       </button>
                       <button
                         onClick={() => {
