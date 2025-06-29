@@ -176,6 +176,7 @@ export type DatabaseAction =
   | { type: 'LOGIN'; payload: { user: User } }
   | { type: 'LOGOUT' }
   | { type: 'REGISTER'; payload: { user: User } }
+  | { type: 'SET_PROJECTS'; payload: { projects: Project[] } }
   | { type: 'ADD_PROJECT'; payload: { name: string; description?: string } }
   | { type: 'UPDATE_PROJECT'; payload: { projectId: string; name?: string; description?: string; settings?: Partial<Project['settings']> } }
   | { type: 'SELECT_PROJECT'; payload: { projectId: string } }

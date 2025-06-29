@@ -20,7 +20,7 @@ export const useApiProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { state } = useDatabase();
+  const { state, dispatch } = useDatabase();
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -31,6 +31,8 @@ export const useApiProjects = () => {
     if (!token) {
       console.log('❌ No auth token found');
       setProjects([]);
+      // Also clear DatabaseContext projects
+      dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
       setError('Authentication required');
       setLoading(false);
       return;
@@ -46,16 +48,23 @@ export const useApiProjects = () => {
         const projects = (response.data as any).projects || [];
         console.log('✅ Projects loaded from backend:', projects.length, 'projects');
         console.log('🔍 Backend project IDs:', projects.map((p: any) => ({ id: p.id, name: p.name, type: typeof p.id })));
+        
+        // Set projects in both hook state AND DatabaseContext
         setProjects(projects);
+        dispatch({ type: 'SET_PROJECTS', payload: { projects } });
+        console.log('🔄 Projects synced to DatabaseContext');
+        
         setError(null);
       } else {
         console.log('❌ Backend projects API failed:', response.error);
         setProjects([]);
+        dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
         setError(response.error || 'Failed to load projects');
       }
     } catch (err: any) {
       console.log('💥 Network error:', err.message);
       setProjects([]);
+      dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
       setError('Network error - please check your connection');
     }
     setLoading(false);
@@ -123,6 +132,7 @@ export const useApiProjects = () => {
     } else {
       // No token means user logged out, clear projects
       setProjects([]);
+      dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
       console.log('🔐 No auth token, clearing projects');
     }
   }, []); // Empty dependency array - only run on mount
@@ -133,6 +143,7 @@ export const useApiProjects = () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
         setProjects([]);
+        dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
         console.log('🔐 Auth token removed, clearing projects');
       } else {
         fetchProjects();

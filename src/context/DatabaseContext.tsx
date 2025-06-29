@@ -314,6 +314,13 @@ function databaseReducer(state: DatabaseState, action: DatabaseAction): Database
       };
       break;
     }
+    case 'SET_PROJECTS': {
+      newState = {
+        ...state,
+        projects: cleanDuplicates(action.payload.projects || []),
+      };
+      break;
+    }
     case 'UPDATE_USER_STATUS': {
       const users = loadUsers();
       const updatedUsers = users.map(user => 
