@@ -5,9 +5,17 @@ import { useApiProjects } from '../hooks/useApiProjects';
 import { Database, LogOut, User, Plus, Eye, Settings, Shield } from 'lucide-react';
 
 const DashboardPage = () => {
-  const { state, logout } = useDatabase();
+  const { state, logout, dispatch } = useDatabase();
   const { projects, loading } = useApiProjects();
   const navigate = useNavigate();
+
+  // ✅ SYNC PROJECTS TO CONTEXT - Ana çözüm!
+  useEffect(() => {
+    if (!loading && projects.length > 0) {
+      dispatch({ type: 'SET_PROJECTS', payload: { projects } });
+      console.log('✅ DashboardPage: Projects context içine aktarıldı:', projects.length, 'projects');
+    }
+  }, [loading, projects, dispatch]);
 
   const handleLogout = () => {
     logout();
