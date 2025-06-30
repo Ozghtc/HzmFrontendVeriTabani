@@ -1,114 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { Table } from 'lucide-react';
 import { useDatabase } from '../../context/DatabaseContext';
-import { PlusCircle, Table, Trash2, AlertTriangle } from 'lucide-react';
-import { apiClient } from '../../utils/api';
+import { useTableApi } from './table/hooks/useTableApi';
+import AddTableForm from './table/components/AddTableForm';
+import TableList from './table/components/TableList';
+import DeleteTableModal from './table/components/DeleteTableModal';
 
 const TablePanel: React.FC = () => {
   const { state, dispatch } = useDatabase();
-  const [newTableName, setNewTableName] = useState('');
+  const { loading, error, loadTables, deleteTable } = useTableApi();
   const [deletingTable, setDeletingTable] = useState<string | null>(null);
-  const [deleteConfirmName, setDeleteConfirmName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   
-  // Load tables when project changes - with better dependency control
+  // Load tables when project changes
   useEffect(() => {
     if (state.selectedProject?.id) {
       console.log('🔄 TablePanel: Project changed, loading tables for:', state.selectedProject.id);
       loadTables();
     }
-  }, [state.selectedProject?.id]); // Keep this dependency but make it more specific
+  }, [state.selectedProject?.id]);
 
-  const loadTables = async () => {
-    if (!state.selectedProject?.id) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('📋 Loading tables for project:', state.selectedProject.id);
-      
-      const response = await apiClient.getTables(state.selectedProject.id.toString());
-      
-      if (response.success && response.data?.tables) {
-        console.log('✅ Tables loaded:', response.data.tables);
-        
-        // Update DatabaseContext with tables from backend
-        dispatch({ 
-          type: 'SET_PROJECT_TABLES', 
-          payload: { 
-            projectId: state.selectedProject.id,
-            tables: response.data.tables.map((table: any) => ({
-              id: table.id.toString(),
-              name: table.name,
-              fields: table.fields || []
-            }))
-          } 
-        });
-      } else {
-        console.error('❌ Failed to load tables:', response.error);
-        setError(response.error || 'Failed to load tables');
-      }
-    } catch (error) {
-      console.error('💥 Error loading tables:', error);
-      setError('Network error while loading tables');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const handleAddTable = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTableName.trim() || !state.selectedProject?.id || loading) return;
-    
-    // Check if table name already exists (client-side check)
-    const tableExists = (state.selectedProject.tables || []).some(
-      table => table.name.toLowerCase() === newTableName.trim().toLowerCase()
-    );
-    
-    if (tableExists) {
-      alert('Bu isimde bir tablo zaten mevcut. Lütfen farklı bir isim seçin.');
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('📝 Creating table:', newTableName, 'for project:', state.selectedProject.id);
-      
-      const response = await apiClient.createTable(state.selectedProject.id.toString(), {
-        name: newTableName.trim(),
-        fields: []
-      });
-      
-      if (response.success && response.data?.table) {
-        console.log('✅ Table created:', response.data.table);
-        setNewTableName('');
-        
-        // Update local state with backend response
-        dispatch({ 
-          type: 'ADD_TABLE', 
-          payload: { 
-            name: response.data.table.name,
-            id: response.data.table.id.toString()
-          } 
-        });
-        
-        // Reload tables to get fresh data
-        await loadTables();
-      } else {
-        console.error('❌ Failed to create table:', response.error);
-        alert(response.error || 'Failed to create table');
-      }
-    } catch (error) {
-      console.error('💥 Error creating table:', error);
-      alert('Network error while creating table');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
   const handleSelectTable = (tableId: string) => {
     console.log('🎯 Selecting table:', tableId);
     dispatch({ type: 'SELECT_TABLE', payload: { tableId } });
@@ -116,53 +26,19 @@ const TablePanel: React.FC = () => {
 
   const handleDeleteTable = (tableId: string, tableName: string) => {
     setDeletingTable(tableId);
-    setDeleteConfirmName('');
   };
 
   const confirmDeleteTable = async () => {
-    if (!deletingTable || !state.selectedProject?.id || loading) return;
+    if (!deletingTable) return;
     
-    const tables = state.selectedProject.tables || [];
-    const tableToDelete = tables.find(t => t.id.toString() === deletingTable);
-    if (!tableToDelete || deleteConfirmName !== tableToDelete.name) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('🗑️ Deleting table:', deletingTable, 'from project:', state.selectedProject.id);
-      
-      const response = await apiClient.deleteTable(
-        state.selectedProject.id.toString(), 
-        deletingTable
-      );
-      
-      if (response.success) {
-        console.log('✅ Table deleted:', response.data);
-        
-        // Update local state
-        dispatch({ type: 'DELETE_TABLE', payload: { tableId: deletingTable } });
-        
-        // Reload tables
-        await loadTables();
-        
-        setDeletingTable(null);
-        setDeleteConfirmName('');
-      } else {
-        console.error('❌ Failed to delete table:', response.error);
-        alert(response.error || 'Failed to delete table');
-      }
-    } catch (error) {
-      console.error('💥 Error deleting table:', error);
-      alert('Network error while deleting table');
-    } finally {
-      setLoading(false);
+    const success = await deleteTable(deletingTable);
+    if (success) {
+      setDeletingTable(null);
     }
   };
 
   const cancelDeleteTable = () => {
     setDeletingTable(null);
-    setDeleteConfirmName('');
   };
   
   // Determine if the panel should be disabled
@@ -170,6 +46,11 @@ const TablePanel: React.FC = () => {
   
   // Get tables from context
   const tables = state.selectedProject?.tables || [];
+  
+  // Get table to delete info
+  const tableToDelete = deletingTable 
+    ? tables.find(t => t.id.toString() === deletingTable)
+    : null;
   
   return (
     <>
@@ -187,167 +68,34 @@ const TablePanel: React.FC = () => {
           )}
         </h2>
         
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            <p className="text-sm">{error}</p>
-            <button 
-              onClick={loadTables}
-              className="mt-2 text-sm underline hover:no-underline"
-            >
-              Tekrar Dene
-            </button>
-          </div>
-        )}
+        <AddTableForm
+          projectId={state.selectedProject?.id}
+          isDisabled={isPanelDisabled}
+          isLoading={loading}
+          onTableAdded={() => {}}
+        />
         
-        <form onSubmit={handleAddTable} className="mb-4">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newTableName}
-              onChange={(e) => setNewTableName(e.target.value)}
-              placeholder="Yeni tablo adı"
-              className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              disabled={isPanelDisabled}
-            />
-            <button
-              type="submit"
-              className={`px-3 py-2 rounded-md transition-colors flex items-center ${
-                isPanelDisabled
-                  ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                  : 'bg-teal-600 text-white hover:bg-teal-700'
-              }`}
-              disabled={isPanelDisabled}
-            >
-              <PlusCircle size={16} className="mr-1" />
-              {loading ? 'Ekliyor...' : 'Ekle'}
-            </button>
-          </div>
-        </form>
-        
-        <div className="panel-content">
-          {!state.selectedProject ? (
-            <p className="text-gray-500 text-sm italic text-center py-4">
-              Lütfen önce bir proje seçin.
-            </p>
-          ) : loading && tables.length === 0 ? (
-            <p className="text-gray-500 text-sm italic text-center py-4">
-              Tablolar yükleniyor...
-            </p>
-          ) : tables.length === 0 ? (
-            <p className="text-gray-500 text-sm italic text-center py-4">
-              Bu projede henüz hiç tablo yok. İlk tablonuzu ekleyin.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {tables.map((table) => (
-                <div
-                  key={table.id}
-                  className={`panel-item p-3 rounded-md border border-gray-100 hover:border-teal-200 hover:bg-teal-50 group ${
-                    state.selectedTable?.id === table.id.toString()
-                      ? 'selected bg-teal-100 border-teal-300 font-medium'
-                      : ''
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <div 
-                      className="flex-1 cursor-pointer"
-                      onClick={() => handleSelectTable(table.id.toString())}
-                    >
-                      <div className="flex justify-between items-center">
-                        <span>{table.name}</span>
-                        <span className="text-xs text-gray-500">{table.fields?.length || 0} alan</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteTable(table.id.toString(), table.name);
-                      }}
-                      className="ml-2 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Tabloyu Sil"
-                      disabled={loading}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <TableList
+          projectId={state.selectedProject?.id}
+          projectName={state.selectedProject?.name}
+          tables={tables}
+          selectedTableId={state.selectedTable?.id}
+          onSelectTable={handleSelectTable}
+          onDeleteTable={handleDeleteTable}
+          loading={loading}
+          error={error}
+          onRetry={loadTables}
+        />
       </div>
 
-      {/* Delete Table Confirmation Modal */}
-      {deletingTable && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="flex items-center mb-4">
-              <AlertTriangle className="text-red-500 mr-3" size={24} />
-              <h3 className="text-lg font-semibold text-gray-800">Tabloyu Sil</h3>
-            </div>
-            
-            <div className="mb-6">
-              {(() => {
-                const tableToDelete = tables.find(t => t.id.toString() === deletingTable);
-                return (
-                  <>
-                    <p className="text-gray-600 mb-4">
-                      <strong>{tableToDelete?.name}</strong> tablosunu ve tüm verilerini kalıcı olarak silmek istediğinizden emin misiniz?
-                    </p>
-                    
-                    <div className="bg-gray-50 p-3 rounded-md mb-4">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Silinecek tablo bilgileri:</p>
-                      <div className="text-sm text-gray-600">
-                        <div><strong>Tablo Adı:</strong> {tableToDelete?.name}</div>
-                        <div><strong>Alan Sayısı:</strong> {tableToDelete?.fields?.length || 0}</div>
-                        <div><strong>Alanlar:</strong> {tableToDelete?.fields?.map((f: any) => f.name).join(', ') || 'Henüz alan yok'}</div>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-red-600 mb-4">
-                      ⚠️ Bu işlem geri alınamaz! Tablonun tüm alanları ve verileri silinecektir.
-                    </p>
-                    
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Silmek için tablo adını yazın: <strong>{tableToDelete?.name}</strong>
-                      </label>
-                      <input
-                        type="text"
-                        value={deleteConfirmName}
-                        onChange={(e) => setDeleteConfirmName(e.target.value)}
-                        placeholder="Tablo adını buraya yazın"
-                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                      />
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-            
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={cancelDeleteTable}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
-                disabled={loading}
-              >
-                İptal
-              </button>
-              <button
-                onClick={confirmDeleteTable}
-                className={`px-4 py-2 rounded-md ${
-                  deleteConfirmName === tables.find(t => t.id.toString() === deletingTable)?.name && !loading
-                    ? 'bg-red-600 text-white hover:bg-red-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-                disabled={deleteConfirmName !== tables.find(t => t.id.toString() === deletingTable)?.name || loading}
-              >
-                {loading ? 'Siliniyor...' : 'Tabloyu Sil'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteTableModal
+        tableId={deletingTable}
+        tableName={tableToDelete?.name || ''}
+        tableFields={tableToDelete?.fields || []}
+        onConfirm={confirmDeleteTable}
+        onCancel={cancelDeleteTable}
+        isLoading={loading}
+      />
     </>
   );
 };
