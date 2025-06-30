@@ -45,13 +45,13 @@
 - Daha yukarıdaki bloklar, açıklamalar veya dosyanın tamamı **göz ardı edilmelidir.**
 
 ## 9. Kod Satırı Sayısı ve Bölme Kuralı
-- Cursor tarafından oluşturulan veya yönetilen her bir kod bloğu en fazla **300 satır** olabilir.  
-- Kod bloğu **200 satırı geçtiğinde**, sistem bu bloğu **mantıklı bir yerden bölmeye** hazırlanmalıdır.  
+- Cursor tarafından oluşturulan veya yönetilen her bir kod bloğu en fazla **320 satır** olabilir.  
+- Kod bloğu **250 satırı geçtiğinde**, sistem bu bloğu **mantıklı bir yerden bölmeye** hazırlanmalıdır.  
 - **Kullanıcı onayı alınmadan bölme yapılmamalıdır.**  
 - Bölümler açık şekilde etiketlenmelidir (örn. `Bölüm 1`, `Bölüm 2`).
 
 **Örnek Uyarı:**  
-> Kod bloğu 300 satıra yaklaştı. Şu noktada ikiye bölmemi ister misiniz?
+> Kod bloğu 320 satıra yaklaştı. Şu noktada ikiye bölmemi ister misiniz?
 
 ## 10. Otomatik GitHub Push Kuralı
 - Proje bir GitHub deposuna bağlıysa, yapılan her değişiklikten sonra sistem:  
@@ -75,15 +75,12 @@
 Silinecek dosya: /src/pages/EskiKod.tsx
 Bu dosyayı silmemi onaylıyor musunuz? [evet/hayır]
 
-markdown
-Copy
-Edit
 
 ---
 
 ## 12. Kod Bölme ve Temizleme Kuralı
 - Eğer bir dosya örneğin **1200 satırdan** oluşuyorsa:  
-  - Kodlar **300 satırı geçmeyecek şekilde** mantıklı ve işlevsel dosyalara **bölünmelidir.**
+  - Kodlar **320 satırı geçmeyecek şekilde** mantıklı ve işlevsel dosyalara **bölünmelidir.**
   - **Var olan `src/` klasörü korunmalı**, Cursor **ekstra bir `src/` klasörü oluşturup dosya taşımamalıdır.**
   - Tüm bölümler mevcut `src/` dizini altında uygun klasör yapısına yerleştirilmelidir.
   - Yeni açılan dosyalar, projenin modüler yapısına **entegre edilerek çalışır durumda bırakılmalıdır.**
