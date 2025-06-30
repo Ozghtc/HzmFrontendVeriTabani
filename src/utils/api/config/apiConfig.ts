@@ -7,7 +7,7 @@ export const API_CONFIG = {
   ],
   timeout: 30000, // 30 seconds
   retryDefaults: {
-    maxRetries: 3,
+    maxRetries: 0, // Retry'ı kapat
     delay: 1000,
     backoff: 'exponential' as const,
   },
