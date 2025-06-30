@@ -9,7 +9,7 @@ const ApiTest = () => {
   const testRegister = async () => {
     setLoading(true);
     try {
-      const result = await apiClient.register({
+      const result = await apiClient.auth.register({
         name: 'Frontend Test User',
         email: 'frontend@test.com',
         password: '123456'
@@ -28,7 +28,7 @@ const ApiTest = () => {
   const testCreateProject = async () => {
     setLoading(true);
     try {
-      const result = await apiClient.createProject({
+      const result = await apiClient.projects.createProject({
         name: 'Frontend Test Project',
         description: 'Created from React frontend'
       });
@@ -42,7 +42,7 @@ const ApiTest = () => {
   const testGetProjects = async () => {
     setLoading(true);
     try {
-      const result = await apiClient.getProjects();
+      const result = await apiClient.projects.getProjects();
       setResponse(result);
     } catch (error) {
       setResponse({ error: 'Network error' });

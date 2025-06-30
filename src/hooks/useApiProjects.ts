@@ -41,7 +41,7 @@ export const useApiProjects = () => {
     try {
       console.log('🔍 Fetching projects from backend...');
       
-      const response = await apiClient.getProjects();
+      const response = await apiClient.projects.getProjects();
       console.log('📊 Projects API response:', response);
       
       if (response.success && response.data) {
@@ -76,7 +76,7 @@ export const useApiProjects = () => {
     
     try {
       console.log('📝 Creating project via backend...');
-      const response = await apiClient.createProject(projectData);
+      const response = await apiClient.projects.createProject(projectData);
       
       if (response.success && response.data) {
         console.log('✅ Project created via backend');
@@ -103,7 +103,7 @@ export const useApiProjects = () => {
     
     try {
       console.log('🗑️ Deleting project via backend...');
-      const response = await apiClient.deleteProject(projectId);
+      const response = await apiClient.projects.deleteProject(projectId);
       
       if (response.success) {
         console.log('✅ Project deleted via backend');
