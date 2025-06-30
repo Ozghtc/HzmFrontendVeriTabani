@@ -9,5 +9,10 @@ apiClient.initialize().catch(error => {
   console.error('Failed to initialize API client:', error);
 });
 
+// Make apiClient available globally for debugging in production
+if (typeof window !== 'undefined') {
+  (window as any).apiClient = apiClient;
+}
+
 // Export for direct use
 export default apiClient; 
