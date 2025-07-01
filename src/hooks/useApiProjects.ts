@@ -59,6 +59,11 @@ export const useApiProjects = () => {
         console.log('📋 Full projects data:', projects);
         console.log('👤 Current user:', state.user);
         
+        // Debug: Check if projects are being filtered
+        console.log('🔍 Projects before set:', projects);
+        console.log('🔍 First project userId type:', projects.length > 0 ? typeof projects[0].userId : 'no projects');
+        console.log('🔍 Current user id type:', typeof state.user?.id);
+        
         // Set projects in both hook state AND DatabaseContext
         setProjects(projects);
         dispatch({ type: 'SET_PROJECTS', payload: { projects } });
