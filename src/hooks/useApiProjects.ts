@@ -45,9 +45,11 @@ export const useApiProjects = () => {
       console.log('📊 Projects API response:', response);
       
       if (response.success && response.data) {
+        console.log('📦 Full backend response:', response);
         const projects = (response.data as any).projects || [];
         console.log('✅ Projects loaded from backend:', projects.length, 'projects');
         console.log('🔍 Backend project IDs:', projects.map((p: any) => ({ id: p.id, name: p.name, type: typeof p.id })));
+        console.log('📋 Full projects data:', projects);
         
         // Set projects in both hook state AND DatabaseContext
         setProjects(projects);
