@@ -30,6 +30,11 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
           console.log('👤 Backend user data:', user);
           console.log('🔒 JWT token saved:', token.substring(0, 20) + '...');
           
+          // Clear old localStorage data to prevent conflicts
+          localStorage.removeItem('all_projects');
+          localStorage.removeItem('database_state');
+          console.log('🧹 Cleared old localStorage data');
+          
           // Dispatch login with backend user data
           dispatch({ type: 'LOGIN', payload: { user } });
           return true;
@@ -144,6 +149,11 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
     });
     
     console.log('🧹 Logout: Cleared all localStorage data including fallbacks');
+    
+    // Also clear on login to ensure fresh start
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('all_projects');
+    }
     
     dispatch({ type: 'LOGOUT' });
   };
