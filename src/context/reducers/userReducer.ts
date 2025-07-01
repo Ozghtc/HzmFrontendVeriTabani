@@ -38,10 +38,7 @@ export const userReducer = (state: DatabaseState, action: DatabaseAction): Datab
       const updatedUsers = users.filter(user => user.id !== action.payload.userId);
       saveUsers(updatedUsers);
       
-      // Also delete user's projects
-      const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-      const updatedProjects = allProjects.filter((project: Project) => project.userId !== action.payload.userId);
-      localStorage.setItem('all_projects', JSON.stringify(updatedProjects));
+      // localStorage removed - using only backend
       
       // If the deleted user is currently logged in, log them out
       if (state.user?.id === action.payload.userId) {

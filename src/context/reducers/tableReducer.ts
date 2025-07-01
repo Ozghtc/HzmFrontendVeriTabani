@@ -39,18 +39,7 @@ export const tableReducer = (state: DatabaseState, action: DatabaseAction): Data
         return project;
       });
       
-      // Update all projects in localStorage
-      const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-      const updatedAllProjects = allProjects.map((project: Project) => {
-        if (project.id === state.selectedProject?.id) {
-          return {
-            ...project,
-            tables: cleanDuplicates([...project.tables, newTable]),
-          };
-        }
-        return project;
-      });
-      localStorage.setItem('all_projects', JSON.stringify(cleanDuplicates(updatedAllProjects)));
+      // localStorage removed - using only backend
       
       const updatedSelectedProject = updatedProjects.find(
         (project) => project.id === state.selectedProject?.id
@@ -76,21 +65,7 @@ export const tableReducer = (state: DatabaseState, action: DatabaseAction): Data
         return project;
       });
       
-      // Update all projects in localStorage
-      const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-      const updatedAllProjects = allProjects.map((project: Project) => {
-        if (project.id === state.selectedProject?.id) {
-          return {
-            ...project,
-            tables: project.tables.filter((table: Table) => table.id !== action.payload.tableId),
-          };
-        }
-        return project;
-      });
-      localStorage.setItem('all_projects', JSON.stringify(cleanDuplicates(updatedAllProjects)));
-      
-      // Also delete table data from localStorage
-      localStorage.removeItem(`table_data_${action.payload.tableId}`);
+      // localStorage removed - using only backend
       
       const updatedSelectedProject = updatedProjects.find(
         (project) => project.id === state.selectedProject?.id

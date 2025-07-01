@@ -36,5 +36,5 @@ export const cleanAllStorage = () => {
   });
   
   // Initialize clean storage
-  localStorage.setItem('all_projects', JSON.stringify([]));
+  // localStorage removed - using only backend
 }; 

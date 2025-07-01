@@ -37,8 +37,7 @@ export const updateProjectsWithModifiedTable = (
     return project;
   });
 
-  // Update localStorage
-  updateLocalStorageProjects(state.selectedProject.id, state.selectedTable.id, tableModifier);
+  // localStorage removed - using only backend
 
   // Get updated references
   const updatedSelectedProject = updatedProjects.find(
@@ -56,28 +55,4 @@ export const updateProjectsWithModifiedTable = (
   };
 };
 
-const updateLocalStorageProjects = (
-  projectId: string,
-  tableId: string,
-  tableModifier: (table: Table) => Table
-): void => {
-  const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-  
-  const updatedAllProjects = allProjects.map((project: Project) => {
-    if (project.id === projectId) {
-      const updatedTables = project.tables.map((table: Table) => {
-        if (table.id === tableId) {
-          return tableModifier(table);
-        }
-        return table;
-      });
-      return {
-        ...project,
-        tables: cleanDuplicates(updatedTables),
-      };
-    }
-    return project;
-  });
-  
-  localStorage.setItem('all_projects', JSON.stringify(cleanDuplicates(updatedAllProjects)));
-};
+// localStorage functions removed - using only backend

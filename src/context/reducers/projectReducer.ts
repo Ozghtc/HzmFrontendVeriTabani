@@ -50,20 +50,7 @@ export const projectReducer = (state: DatabaseState, action: DatabaseAction): Da
         return project;
       });
       
-      // Update all projects in localStorage
-      const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-      const updatedAllProjects = allProjects.map((project: Project) => {
-        if (project.id === action.payload.projectId) {
-          return {
-            ...project,
-            ...(action.payload.name && { name: action.payload.name.trim() }),
-            ...(action.payload.description !== undefined && { description: action.payload.description.trim() }),
-            ...(action.payload.settings && { settings: { ...project.settings, ...action.payload.settings } }),
-          };
-        }
-        return project;
-      });
-      localStorage.setItem('all_projects', JSON.stringify(cleanDuplicates(updatedAllProjects)));
+      // localStorage removed - using only backend
       
       const updatedSelectedProject = state.selectedProject?.id === action.payload.projectId
         ? updatedProjects.find(p => p.id === action.payload.projectId) || null
@@ -141,18 +128,7 @@ export const projectReducer = (state: DatabaseState, action: DatabaseAction): Da
         return project;
       });
       
-      // Update all projects in localStorage
-      const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-      const updatedAllProjects = allProjects.map((project: Project) => {
-        if (project.id === action.payload.projectId) {
-          return {
-            ...project,
-            apiKeys: [...project.apiKeys, newApiKey],
-          };
-        }
-        return project;
-      });
-      localStorage.setItem('all_projects', JSON.stringify(cleanDuplicates(updatedAllProjects)));
+      // localStorage removed - using only backend
       
       const updatedSelectedProject = state.selectedProject?.id === action.payload.projectId
         ? updatedProjects.find(p => p.id === action.payload.projectId) || null
@@ -183,18 +159,7 @@ export const projectReducer = (state: DatabaseState, action: DatabaseAction): Da
         return project;
       });
       
-      // Update all projects in localStorage
-      const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-      const updatedAllProjects = allProjects.map((project: Project) => {
-        if (project.id === action.payload.projectId) {
-          return {
-            ...project,
-            apiKey: newApiKey,
-          };
-        }
-        return project;
-      });
-      localStorage.setItem('all_projects', JSON.stringify(cleanDuplicates(updatedAllProjects)));
+      // localStorage removed - using only backend
       
       const updatedSelectedProject = state.selectedProject?.id === action.payload.projectId
         ? updatedProjects.find(p => p.id === action.payload.projectId) || null
