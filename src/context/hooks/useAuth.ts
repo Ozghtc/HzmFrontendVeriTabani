@@ -18,18 +18,22 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
       });
 
       if (response.ok) {
-        const data = await response.json();
-        const { token, user } = data;
+        const result = await response.json();
+        console.log('📦 Backend response:', result);
         
-        // Save auth token for API calls
-        localStorage.setItem('auth_token', token);
-        console.log('✅ Backend login successful');
-        console.log('👤 Backend user data:', user);
-        console.log('🔒 JWT token saved');
-        
-        // Dispatch login with backend user data
-        dispatch({ type: 'LOGIN', payload: { user } });
-        return true;
+        if (result.success && result.data) {
+          const { token, user } = result.data;
+          
+          // Save auth token for API calls
+          localStorage.setItem('auth_token', token);
+          console.log('✅ Backend login successful');
+          console.log('👤 Backend user data:', user);
+          console.log('🔒 JWT token saved:', token.substring(0, 20) + '...');
+          
+          // Dispatch login with backend user data
+          dispatch({ type: 'LOGIN', payload: { user } });
+          return true;
+        }
       } else {
         const errorData = await response.json();
         console.log('❌ Backend login failed:', errorData.error);
@@ -69,18 +73,22 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
       });
 
       if (response.ok) {
-        const data = await response.json();
-        const { token, user } = data;
+        const result = await response.json();
+        console.log('📦 Backend response:', result);
         
-        // Save auth token for API calls
-        localStorage.setItem('auth_token', token);
-        console.log('✅ Backend registration successful');
-        console.log('👤 Backend user data:', user);
-        console.log('🔒 JWT token saved');
-        
-        // Dispatch register with backend user data
-        dispatch({ type: 'REGISTER', payload: { user } });
-        return true;
+        if (result.success && result.data) {
+          const { token, user } = result.data;
+          
+          // Save auth token for API calls
+          localStorage.setItem('auth_token', token);
+          console.log('✅ Backend registration successful');
+          console.log('👤 Backend user data:', user);
+          console.log('🔒 JWT token saved:', token.substring(0, 20) + '...');
+          
+          // Dispatch register with backend user data
+          dispatch({ type: 'REGISTER', payload: { user } });
+          return true;
+        }
       } else {
         const errorData = await response.json();
         console.log('❌ Backend registration failed:', errorData.error);
