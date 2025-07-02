@@ -43,10 +43,16 @@ export const useProjectData = () => {
             const response = await apiClient.projects.getProject(projectId);
             if (response.success && response.data) {
               console.log('✅ Backend data received, updating...');
+              console.log('🔍 Raw response.data:', response.data);
+              
+              // Fix double wrapping issue (apiduzenleme.md)
+              const projectData = (response.data as any).data || response.data;
+              console.log('🎯 Extracted project data:', projectData);
+              
               // Transform backend data to frontend format
               const transformedProject = {
-                ...response.data,
-                userId: Number((response.data as any).userId),
+                ...projectData,
+                userId: Number(projectData.userId),
                 tables: (frontendProject as any).tables || [],
                 apiKeys: (frontendProject as any).apiKeys || [],
                 isPublic: (frontendProject as any).isPublic || false,
@@ -78,10 +84,15 @@ export const useProjectData = () => {
         
         if (response.success && response.data) {
           console.log('✅ Project loaded from backend only:', response.data);
+          
+          // Fix double wrapping issue (apiduzenleme.md)  
+          const projectData = (response.data as any).data || response.data;
+          console.log('🎯 Extracted project data:', projectData);
+          
           // Transform backend data to frontend format
           const transformedProject = {
-            ...response.data,
-            userId: Number((response.data as any).userId),
+            ...projectData,
+            userId: Number(projectData.userId),
             tables: [],
             apiKeys: [],
             isPublic: false,
