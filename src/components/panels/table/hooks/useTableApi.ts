@@ -17,16 +17,19 @@ export const useTableApi = (): TableApiHookReturn => {
       
       console.log('📋 Loading tables for project:', state.selectedProject.id);
       
-      const response = await apiClient.getTables(state.selectedProject.id.toString());
+      const response = await apiClient.tables.getTables(state.selectedProject.id.toString());
       
-      if (response.success && response.data?.tables) {
-        console.log('✅ Tables loaded:', response.data.tables);
+      // Fix double wrapping issue (same as projects)
+      const tablesData = (response.data as any).data?.tables || (response.data as any).tables || [];
+      
+      if (response.success && tablesData) {
+        console.log('✅ Tables loaded:', tablesData);
         
         dispatch({ 
           type: 'SET_PROJECT_TABLES', 
           payload: { 
             projectId: state.selectedProject.id,
-            tables: response.data.tables.map((table: any) => ({
+            tables: tablesData.map((table: any) => ({
               id: table.id.toString(),
               name: table.name,
               fields: table.fields || []
@@ -54,19 +57,21 @@ export const useTableApi = (): TableApiHookReturn => {
       
       console.log('📝 Creating table:', name, 'for project:', state.selectedProject.id);
       
-      const response = await apiClient.createTable(state.selectedProject.id.toString(), {
-        name: name.trim(),
-        fields: []
-      });
+      const response = await apiClient.tables.createTable(state.selectedProject.id.toString(), {
+        name: name.trim()
+      } as any);
       
-      if (response.success && response.data?.table) {
-        console.log('✅ Table created:', response.data.table);
+      // Fix double wrapping
+      const tableData = (response.data as any).data || response.data;
+      
+      if (response.success && tableData) {
+        console.log('✅ Table created:', tableData);
         
         dispatch({ 
           type: 'ADD_TABLE', 
           payload: { 
-            name: response.data.table.name,
-            id: response.data.table.id.toString()
+            name: tableData.name,
+            id: tableData.id.toString()
           } 
         });
         
@@ -95,7 +100,7 @@ export const useTableApi = (): TableApiHookReturn => {
       
       console.log('🗑️ Deleting table:', tableId, 'from project:', state.selectedProject.id);
       
-      const response = await apiClient.deleteTable(
+      const response = await apiClient.tables.deleteTable(
         state.selectedProject.id.toString(), 
         tableId
       );
