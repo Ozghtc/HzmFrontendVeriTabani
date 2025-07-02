@@ -9,13 +9,14 @@ const DashboardPage = () => {
   const { projects, loading } = useApiProjects();
   const navigate = useNavigate();
 
+  // DISABLED - This was causing infinite loops
   // ✅ SYNC PROJECTS TO CONTEXT - Ana çözüm!
-  useEffect(() => {
-    if (!loading && projects.length > 0) {
-      dispatch({ type: 'SET_PROJECTS', payload: { projects } });
-      console.log('✅ DashboardPage: Projects context içine aktarıldı:', projects.length, 'projects');
-    }
-  }, [loading, projects, dispatch]);
+  // useEffect(() => {
+  //   if (!loading && projects.length > 0) {
+  //     dispatch({ type: 'SET_PROJECTS', payload: { projects } });
+  //     console.log('✅ DashboardPage: Projects context içine aktarıldı:', projects.length, 'projects');
+  //   }
+  // }, [loading, projects, dispatch]);
 
   const handleLogout = () => {
     logout();

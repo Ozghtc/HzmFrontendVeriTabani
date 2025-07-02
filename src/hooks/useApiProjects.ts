@@ -160,27 +160,28 @@ export const useApiProjects = () => {
     }
   }, []); // Empty dependency array - only run on mount
 
+  // DISABLED - This was causing infinite loops
   // Clear projects when auth token changes (login/logout)
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        setProjects([]);
-        dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
-        console.log('🔐 Auth token removed, clearing projects');
-      } else {
-        fetchProjects();
-        console.log('🔐 Auth token detected, fetching projects');
-      }
-    };
+  // useEffect(() => {
+  //   const handleStorageChange = () => {
+  //     const token = localStorage.getItem('auth_token');
+  //     if (!token) {
+  //       setProjects([]);
+  //       dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
+  //       console.log('🔐 Auth token removed, clearing projects');
+  //     } else {
+  //       fetchProjects();
+  //       console.log('🔐 Auth token detected, fetching projects');
+  //     }
+  //   };
 
-    // Listen for localStorage changes
-    window.addEventListener('storage', handleStorageChange);
+  //   // Listen for localStorage changes
+  //   window.addEventListener('storage', handleStorageChange);
     
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []); // Empty dependency array - only setup listener once
+  //   return () => {
+  //     window.removeEventListener('storage', handleStorageChange);
+  //   };
+  // }, []); // Empty dependency array - only setup listener once
 
   return {
     projects,
