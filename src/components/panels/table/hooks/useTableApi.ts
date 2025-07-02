@@ -19,11 +19,12 @@ export const useTableApi = (): TableApiHookReturn => {
       
       const response = await apiClient.tables.getTables(state.selectedProject.id.toString());
       
-      // Fix double wrapping issue (same as projects)
-      const tablesData = (response.data as any).data?.tables || (response.data as any).tables || [];
+      // Fix response parsing - Backend returns { data: { tables: [...] } }
+      const responseData = (response.data as any).data || response.data;
+      const tablesData = responseData.tables || [];
       
-      if (response.success && tablesData) {
-        console.log('✅ Tables loaded:', tablesData);
+      if (response.success && tablesData && Array.isArray(tablesData)) {
+        console.log('✅ Tables loaded:', tablesData.length, 'tables:', tablesData);
         
         dispatch({ 
           type: 'SET_PROJECT_TABLES', 
@@ -37,8 +38,20 @@ export const useTableApi = (): TableApiHookReturn => {
           } 
         });
       } else {
-        console.error('❌ Failed to load tables:', response.error);
-        setError(response.error || 'Failed to load tables');
+        // Even if no tables, dispatch empty array to clear state
+        console.log('📝 No tables found, clearing state');
+        dispatch({ 
+          type: 'SET_PROJECT_TABLES', 
+          payload: { 
+            projectId: state.selectedProject.id,
+            tables: []
+          } 
+        });
+        
+        if (!response.success) {
+          console.error('❌ Failed to load tables:', response.error);
+          setError(response.error || 'Failed to load tables');
+        }
       }
     } catch (error) {
       console.error('💥 Error loading tables:', error);
@@ -61,8 +74,9 @@ export const useTableApi = (): TableApiHookReturn => {
         name: name.trim()
       } as any);
       
-      // Fix double wrapping
-      const tableData = (response.data as any).data || response.data;
+      // Fix response parsing - Backend returns { data: { table: {...} } }
+      const responseData = (response.data as any).data || response.data;
+      const tableData = responseData.table || responseData;
       
       if (response.success && tableData) {
         console.log('✅ Table created:', tableData);
@@ -70,7 +84,7 @@ export const useTableApi = (): TableApiHookReturn => {
         dispatch({ 
           type: 'ADD_TABLE', 
           payload: { 
-            name: tableData.name,
+            name: tableData.name || tableData.displayName,
             id: tableData.id.toString()
           } 
         });
