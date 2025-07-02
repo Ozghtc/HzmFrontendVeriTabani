@@ -60,7 +60,7 @@ export const useProjectData = () => {
     };
 
     loadProject();
-  }, [projectId, projects, projectsLoading]);
+  }, [projectId]);  // ✅ FIXED - only when projectId changes
 
   // Find project owner
   let projectOwner = null;
