@@ -9,6 +9,15 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   onBack 
 }) => {
   console.log('🔍 ProjectHeader received project:', project);
+  console.log('🔍 Project name:', project?.name);
+  console.log('🔍 Project ID:', project?.id);
+  
+  // Better fallback logic
+  const getProjectTitle = () => {
+    if (project?.name) return project.name;
+    if (project?.id) return `Proje ${project.id}`;
+    return 'Proje Yükleniyor...';
+  };
   
   return (
     <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
@@ -22,7 +31,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
               <ArrowLeft size={24} />
             </button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold">{project?.name || `Proje ${project?.id}` || 'Proje Yükleniyor...'}</h1>
+              <h1 className="text-2xl font-bold">{getProjectTitle()}</h1>
               {project.description && (
                 <p className="text-blue-100 text-sm mt-1">{project.description}</p>
               )}

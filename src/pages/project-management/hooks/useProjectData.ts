@@ -26,8 +26,12 @@ export const useProjectData = () => {
 
         // Frontend-first approach
         console.log('🚀 Looking for project in frontend list first...');
+        console.log('🔍 URL projectId:', projectId);
+        console.log('🔍 Available projects:', projects);
         const parsedProjectId = Number(projectId);
+        console.log('🔍 Parsed projectId:', parsedProjectId);
         const frontendProject = projects.find(p => {
+          console.log('🔍 Checking project:', p.id, 'vs', parsedProjectId);
           return p.id === parsedProjectId || p.id.toString() === projectId;
         });
         
