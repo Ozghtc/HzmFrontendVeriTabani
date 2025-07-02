@@ -44,6 +44,9 @@ export const useApiProjects = () => {
       
       const response = await apiClient.projects.getProjects();
       console.log('📊 Projects API response:', response);
+      console.log('📊 Response success:', response.success);
+      console.log('📊 Response data:', response.data);
+      console.log('📊 Response data type:', typeof response.data);
       
       if (response.success && response.data) {
         console.log('📦 Full backend response:', response);
