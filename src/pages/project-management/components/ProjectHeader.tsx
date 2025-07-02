@@ -8,35 +8,8 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   currentUser, 
   onBack 
 }) => {
-  console.log('🔍 ProjectHeader received project:', project);
-  console.log('🔍 Project name:', project?.name);
-  console.log('🔍 Project ID:', project?.id);
-  
-  // Better fallback logic
-  const getProjectTitle = () => {
-    console.log('🎯 getProjectTitle - project object:', project);
-    
-    if (project?.name) {
-      console.log('✅ Using project.name:', project.name);
-      return project.name;
-    }
-    
-    if (project?.id) {
-      console.log('⚠️ No name, using ID fallback:', project.id);
-      return `Proje ${project.id}`;
-    }
-    
-    // URL fallback - extract from window.location
-    const urlMatch = window.location.pathname.match(/\/projects\/(\d+)/);
-    if (urlMatch) {
-      const urlProjectId = urlMatch[1];
-      console.log('🔄 Using URL fallback for project:', urlProjectId);
-      return `Proje ${urlProjectId}`;
-    }
-    
-    console.log('❌ No project data available');
-    return 'Proje Yükleniyor...';
-  };
+  // Simple and clean - no hacks
+  const projectTitle = project?.name || 'Proje Yükleniyor...';
   
   return (
     <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
@@ -50,7 +23,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
               <ArrowLeft size={24} />
             </button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold">{getProjectTitle()}</h1>
+              <h1 className="text-2xl font-bold">{projectTitle}</h1>
               {project.description && (
                 <p className="text-blue-100 text-sm mt-1">{project.description}</p>
               )}

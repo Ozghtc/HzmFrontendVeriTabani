@@ -25,95 +25,31 @@ export const useProjectData = () => {
         setError(null);
 
         // Frontend-first approach
-        console.log('🚀 Looking for project in frontend list first...');
-        console.log('🔍 URL projectId:', projectId);
-        console.log('🔍 Available projects:', projects);
         const parsedProjectId = Number(projectId);
-        console.log('🔍 Parsed projectId:', parsedProjectId);
+        console.log('Looking for project:', parsedProjectId, 'in', projects.length, 'projects');
+        
         const frontendProject = projects.find(p => {
-          console.log('🔍 Checking project:', p.id, 'vs', parsedProjectId);
           return p.id === parsedProjectId || p.id.toString() === projectId;
         });
         
         if (frontendProject) {
-          console.log('✅ Found project in frontend list:', frontendProject);
-          setProject(frontendProject);
+          console.log('✅ Found project:', frontendProject.name);
+          setProject(frontendProject as any);
           dispatch({ type: 'SELECT_PROJECT', payload: { projectId: parsedProjectId } });
-          dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: frontendProject } });
+          dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: frontendProject as any } });
           setLoading(false);
-          
-          // Background update from backend
-          try {
-            const response = await apiClient.projects.getProject(projectId);
-            if (response.success && response.data) {
-              console.log('✅ Backend data received, updating...');
-              console.log('🔍 Raw response.data:', response.data);
-              
-              // Fix double wrapping issue (apiduzenleme.md)
-              const projectData = (response.data as any).data || response.data;
-              console.log('🎯 Extracted project data:', projectData);
-              
-              // Transform backend data to frontend format
-              const transformedProject = {
-                ...projectData,
-                userId: Number(projectData.userId),
-                tables: (frontendProject as any).tables || [],
-                apiKeys: (frontendProject as any).apiKeys || [],
-                isPublic: (frontendProject as any).isPublic || false,
-                settings: (frontendProject as any).settings || {
-                  allowApiAccess: true,
-                  requireAuth: false,
-                  maxRequestsPerMinute: 100,
-                  enableWebhooks: false
-                }
-              } as any;
-              setProject(transformedProject);
-              dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: transformedProject } });
-            }
-          } catch (backendError) {
-            console.log('ℹ️ Backend error, keeping frontend data:', backendError);
-          }
           return;
         }
 
         if (projectsLoading) {
-          console.log('⏳ Projects still loading, waiting...');
+          console.log('Projects still loading...');
           setLoading(false);
           return;
         }
 
-        // Try backend only
-        console.log('🔄 Project not in frontend list, trying backend only...');
-        const response = await apiClient.projects.getProject(projectId);
-        
-        if (response.success && response.data) {
-          console.log('✅ Project loaded from backend only:', response.data);
-          
-          // Fix double wrapping issue (apiduzenleme.md)  
-          const projectData = (response.data as any).data || response.data;
-          console.log('🎯 Extracted project data:', projectData);
-          
-          // Transform backend data to frontend format
-          const transformedProject = {
-            ...projectData,
-            userId: Number(projectData.userId),
-            tables: [],
-            apiKeys: [],
-            isPublic: false,
-            settings: {
-              allowApiAccess: true,
-              requireAuth: false,
-              maxRequestsPerMinute: 100,
-              enableWebhooks: false
-            }
-          } as any;
-          setProject(transformedProject);
-          dispatch({ type: 'SELECT_PROJECT', payload: { projectId: parsedProjectId } });
-          dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: transformedProject } });
-        } else {
-          console.error('❌ Project not found anywhere');
-          setError(response.error || 'Project not found');
-        }
+        console.log('❌ Project not found in frontend list');
+        setError('Project not found');
+        setLoading(false);
         
       } catch (error: any) {
         console.error('Failed to load project:', error);
