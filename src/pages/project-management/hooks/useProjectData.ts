@@ -124,7 +124,7 @@ export const useProjectData = () => {
     };
 
     loadProject();
-  }, [projectId]);
+  }, [projectId, projects, projectsLoading]);
 
   // Find project owner
   let projectOwner = null;
