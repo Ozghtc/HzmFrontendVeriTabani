@@ -38,10 +38,10 @@ export const ENDPOINTS = {
     delete: (id: string) => `/projects/${id}`,
   },
   tables: {
-    list: (projectId: string) => `/tables/${projectId}`,
-    create: (projectId: string) => `/tables/${projectId}`,
-    update: (projectId: string, tableId: string) => `/tables/${projectId}/${tableId}`,
-    delete: (projectId: string, tableId: string) => `/tables/${projectId}/${tableId}`,
+    list: (projectId: string) => `/tables/project/${projectId}`,
+    create: (projectId: string) => `/tables/project/${projectId}`,
+    update: (projectId: string, tableId: string) => `/tables/project/${projectId}/${tableId}`,
+    delete: (projectId: string, tableId: string) => `/tables/project/${projectId}/${tableId}`,
   },
   fields: {
     add: (projectId: string, tableId: string) => `/tables/${projectId}/${tableId}/fields`,
