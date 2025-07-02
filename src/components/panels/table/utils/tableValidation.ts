@@ -11,8 +11,9 @@ export const validateTableName = (name: string): string | null => {
     return 'Tablo adı en fazla 50 karakter olabilir';
   }
   
-  if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
-    return 'Tablo adı harf ile başlamalı ve sadece harf, rakam ve alt çizgi içermelidir';
+  // Çok az kısıtlama - sadece tehlikeli karakterleri engelle
+  if (/[<>'"&;\\\/\x00-\x1f\x7f]/.test(name)) {
+    return 'Tablo adında güvenlik açısından tehlikeli karakterler kullanılamaz';
   }
   
   return null;

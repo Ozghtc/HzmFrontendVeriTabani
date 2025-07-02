@@ -8,6 +8,8 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   currentUser, 
   onBack 
 }) => {
+  console.log('🔍 ProjectHeader received project:', project);
+  
   return (
     <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
       <div className="container mx-auto">
@@ -20,7 +22,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
               <ArrowLeft size={24} />
             </button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold">{project.name}</h1>
+              <h1 className="text-2xl font-bold">{project?.name || `Proje ${project?.id}` || 'Proje Yükleniyor...'}</h1>
               {project.description && (
                 <p className="text-blue-100 text-sm mt-1">{project.description}</p>
               )}
