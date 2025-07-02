@@ -14,8 +14,27 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   
   // Better fallback logic
   const getProjectTitle = () => {
-    if (project?.name) return project.name;
-    if (project?.id) return `Proje ${project.id}`;
+    console.log('🎯 getProjectTitle - project object:', project);
+    
+    if (project?.name) {
+      console.log('✅ Using project.name:', project.name);
+      return project.name;
+    }
+    
+    if (project?.id) {
+      console.log('⚠️ No name, using ID fallback:', project.id);
+      return `Proje ${project.id}`;
+    }
+    
+    // URL fallback - extract from window.location
+    const urlMatch = window.location.pathname.match(/\/projects\/(\d+)/);
+    if (urlMatch) {
+      const urlProjectId = urlMatch[1];
+      console.log('🔄 Using URL fallback for project:', urlProjectId);
+      return `Proje ${urlProjectId}`;
+    }
+    
+    console.log('❌ No project data available');
     return 'Proje Yükleniyor...';
   };
   
