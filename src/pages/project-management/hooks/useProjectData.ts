@@ -34,17 +34,31 @@ export const useProjectData = () => {
         if (frontendProject) {
           console.log('✅ Found project in frontend list:', frontendProject);
           setProject(frontendProject);
-          dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
+          dispatch({ type: 'SELECT_PROJECT', payload: { projectId: parsedProjectId } });
           dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: frontendProject } });
           setLoading(false);
           
           // Background update from backend
           try {
-            const response = await apiClient.getProject(projectId);
+            const response = await apiClient.projects.getProject(projectId);
             if (response.success && response.data) {
               console.log('✅ Backend data received, updating...');
-              setProject(response.data);
-              dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: response.data } });
+              // Transform backend data to frontend format
+              const transformedProject = {
+                ...response.data,
+                userId: Number((response.data as any).userId),
+                tables: (frontendProject as any).tables || [],
+                apiKeys: (frontendProject as any).apiKeys || [],
+                isPublic: (frontendProject as any).isPublic || false,
+                settings: (frontendProject as any).settings || {
+                  allowApiAccess: true,
+                  requireAuth: false,
+                  maxRequestsPerMinute: 100,
+                  enableWebhooks: false
+                }
+              } as any;
+              setProject(transformedProject);
+              dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: transformedProject } });
             }
           } catch (backendError) {
             console.log('ℹ️ Backend error, keeping frontend data:', backendError);
@@ -60,13 +74,27 @@ export const useProjectData = () => {
 
         // Try backend only
         console.log('🔄 Project not in frontend list, trying backend only...');
-        const response = await apiClient.getProject(projectId);
+        const response = await apiClient.projects.getProject(projectId);
         
         if (response.success && response.data) {
           console.log('✅ Project loaded from backend only:', response.data);
-          setProject(response.data);
-          dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
-          dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: response.data } });
+          // Transform backend data to frontend format
+          const transformedProject = {
+            ...response.data,
+            userId: Number((response.data as any).userId),
+            tables: [],
+            apiKeys: [],
+            isPublic: false,
+            settings: {
+              allowApiAccess: true,
+              requireAuth: false,
+              maxRequestsPerMinute: 100,
+              enableWebhooks: false
+            }
+          } as any;
+          setProject(transformedProject);
+          dispatch({ type: 'SELECT_PROJECT', payload: { projectId: parsedProjectId } });
+          dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: transformedProject } });
         } else {
           console.error('❌ Project not found anywhere');
           setError(response.error || 'Project not found');
