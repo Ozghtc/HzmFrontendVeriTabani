@@ -42,7 +42,7 @@ export const useApiUsers = () => {
       const token = localStorage.getItem('auth_token');
       console.log('🔍 Admin fetching users with token:', token ? 'EXISTS' : 'MISSING');
       
-      const response = await fetch('https://hzmbackandveritabani-production.up.railway.app/api/v1/admin/users', {
+      const response = await fetch('https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/admin/users', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -92,7 +92,7 @@ export const useApiUsers = () => {
     try {
       const token = localStorage.getItem('auth_token');
       
-      const response = await fetch(`https://hzmbackandveritabani-production.up.railway.app/api/v1/admin/users/${userId}`, {
+      const response = await fetch(`https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -161,7 +161,7 @@ export const useApiUsers = () => {
     try {
       const token = localStorage.getItem('auth_token');
       
-      const response = await fetch(`https://hzmbackandveritabani-production.up.railway.app/api/v1/admin/users/${userId}`, {
+      const response = await fetch(`https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -245,7 +245,7 @@ export const useApiAdminProjects = () => {
       const token = localStorage.getItem('auth_token');
       console.log('🔍 Admin fetching all projects with token:', token ? 'EXISTS' : 'MISSING');
       
-      const response = await fetch('https://hzmbackandveritabani-production.up.railway.app/api/v1/admin/projects', {
+      const response = await fetch('https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/admin/projects', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -272,7 +272,7 @@ export const useApiAdminProjects = () => {
     try {
       const token = localStorage.getItem('auth_token');
       
-      const response = await fetch(`https://hzmbackandveritabani-production.up.railway.app/api/v1/admin/projects/${projectId}`, {
+      const response = await fetch(`https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/admin/projects/${projectId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

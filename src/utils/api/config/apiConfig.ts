@@ -1,8 +1,8 @@
 // API Configuration
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production.up.railway.app/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1',
   backupURLs: [
-    'https://hzmbackandveritabani-production.up.railway.app/api/v1',
+    'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1',
     // Add more backup URLs if needed
   ],
   timeout: 30000, // 30 seconds

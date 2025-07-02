@@ -15,7 +15,7 @@ Projects are not showing up in the frontend despite being present in the databas
 ### 1. Backend Status Check
 ```bash
 # Backend should be running on Railway
-curl https://hzmbackandveritabani-production.up.railway.app/api/v1/health
+curl https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/health
 ```
 
 ### 2. Frontend Console Debugging
