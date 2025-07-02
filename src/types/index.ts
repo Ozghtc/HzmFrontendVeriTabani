@@ -62,7 +62,7 @@ export interface Table {
 export interface ApiKey {
   id: string;
   key: string;
-  projectId: string;
+  projectId: number;
   name: string;
   permissions: ('read' | 'write' | 'delete' | 'admin')[];
   isActive: boolean;
@@ -74,10 +74,10 @@ export interface ApiKey {
 }
 
 export interface Project {
-  id: string;
+  id: number;
   name: string;
   tables: Table[];
-  userId: string;
+  userId: number;
   createdAt: string;
   apiKey: string; // Main API key for the project
   apiKeys: ApiKey[]; // Additional API keys
@@ -93,7 +93,7 @@ export interface Project {
 }
 
 export interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
   createdAt: string;
@@ -178,10 +178,10 @@ export type DatabaseAction =
   | { type: 'REGISTER'; payload: { user: User } }
   | { type: 'SET_PROJECTS'; payload: { projects: Project[] } }
   | { type: 'ADD_PROJECT'; payload: { name: string; description?: string } }
-  | { type: 'UPDATE_PROJECT'; payload: { projectId: string; name?: string; description?: string; settings?: Partial<Project['settings']> } }
-  | { type: 'SELECT_PROJECT'; payload: { projectId: string } }
+  | { type: 'UPDATE_PROJECT'; payload: { projectId: number; name?: string; description?: string; settings?: Partial<Project['settings']> } }
+  | { type: 'SELECT_PROJECT'; payload: { projectId: number } }
   | { type: 'SET_SELECTED_PROJECT'; payload: { project: Project } }
-  | { type: 'SET_PROJECT_TABLES'; payload: { projectId: string; tables: Table[] } }
+  | { type: 'SET_PROJECT_TABLES'; payload: { projectId: number; tables: Table[] } }
   | { type: 'ADD_TABLE'; payload: { name: string; id?: string } }
   | { type: 'DELETE_TABLE'; payload: { tableId: string } }
   | { type: 'SELECT_TABLE'; payload: { tableId: string } }
@@ -191,10 +191,10 @@ export type DatabaseAction =
   | { type: 'REORDER_FIELDS'; payload: { oldIndex: number; newIndex: number } }
   | { type: 'ADD_FIELD_RELATIONSHIP'; payload: { fieldId: string; relationship: FieldRelationship } }
   | { type: 'REMOVE_FIELD_RELATIONSHIP'; payload: { fieldId: string; relationshipId: string } }
-  | { type: 'ADD_API_KEY'; payload: { projectId: string; name: string; permissions: ApiKey['permissions']; expiresAt?: string } }
-  | { type: 'UPDATE_API_KEY'; payload: { projectId: string; keyId: string; name?: string; permissions?: ApiKey['permissions']; isActive?: boolean } }
-  | { type: 'DELETE_API_KEY'; payload: { projectId: string; keyId: string } }
-  | { type: 'REGENERATE_MAIN_API_KEY'; payload: { projectId: string } }
+  | { type: 'ADD_API_KEY'; payload: { projectId: number; name: string; permissions: ApiKey['permissions']; expiresAt?: string } }
+  | { type: 'UPDATE_API_KEY'; payload: { projectId: number; keyId: string; name?: string; permissions?: ApiKey['permissions']; isActive?: boolean } }
+  | { type: 'DELETE_API_KEY'; payload: { projectId: number; keyId: string } }
+  | { type: 'REGENERATE_MAIN_API_KEY'; payload: { projectId: number } }
   | { type: 'UPDATE_USER_STATUS'; payload: { userId: string; isActive: boolean } }
   | { type: 'UPDATE_USER_SUBSCRIPTION'; payload: { userId: string; subscriptionType: User['subscriptionType']; maxProjects: number; maxTables: number } }
   | { type: 'DELETE_USER'; payload: { userId: string } }
