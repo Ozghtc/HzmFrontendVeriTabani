@@ -43,7 +43,13 @@ export const useProjectData = () => {
 
         if (projectsLoading) {
           console.log('Projects still loading...');
-          setLoading(false);
+          // Don't set loading false here, keep waiting
+          return;
+        }
+
+        // Only if projects have loaded and we still don't find it
+        if (projects.length === 0) {
+          console.log('❌ No projects loaded yet, wait for them');
           return;
         }
 
@@ -60,7 +66,7 @@ export const useProjectData = () => {
     };
 
     loadProject();
-  }, [projectId]);  // ✅ FIXED - only when projectId changes
+  }, [projectId, projects, projectsLoading, dispatch]);  // ✅ FIXED - include all dependencies
 
   // Find project owner
   let projectOwner = null;
