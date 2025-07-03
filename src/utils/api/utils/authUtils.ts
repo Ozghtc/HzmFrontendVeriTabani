@@ -35,11 +35,17 @@ export class AuthManager {
   static getAuthHeaders(): Record<string, string> {
     const token = this.getToken();
     
+    console.log('🔐 AuthManager.getAuthHeaders() called');
+    console.log('🔑 Token from localStorage:', token ? token.substring(0, 20) + '...' : 'NULL');
+    console.log('⏰ Token expired?', this.isTokenExpired());
+    
     if (!token || this.isTokenExpired()) {
+      console.log('❌ No valid token, removing expired token');
       this.removeToken();
       return {};
     }
     
+    console.log('✅ Valid token found, adding Authorization header');
     return {
       'Authorization': `Bearer ${token}`
     };
