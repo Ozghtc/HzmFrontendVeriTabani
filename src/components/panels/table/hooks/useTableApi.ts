@@ -89,7 +89,7 @@ export const useTableApi = (): TableApiHookReturn => {
           } 
         });
         
-        await loadTables();
+        // Don't call loadTables() to avoid state conflicts
         return true;
       } else {
         console.error('❌ Failed to create table:', response.error);
