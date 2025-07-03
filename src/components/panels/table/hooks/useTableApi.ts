@@ -81,23 +81,10 @@ export const useTableApi = (): TableApiHookReturn => {
       if (response.success && tableData && tableData.name) {
         console.log('✅ Table created successfully:', tableData.name);
         
-        // ✅ Güvenli tablo ekleme - mevcut tables'a ekle
-        const currentTables = state.selectedProject?.tables || [];
-        const newTable = {
-          id: tableData.id.toString(),
-          name: tableData.name || tableData.displayName,
-          fields: Array.isArray(tableData.fields) ? tableData.fields : []  // ✅ Güvenli fields
-        };
+        // ✅ Fresh data çek - backend'den güncel tablo listesini al
+        console.log('🔄 Refreshing table list from backend...');
+        await loadTables();
         
-        dispatch({ 
-          type: 'SET_PROJECT_TABLES', 
-          payload: { 
-            projectId: state.selectedProject.id,
-            tables: [...currentTables, newTable]
-          } 
-        });
-        
-        // Don't call loadTables() to avoid state conflicts
         return true;
       } else {
         console.error('❌ Failed to create table:', response.error);
