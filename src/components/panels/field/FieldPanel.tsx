@@ -60,9 +60,9 @@ const FieldPanel: React.FC = () => {
       
       console.log('🔧 Adding field to backend:', fieldData.name);
       
-      const response = await apiClient.addField(
-        state.selectedProject.id, 
-        state.selectedTable.id, 
+      const response = await apiClient.fields.addField(
+        state.selectedProject.id.toString(), 
+        state.selectedTable.id.toString(), 
         fieldData
       );
       
