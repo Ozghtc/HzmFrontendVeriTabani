@@ -19,9 +19,8 @@ export const useTableApi = (): TableApiHookReturn => {
       
       const response = await apiClient.tables.getTables(state.selectedProject.id.toString());
       
-      // Fix response parsing - Backend returns { data: { tables: [...] } }
-      const responseData = (response.data as any).data || response.data;
-      const tablesData = responseData.tables || [];
+      // ✅ FIX: Double response wrapping - same as apiduzenleme.md solution
+      const tablesData = (response.data as any).data?.tables || [];
       
       if (response.success && tablesData && Array.isArray(tablesData)) {
         console.log('✅ Tables loaded:', tablesData.length, 'tables:', tablesData);
@@ -74,9 +73,8 @@ export const useTableApi = (): TableApiHookReturn => {
         name: name.trim()
       } as any);
       
-      // ✅ FIX: Double wrapping - same as apiduzenleme.md solution  
-      const responseData = (response.data as any).data || response.data;
-      const tableData = responseData.table || responseData;
+      // ✅ FIX: Double response wrapping - same as apiduzenleme.md solution  
+      const tableData = (response.data as any).data?.table || response.data;
       
       if (response.success && tableData && tableData.name) {
         console.log('✅ Table created successfully:', tableData.name);
