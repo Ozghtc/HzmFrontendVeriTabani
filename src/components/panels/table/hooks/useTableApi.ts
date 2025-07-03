@@ -75,25 +75,25 @@ export const useTableApi = (): TableApiHookReturn => {
       } as any);
       
       // ✅ FIX: Double wrapping - same as apiduzenleme.md solution  
-      console.log('📦 Full response:', response);
-      console.log('📦 Response.data:', response.data);
-      console.log('📦 Response.data.data:', (response.data as any).data);
-      
       const responseData = (response.data as any).data || response.data;
       const tableData = responseData.table || responseData;
-      
-      console.log('📦 Parsed responseData:', responseData);
-      console.log('📦 Parsed tableData:', tableData);
-      console.log('📦 tableData.name:', tableData?.name);
       
       if (response.success && tableData && tableData.name) {
         console.log('✅ Table created successfully:', tableData.name);
         
+        // ✅ Güvenli tablo ekleme - mevcut tables'a ekle
+        const currentTables = state.selectedProject?.tables || [];
+        const newTable = {
+          id: tableData.id.toString(),
+          name: tableData.name || tableData.displayName,
+          fields: Array.isArray(tableData.fields) ? tableData.fields : []  // ✅ Güvenli fields
+        };
+        
         dispatch({ 
-          type: 'ADD_TABLE', 
+          type: 'SET_PROJECT_TABLES', 
           payload: { 
-            name: tableData.name || tableData.displayName,
-            id: tableData.id.toString()
+            projectId: state.selectedProject.id,
+            tables: [...currentTables, newTable]
           } 
         });
         
