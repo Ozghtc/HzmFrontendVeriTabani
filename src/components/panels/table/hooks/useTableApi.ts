@@ -74,12 +74,20 @@ export const useTableApi = (): TableApiHookReturn => {
         name: name.trim()
       } as any);
       
-      // Fix response parsing - Backend returns { data: { table: {...} } }
+      // ✅ FIX: Double wrapping - same as apiduzenleme.md solution  
+      console.log('📦 Full response:', response);
+      console.log('📦 Response.data:', response.data);
+      console.log('📦 Response.data.data:', (response.data as any).data);
+      
       const responseData = (response.data as any).data || response.data;
       const tableData = responseData.table || responseData;
       
-      if (response.success && tableData) {
-        console.log('✅ Table created:', tableData);
+      console.log('📦 Parsed responseData:', responseData);
+      console.log('📦 Parsed tableData:', tableData);
+      console.log('📦 tableData.name:', tableData?.name);
+      
+      if (response.success && tableData && tableData.name) {
+        console.log('✅ Table created successfully:', tableData.name);
         
         dispatch({ 
           type: 'ADD_TABLE', 
