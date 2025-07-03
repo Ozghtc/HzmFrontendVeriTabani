@@ -7,8 +7,9 @@ export const fieldReducer = (state: DatabaseState, action: DatabaseAction): Data
     case 'ADD_FIELD': {
       if (!state.selectedProject || !state.selectedTable || !state.user) return state;
       
-      // Check if field name already exists
-      const fieldExists = state.selectedTable.fields.some(
+      // ✅ Safe field existence check
+      const existingFields = Array.isArray(state.selectedTable.fields) ? state.selectedTable.fields : [];
+      const fieldExists = existingFields.some(
         field => field.name.toLowerCase().trim() === action.payload.name.toLowerCase().trim()
       );
       
@@ -30,7 +31,7 @@ export const fieldReducer = (state: DatabaseState, action: DatabaseAction): Data
       const { updatedProjects, updatedSelectedProject, updatedSelectedTable } = 
         updateProjectsWithModifiedTable(state, (table) => ({
           ...table,
-          fields: cleanDuplicates([...table.fields, newField]),
+          fields: cleanDuplicates([...(Array.isArray(table.fields) ? table.fields : []), newField]),
         }));
       
       return {
@@ -47,7 +48,7 @@ export const fieldReducer = (state: DatabaseState, action: DatabaseAction): Data
       const { updatedProjects, updatedSelectedProject, updatedSelectedTable } = 
         updateProjectsWithModifiedTable(state, (table) => ({
           ...table,
-          fields: table.fields.map((field) => {
+          fields: (Array.isArray(table.fields) ? table.fields : []).map((field) => {
             if (field.id === action.payload.fieldId) {
               return {
                 ...field,
@@ -76,7 +77,7 @@ export const fieldReducer = (state: DatabaseState, action: DatabaseAction): Data
       const { updatedProjects, updatedSelectedProject, updatedSelectedTable } = 
         updateProjectsWithModifiedTable(state, (table) => ({
           ...table,
-          fields: table.fields.filter(field => field.id !== action.payload.fieldId),
+          fields: (Array.isArray(table.fields) ? table.fields : []).filter(field => field.id !== action.payload.fieldId),
         }));
       
       return {
@@ -93,7 +94,7 @@ export const fieldReducer = (state: DatabaseState, action: DatabaseAction): Data
       const { updatedProjects, updatedSelectedProject, updatedSelectedTable } = 
         updateProjectsWithModifiedTable(state, (table) => ({
           ...table,
-          fields: table.fields.map((field) => {
+          fields: (Array.isArray(table.fields) ? table.fields : []).map((field) => {
             if (field.id === action.payload.fieldId) {
               return {
                 ...field,
@@ -118,7 +119,7 @@ export const fieldReducer = (state: DatabaseState, action: DatabaseAction): Data
       const { updatedProjects, updatedSelectedProject, updatedSelectedTable } = 
         updateProjectsWithModifiedTable(state, (table) => ({
           ...table,
-          fields: table.fields.map((field) => {
+          fields: (Array.isArray(table.fields) ? table.fields : []).map((field) => {
             if (field.id === action.payload.fieldId) {
               return {
                 ...field,
@@ -144,7 +145,7 @@ export const fieldReducer = (state: DatabaseState, action: DatabaseAction): Data
 
       const { updatedProjects, updatedSelectedProject, updatedSelectedTable } = 
         updateProjectsWithModifiedTable(state, (table) => {
-          const fields = [...table.fields];
+          const fields = [...(Array.isArray(table.fields) ? table.fields : [])];
           const [removed] = fields.splice(action.payload.oldIndex, 1);
           fields.splice(action.payload.newIndex, 0, removed);
           return {
