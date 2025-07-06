@@ -11,6 +11,7 @@ import { ResponseInterceptorManager } from '../interceptors/responseInterceptor'
 import { AuthEndpoints } from '../endpoints/authEndpoints';
 import { ProjectEndpoints } from '../endpoints/projectEndpoints';
 import { TableEndpoints } from '../endpoints/tableEndpoints';
+import { TableEndpointsNew } from '../endpoints/tableEndpoints_new';
 import { FieldEndpoints } from '../endpoints/fieldEndpoints';
 import { DataEndpoints } from '../endpoints/dataEndpoints';
 import { ApiKeyEndpoints } from '../endpoints/apiKeyEndpoints';
@@ -27,6 +28,7 @@ export class ApiClient {
   public auth: AuthEndpoints;
   public projects: ProjectEndpoints;
   public tables: TableEndpoints;
+  public tablesNew: TableEndpointsNew; // YENİ STANDARDIZE API
   public fields: FieldEndpoints;
   public data: DataEndpoints;
   public apiKeys: ApiKeyEndpoints;
@@ -44,6 +46,7 @@ export class ApiClient {
     this.auth = new AuthEndpoints(requestFn);
     this.projects = new ProjectEndpoints(requestFn);
     this.tables = new TableEndpoints(requestFn);
+    this.tablesNew = new TableEndpointsNew(requestFn); // YENİ STANDARDIZE API
     this.fields = new FieldEndpoints(requestFn);
     this.data = new DataEndpoints(requestFn);
     this.apiKeys = new ApiKeyEndpoints(requestFn);
