@@ -1,12 +1,13 @@
-// In-memory token storage (no localStorage)
-class InMemoryTokenStorage {
-  private token: string | null = null;
-  private tokenExpiry: number | null = null;
+// SessionStorage token storage (secure + persistent during session)
+class SessionTokenStorage {
+  private readonly TOKEN_KEY = 'auth_token_session';
+  private readonly TOKEN_EXPIRY_KEY = 'auth_token_expiry_session';
 
   setToken(token: string, expiresIn?: number): void {
-    this.token = token;
+    sessionStorage.setItem(this.TOKEN_KEY, token);
     if (expiresIn) {
-      this.tokenExpiry = Date.now() + (expiresIn * 1000);
+      const expiryTime = Date.now() + (expiresIn * 1000);
+      sessionStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
     }
   }
 
@@ -15,26 +16,28 @@ class InMemoryTokenStorage {
       this.clearToken();
       return null;
     }
-    return this.token;
+    return sessionStorage.getItem(this.TOKEN_KEY);
   }
 
   clearToken(): void {
-    this.token = null;
-    this.tokenExpiry = null;
+    sessionStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.TOKEN_EXPIRY_KEY);
   }
 
   isExpired(): boolean {
-    if (!this.tokenExpiry) return false;
-    return Date.now() > this.tokenExpiry;
+    const expiry = sessionStorage.getItem(this.TOKEN_EXPIRY_KEY);
+    if (!expiry) return false;
+    return Date.now() > parseInt(expiry);
   }
 
   hasToken(): boolean {
-    return this.token !== null && !this.isExpired();
+    const token = sessionStorage.getItem(this.TOKEN_KEY);
+    return token !== null && !this.isExpired();
   }
 }
 
 // Global instance
-const tokenStorage = new InMemoryTokenStorage();
+const tokenStorage = new SessionTokenStorage();
 
 export class AuthManager {
   // Get stored token
@@ -62,7 +65,7 @@ export class AuthManager {
     const token = this.getToken();
     
     console.log('🔐 AuthManager.getAuthHeaders() called');
-    console.log('🔑 Token from memory:', token ? token.substring(0, 20) + '...' : 'NULL');
+    console.log('🔑 Token from sessionStorage:', token ? token.substring(0, 20) + '...' : 'NULL');
     console.log('⏰ Token expired?', this.isTokenExpired());
     
     if (!token || this.isTokenExpired()) {
