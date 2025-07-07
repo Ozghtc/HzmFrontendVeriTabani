@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { apiClient } from '../utils/api';
+import { AuthManager } from '../utils/api/utils/authUtils';
 
 const ApiTest = () => {
   const [response, setResponse] = useState<any>(null);
@@ -16,7 +17,7 @@ const ApiTest = () => {
       });
       setResponse(result);
       if (result.success && (result.data as any)?.token) {
-        localStorage.setItem('auth_token', (result.data as any).token);
+        AuthManager.setToken((result.data as any).token);
         setToken((result.data as any).token);
       }
     } catch (error) {

@@ -1,34 +1,60 @@
-const TOKEN_KEY = 'auth_token';
-const TOKEN_EXPIRY_KEY = 'auth_token_expiry';
+// In-memory token storage (no localStorage)
+class InMemoryTokenStorage {
+  private token: string | null = null;
+  private tokenExpiry: number | null = null;
+
+  setToken(token: string, expiresIn?: number): void {
+    this.token = token;
+    if (expiresIn) {
+      this.tokenExpiry = Date.now() + (expiresIn * 1000);
+    }
+  }
+
+  getToken(): string | null {
+    if (this.isExpired()) {
+      this.clearToken();
+      return null;
+    }
+    return this.token;
+  }
+
+  clearToken(): void {
+    this.token = null;
+    this.tokenExpiry = null;
+  }
+
+  isExpired(): boolean {
+    if (!this.tokenExpiry) return false;
+    return Date.now() > this.tokenExpiry;
+  }
+
+  hasToken(): boolean {
+    return this.token !== null && !this.isExpired();
+  }
+}
+
+// Global instance
+const tokenStorage = new InMemoryTokenStorage();
 
 export class AuthManager {
   // Get stored token
   static getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return tokenStorage.getToken();
   }
 
   // Set token with optional expiry
   static setToken(token: string, expiresIn?: number): void {
-    localStorage.setItem(TOKEN_KEY, token);
-    
-    if (expiresIn) {
-      const expiryTime = Date.now() + (expiresIn * 1000);
-      localStorage.setItem(TOKEN_EXPIRY_KEY, expiryTime.toString());
-    }
+    tokenStorage.setToken(token, expiresIn);
   }
 
   // Remove token
   static removeToken(): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(TOKEN_EXPIRY_KEY);
+    tokenStorage.clearToken();
   }
 
   // Check if token is expired
   static isTokenExpired(): boolean {
-    const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
-    if (!expiry) return false;
-    
-    return Date.now() > parseInt(expiry);
+    return tokenStorage.isExpired();
   }
 
   // Get auth headers
@@ -36,7 +62,7 @@ export class AuthManager {
     const token = this.getToken();
     
     console.log('🔐 AuthManager.getAuthHeaders() called');
-    console.log('🔑 Token from localStorage:', token ? token.substring(0, 20) + '...' : 'NULL');
+    console.log('🔑 Token from memory:', token ? token.substring(0, 20) + '...' : 'NULL');
     console.log('⏰ Token expired?', this.isTokenExpired());
     
     if (!token || this.isTokenExpired()) {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../utils/api';
+import { AuthManager } from '../utils/api/utils/authUtils';
 
 // Types
 interface User {
@@ -39,7 +40,7 @@ export const useApiUsers = () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = AuthManager.getToken();
       console.log('🔍 Admin fetching users with token:', token ? 'EXISTS' : 'MISSING');
       
       const response = await fetch('https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/admin/users', {
@@ -90,7 +91,7 @@ export const useApiUsers = () => {
     console.log('🔄 Updating user:', userId, userData);
     
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = AuthManager.getToken();
       
       const response = await fetch(`https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/admin/users/${userId}`, {
         method: 'PUT',
@@ -159,7 +160,7 @@ export const useApiUsers = () => {
     console.log('🗑️ Deleting user:', userId);
     
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = AuthManager.getToken();
       
       const response = await fetch(`https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/admin/users/${userId}`, {
         method: 'DELETE',
@@ -216,7 +217,7 @@ export const useApiUsers = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
+    const token = AuthManager.getToken();
     if (token) {
       fetchUsers();
     }
@@ -242,7 +243,7 @@ export const useApiAdminProjects = () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = AuthManager.getToken();
       console.log('🔍 Admin fetching all projects with token:', token ? 'EXISTS' : 'MISSING');
       
       const response = await fetch('https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/admin/projects', {
@@ -270,7 +271,7 @@ export const useApiAdminProjects = () => {
 
   const deleteProject = async (projectId: number) => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = AuthManager.getToken();
       
       const response = await fetch(`https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/admin/projects/${projectId}`, {
         method: 'DELETE',
@@ -297,7 +298,7 @@ export const useApiAdminProjects = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
+    const token = AuthManager.getToken();
     if (token) {
       fetchAllProjects();
     }

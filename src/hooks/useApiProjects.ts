@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../utils/api';
 import { useDatabase } from '../context/DatabaseContext';
+import { AuthManager } from '../utils/api/utils/authUtils';
 
 interface Project {
   id: number;
@@ -28,7 +29,7 @@ export const useApiProjects = () => {
     setError(null);
     
     // Check if user is authenticated
-    const token = localStorage.getItem('auth_token');
+    const token = AuthManager.getToken();
     if (!token) {
       console.log('❌ No auth token found');
       setProjects([]);
@@ -149,7 +150,7 @@ export const useApiProjects = () => {
 
   // Auto-fetch on mount if user is authenticated
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
+    const token = AuthManager.getToken();
     if (token) {
       fetchProjects();
     } else {
