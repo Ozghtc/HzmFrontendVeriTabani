@@ -1,6 +1,7 @@
 import { DatabaseAction } from '../../types';
 import { loadUsers, saveUsers } from '../utils/storage';
 import { defaultAdminUser } from '../constants/defaultData';
+import { AuthManager } from '../../utils/api/utils/authUtils';
 
 export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) => {
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -24,11 +25,11 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
         if (result.success && result.data) {
           const { token, user } = result.data;
           
-          // Save auth token for API calls
-          localStorage.setItem('auth_token', token);
+          // Save auth token for API calls using AuthManager
+          AuthManager.setToken(token);
           console.log('✅ Backend login successful');
           console.log('👤 Backend user data:', user);
-          console.log('🔒 JWT token saved:', token.substring(0, 20) + '...');
+          console.log('🔒 JWT token saved to sessionStorage:', token.substring(0, 20) + '...');
           
           // Clear old localStorage data to prevent conflicts
           localStorage.removeItem('all_projects');
@@ -84,11 +85,11 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
         if (result.success && result.data) {
           const { token, user } = result.data;
           
-          // Save auth token for API calls
-          localStorage.setItem('auth_token', token);
+          // Save auth token for API calls using AuthManager
+          AuthManager.setToken(token);
           console.log('✅ Backend registration successful');
           console.log('👤 Backend user data:', user);
-          console.log('🔒 JWT token saved:', token.substring(0, 20) + '...');
+          console.log('🔒 JWT token saved to sessionStorage:', token.substring(0, 20) + '...');
           
           // Dispatch register with backend user data
           dispatch({ type: 'REGISTER', payload: { user } });
@@ -134,8 +135,10 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
   };
   
   const logout = () => {
+    // Clear auth token using AuthManager
+    AuthManager.removeToken();
+    
     // Clear ALL localStorage data to prevent fallback issues
-    localStorage.removeItem('auth_token');
     localStorage.removeItem('database_state');
     localStorage.removeItem('database_users');
     localStorage.removeItem('all_projects');
@@ -164,8 +167,8 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
   
   // Save auth token for API calls
   const saveAuthToken = (token: string) => {
-    localStorage.setItem('auth_token', token);
-    console.log('🔑 Auth token saved for API calls');
+    AuthManager.setToken(token);
+    console.log('🔑 Auth token saved to sessionStorage for API calls');
   };
   
   return { login, register, logout, getAllUsers, saveAuthToken };
