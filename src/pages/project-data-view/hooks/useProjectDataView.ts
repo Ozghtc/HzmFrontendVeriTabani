@@ -81,7 +81,7 @@ export const useProjectDataView = () => {
     }
   };
 
-  const currentTable = project?.tables.find((t: any) => t.id === selectedTable);
+  const currentTable = project?.tables?.find((t: any) => t.id === selectedTable);
 
   // Load data from API using tableId
   const loadDataFromAPI = async (tableId: string) => {
