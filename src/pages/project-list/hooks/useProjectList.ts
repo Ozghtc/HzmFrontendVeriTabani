@@ -108,6 +108,8 @@ export const useProjectList = () => {
 
   // Navigation handlers
   const navigateToData = useCallback((projectId: number) => {
+    console.log('🔍 Navigating to data for project:', projectId);
+    console.log('🔍 URL will be:', `/projects/${projectId}/data`);
     navigate(`/projects/${projectId}/data`);
   }, [navigate]);
 

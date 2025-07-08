@@ -36,6 +36,9 @@ export const useProjectDataView = () => {
   const loadProject = async () => {
     try {
       setProjectLoading(true);
+      console.log('🔍 Loading project with ID:', parsedProjectId);
+      console.log('🔍 Original projectId param:', projectId);
+      
       const token = getAuthToken();
       if (!token) {
         throw new Error('Authentication required');
