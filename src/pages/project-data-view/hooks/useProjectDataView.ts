@@ -352,6 +352,13 @@ export const useProjectDataView = () => {
     loadProject();
   }, [parsedProjectId]);
 
+  // Eğer context'te tablo yoksa, loadProject'i tekrar tetikle
+  useEffect(() => {
+    if (project && (!project.tables || project.tables.length === 0)) {
+      loadProject();
+    }
+  }, [project]);
+
   // Auto-select first table when project loads
   useEffect(() => {
     if (project?.tables?.length > 0 && !selectedTable) {
