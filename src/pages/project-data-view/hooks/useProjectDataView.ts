@@ -27,6 +27,11 @@ export const useProjectDataView = () => {
   // Safe ID comparison - handle both string and number types
   const parsedProjectId = Number(projectId);
 
+  // Get auth token
+  const getAuthToken = () => {
+    return sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
+  };
+
   // Load project from API
   const loadProject = async () => {
     try {
@@ -77,11 +82,6 @@ export const useProjectDataView = () => {
   };
 
   const currentTable = project?.tables.find((t: any) => t.id === selectedTable);
-
-  // Get auth token
-  const getAuthToken = () => {
-    return sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
-  };
 
   // Load data from API using tableId
   const loadDataFromAPI = async (tableId: string) => {
