@@ -56,7 +56,7 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
     );
   }
 
-  if (table.fields.length === 0) {
+  if (!table.fields || table.fields.length === 0) {
     return (
       <NoFieldsState
         projectId={projectId}

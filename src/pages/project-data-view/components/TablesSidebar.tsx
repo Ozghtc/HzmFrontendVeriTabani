@@ -11,14 +11,14 @@ const TablesSidebar: React.FC<TablesSidebarProps> = ({ project, selectedTable, o
         <Table size={20} className="mr-2" />
         Tablolar
       </h2>
-      {project.tables.length === 0 ? (
+      {!project?.tables || project.tables.length === 0 ? (
         <div className="text-center text-gray-500 py-4">
           <Table className="mx-auto mb-2" size={32} />
           <p className="text-sm">Henüz tablo yok</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {project.tables.map((table: any) => (
+          {project.tables?.map((table: any) => (
             <button
               key={table.id}
               onClick={() => onTableSelect(table.id)}
@@ -29,7 +29,7 @@ const TablesSidebar: React.FC<TablesSidebarProps> = ({ project, selectedTable, o
               }`}
             >
               <div className="font-medium">{table.name}</div>
-              <div className="text-xs text-gray-500">{table.fields.length} alan</div>
+              <div className="text-xs text-gray-500">{table.fields?.length || 0} alan</div>
             </button>
           ))}
         </div>
