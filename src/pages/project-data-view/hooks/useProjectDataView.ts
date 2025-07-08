@@ -38,6 +38,7 @@ export const useProjectDataView = () => {
       setProjectLoading(true);
       console.log('🔍 Loading project with ID:', parsedProjectId);
       console.log('🔍 Original projectId param:', projectId);
+      console.log('🔍 Context projects:', state.projects);
       
       const token = getAuthToken();
       if (!token) {
@@ -46,15 +47,19 @@ export const useProjectDataView = () => {
 
       // First try to get project from context
       let foundProject = state.projects.find(p => p.id === parsedProjectId);
+      console.log('🔍 Found project in context:', foundProject);
       
       if (!foundProject) {
         // If not in context, fetch from API
+        console.log('🔍 Project not in context, fetching from API...');
         const response = await axios.get(`${API_URL}/tables/project/${parsedProjectId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
+        
+        console.log('🔍 API Response:', response.data);
         
         if (response.data.success) {
           foundProject = {
@@ -72,9 +77,11 @@ export const useProjectDataView = () => {
               fields: table.fields || []
             }))
           } as any;
+          console.log('🔍 Created project object:', foundProject);
         }
       }
       
+      console.log('🔍 Final project to set:', foundProject);
       setProject(foundProject);
     } catch (err: any) {
       console.error('Error loading project:', err);
