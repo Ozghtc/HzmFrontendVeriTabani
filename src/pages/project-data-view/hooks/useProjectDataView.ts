@@ -10,7 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://hzmbackandveritabani-pr
 export const useProjectDataView = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const { state } = useDatabase();
+  const { state, dispatch } = useDatabase(); // dispatch eklendi
   
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [tableData, setTableData] = useState<TableData[]>([]);
@@ -64,25 +64,31 @@ export const useProjectDataView = () => {
         if (response.data.success) {
           foundProject = {
             id: parsedProjectId,
-            name: 'e-ticaret',
-            userId: 1,
-            createdAt: new Date().toISOString(),
-            apiKey: '',
-            apiKeys: [],
-            isPublic: false,
-            settings: {},
+            name: response.data.data.project?.name || 'e-ticaret',
+            userId: response.data.data.project?.userId || 1,
+            createdAt: response.data.data.project?.createdAt || new Date().toISOString(),
+            apiKey: response.data.data.project?.apiKey || '',
+            apiKeys: response.data.data.project?.apiKeys || [],
+            isPublic: response.data.data.project?.isPublic || false,
+            settings: response.data.data.project?.settings || {},
+            description: response.data.data.project?.description || '',
             tables: response.data.data.tables.map((table: any) => ({
               id: table.id.toString(),
               name: table.name,
               fields: table.fields || []
             }))
           } as any;
-          console.log('🔍 Created project object:', foundProject);
+          // Context'e ekle/güncelle
+          dispatch({ type: 'SET_PROJECTS', payload: { projects: [ ...state.projects.filter(p => p.id !== foundProject.id), foundProject ] } });
         }
       }
       
       console.log('🔍 Final project to set:', foundProject);
-      setProject(foundProject);
+      if (foundProject !== undefined && foundProject !== null) {
+        setProject(foundProject as any);
+      } else {
+        setProject(null);
+      }
     } catch (err: any) {
       console.error('Error loading project:', err);
       setError('Proje bilgileri yüklenirken hata oluştu');
@@ -102,7 +108,7 @@ export const useProjectDataView = () => {
       const token = getAuthToken();
       if (!token) {
         throw new Error('Authentication required');
-      }
+  }
 
       const response = await axios.get(`${API_URL}/data/table/${tableId}`, {
         headers: {
