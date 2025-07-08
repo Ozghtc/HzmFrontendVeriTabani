@@ -21,18 +21,62 @@ export const useProjectDataView = () => {
   const [newRowData, setNewRowData] = useState<RowFormData>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [project, setProject] = useState<any>(null);
+  const [projectLoading, setProjectLoading] = useState(true);
 
   // Safe ID comparison - handle both string and number types
   const parsedProjectId = Number(projectId);
-  let project = state.projects.find(p => p.id === parsedProjectId);
 
-  // If admin and project not found, search in localStorage
-  if (!project && state.user?.isAdmin) {
-    const allProjects = JSON.parse(localStorage.getItem('all_projects') || '[]');
-    project = allProjects.find((p: any) => p.id === parsedProjectId);
-  }
+  // Load project from API
+  const loadProject = async () => {
+    try {
+      setProjectLoading(true);
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
 
-  const currentTable = project?.tables.find(t => t.id === selectedTable);
+      // First try to get project from context
+      let foundProject = state.projects.find(p => p.id === parsedProjectId);
+      
+      if (!foundProject) {
+        // If not in context, fetch from API
+        const response = await axios.get(`${API_URL}/tables/project/${parsedProjectId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.data.success) {
+          foundProject = {
+            id: parsedProjectId,
+            name: 'e-ticaret',
+            userId: 1,
+            createdAt: new Date().toISOString(),
+            apiKey: '',
+            apiKeys: [],
+            isPublic: false,
+            settings: {},
+            tables: response.data.data.tables.map((table: any) => ({
+              id: table.id.toString(),
+              name: table.name,
+              fields: table.fields || []
+            }))
+          } as any;
+        }
+      }
+      
+      setProject(foundProject);
+    } catch (err: any) {
+      console.error('Error loading project:', err);
+      setError('Proje bilgileri yüklenirken hata oluştu');
+    } finally {
+      setProjectLoading(false);
+    }
+  };
+
+  const currentTable = project?.tables.find((t: any) => t.id === selectedTable);
 
   // Get auth token
   const getAuthToken = () => {
@@ -124,12 +168,12 @@ export const useProjectDataView = () => {
       console.error('Error adding record:', err);
       
       // If API fails, save to localStorage
-      const newRow = createNewRow(currentTable.fields, newRowData);
-      const updatedData = [...tableData, newRow];
-      saveTableData(selectedTable!, updatedData);
-      setTableData(updatedData);
-      setAddingRow(false);
-      setNewRowData({});
+    const newRow = createNewRow(currentTable.fields, newRowData);
+    const updatedData = [...tableData, newRow];
+    saveTableData(selectedTable!, updatedData);
+    setTableData(updatedData);
+    setAddingRow(false);
+    setNewRowData({});
       
       if (err.response?.status === 401) {
         setError('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
@@ -187,13 +231,13 @@ export const useProjectDataView = () => {
       console.error('Error updating record:', err);
       
       // Fallback to local storage
-      const updatedData = tableData.map(row => 
+    const updatedData = tableData.map(row => 
         row.id === editingRow ? { ...row, ...editData } : row
-      );
-      saveTableData(selectedTable!, updatedData);
-      setTableData(updatedData);
-      setEditingRow(null);
-      setEditData({});
+    );
+    saveTableData(selectedTable!, updatedData);
+    setTableData(updatedData);
+    setEditingRow(null);
+    setEditData({});
       
       if (err.response?.status === 401) {
         setError('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
@@ -251,10 +295,10 @@ export const useProjectDataView = () => {
       console.error('Error deleting record:', err);
       
       // Fallback to local storage
-      const updatedData = tableData.filter(row => row.id !== deletingRow.id);
-      saveTableData(selectedTable!, updatedData);
-      setTableData(updatedData);
-      setDeletingRow(null);
+    const updatedData = tableData.filter(row => row.id !== deletingRow.id);
+    saveTableData(selectedTable!, updatedData);
+    setTableData(updatedData);
+    setDeletingRow(null);
       
       if (err.response?.status === 401) {
         setError('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
@@ -287,6 +331,11 @@ export const useProjectDataView = () => {
     }));
   };
 
+  // Load project on component mount
+  useEffect(() => {
+    loadProject();
+  }, [parsedProjectId]);
+
   // Reload data when selectedTable changes
   useEffect(() => {
     if (selectedTable) {
@@ -308,6 +357,7 @@ export const useProjectDataView = () => {
     newRowData,
     loading,
     error,
+    projectLoading,
     
     // Actions
     navigate,
