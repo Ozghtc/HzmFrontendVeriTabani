@@ -14,6 +14,8 @@ interface ExtendedDataTableProps extends DataTableProps {
   projectId: number;
   navigate: (path: string) => void;
   selectedTable: string | null;
+  loading?: boolean;
+  error?: string | null;
 }
 
 const DataTable: React.FC<ExtendedDataTableProps> = ({
@@ -34,7 +36,9 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
   setNewRowData,
   projectId,
   navigate,
-  selectedTable
+  selectedTable,
+  loading,
+  error
 }) => {
   const { AlertTriangle } = icons;
 
@@ -67,6 +71,18 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
         tableName={table.name}
         onAddNewRow={() => setAddingRow(true)}
       />
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600 text-sm">{error}</p>
+        </div>
+      )}
+
+      {loading && (
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-blue-600 text-sm">Veriler yükleniyor...</p>
+        </div>
+      )}
 
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">

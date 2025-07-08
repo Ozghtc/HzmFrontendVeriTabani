@@ -22,6 +22,8 @@ const ProjectDataView = () => {
     deletingRow,
     editData,
     newRowData,
+    loading,
+    error,
     
     // Actions
     navigate,
@@ -81,6 +83,8 @@ const ProjectDataView = () => {
               projectId={projectId}
               navigate={navigate}
               selectedTable={selectedTable}
+              loading={loading}
+              error={error}
             />
           </div>
         </div>
