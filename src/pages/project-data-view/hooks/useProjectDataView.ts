@@ -336,6 +336,15 @@ export const useProjectDataView = () => {
     loadProject();
   }, [parsedProjectId]);
 
+  // Auto-select first table when project loads
+  useEffect(() => {
+    if (project?.tables?.length > 0 && !selectedTable) {
+      const firstTable = project.tables[0];
+      setSelectedTable(firstTable.id);
+      loadDataFromAPI(firstTable.id);
+    }
+  }, [project, selectedTable]);
+
   // Reload data when selectedTable changes
   useEffect(() => {
     if (selectedTable) {
