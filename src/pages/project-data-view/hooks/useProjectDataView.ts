@@ -32,66 +32,53 @@ export const useProjectDataView = () => {
     return sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
   };
 
-  // Load project from API
+  // Load project from API veya context
   const loadProject = async () => {
     try {
       setProjectLoading(true);
-      console.log('🔍 Loading project with ID:', parsedProjectId);
-      console.log('🔍 Original projectId param:', projectId);
-      console.log('🔍 Context projects:', state.projects);
-      
       const token = getAuthToken();
       if (!token) {
         throw new Error('Authentication required');
       }
-
-      // First try to get project from context
+      // Önce context'te doğru projeyi bul
       let foundProject = state.projects.find(p => p.id === parsedProjectId);
-      console.log('🔍 Found project in context:', foundProject);
-      
-      if (!foundProject) {
-        // If not in context, fetch from API
-        console.log('🔍 Project not in context, fetching from API...');
-        const response = await axios.get(`${API_URL}/tables/project/${parsedProjectId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        console.log('🔍 API Response:', response.data);
-        
-        if (response.data.success) {
-          foundProject = {
-            id: parsedProjectId,
-            name: response.data.data.project?.name || 'e-ticaret',
-            userId: response.data.data.project?.userId || 1,
-            createdAt: response.data.data.project?.createdAt || new Date().toISOString(),
-            apiKey: response.data.data.project?.apiKey || '',
-            apiKeys: response.data.data.project?.apiKeys || [],
-            isPublic: response.data.data.project?.isPublic || false,
-            settings: response.data.data.project?.settings || {},
-            description: response.data.data.project?.description || '',
-            tables: response.data.data.tables.map((table: any) => ({
-              id: table.id.toString(),
-              name: table.name,
-              fields: table.fields || []
-            }))
-          } as any;
-          // Context'e ekle/güncelle
-          dispatch({ type: 'SET_PROJECTS', payload: { projects: [ ...state.projects.filter(p => p.id !== foundProject.id), foundProject ] } });
-        }
+      if (foundProject) {
+        setProject(foundProject);
+        setProjectLoading(false);
+        return;
       }
-      
-      console.log('🔍 Final project to set:', foundProject);
-      if (foundProject !== undefined && foundProject !== null) {
-        setProject(foundProject as any);
+      // Yoksa API'den fetch et
+      const response = await axios.get(`${API_URL}/tables/project/${parsedProjectId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.data.success) {
+        foundProject = {
+          id: parsedProjectId,
+          name: response.data.data.project?.name || 'e-ticaret',
+          userId: response.data.data.project?.userId || 1,
+          createdAt: response.data.data.project?.createdAt || new Date().toISOString(),
+          apiKey: response.data.data.project?.apiKey || '',
+          apiKeys: response.data.data.project?.apiKeys || [],
+          isPublic: response.data.data.project?.isPublic || false,
+          settings: response.data.data.project?.settings || {},
+          description: response.data.data.project?.description || '',
+          tables: response.data.data.tables.map((table: any) => ({
+            id: table.id.toString(),
+            name: table.name,
+            fields: table.fields || []
+          }))
+        } as any;
+        dispatch({ type: 'SET_PROJECTS', payload: { projects: [ ...state.projects.filter(p => p.id !== foundProject.id), foundProject ] } });
+        setProject(foundProject);
       } else {
         setProject(null);
       }
     } catch (err: any) {
-      console.error('Error loading project:', err);
       setError('Proje bilgileri yüklenirken hata oluştu');
+      setProject(null);
     } finally {
       setProjectLoading(false);
     }
