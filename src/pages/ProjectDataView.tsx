@@ -44,7 +44,7 @@ const ProjectDataView = () => {
   } = useProjectDataView();
 
   const { state } = useDatabase();
-  // users dizisini context, localStorage veya admin panelinden fallback ile al
+  // users dizisini context, localStorage veya API'den fallback ile al
   let users = [];
   if (state && Array.isArray((state as any).users)) {
     users = (state as any).users;
@@ -56,14 +56,21 @@ const ProjectDataView = () => {
     }
   }
 
-  // project objesinin name, userId, userName alanlarını eksiksiz parse et
-  if (project && (!project.name || !project.userId || !project.userName)) {
-    const contextProject = users.length > 0
-      ? users.find(u => u.id === project.userId)
-      : null;
-    project.name = project.name || '';
-    project.userId = project.userId || (contextProject ? contextProject.id : null);
-    project.userName = project.userName || (contextProject ? contextProject.name : '');
+  // project objesinin userId ve userName alanlarını users dizisinden doldur
+  if (project && (!project.userId || !project.userName)) {
+    const user = users.find((u: any) => u.id === project.userId);
+    if (user) {
+      project.userName = user.name;
+      project.userId = user.id;
+    }
+  }
+
+  // API response parse hatası veya rate limit için kullanıcıya mesaj göster
+  if (error && error.toLowerCase().includes('json')) {
+    return <div className="text-center text-red-600 mt-12">Sunucu yanıtı geçersiz. Lütfen sayfayı yenileyin veya biraz bekleyin.</div>;
+  }
+  if (error && error.toLowerCase().includes('429')) {
+    return <div className="text-center text-red-600 mt-12">Çok fazla istek attınız. Lütfen biraz bekleyin ve tekrar deneyin.</div>;
   }
 
   if (projectLoading) {
