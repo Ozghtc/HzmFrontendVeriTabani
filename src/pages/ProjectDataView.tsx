@@ -56,6 +56,16 @@ const ProjectDataView = () => {
     }
   }
 
+  // project objesinin name, userId, userName alanlarını eksiksiz parse et
+  if (project && (!project.name || !project.userId || !project.userName)) {
+    const contextProject = users.length > 0
+      ? users.find(u => u.id === project.userId)
+      : null;
+    project.name = project.name || '';
+    project.userId = project.userId || (contextProject ? contextProject.id : null);
+    project.userName = project.userName || (contextProject ? contextProject.name : '');
+  }
+
   if (projectLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
