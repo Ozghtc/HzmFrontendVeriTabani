@@ -1,6 +1,7 @@
 import React from 'react';
 import { useProjectDataView } from './project-data-view/hooks/useProjectDataView';
 import { formatDisplayValue } from './project-data-view/utils/dataFormatters';
+import { useDatabase } from '../context/DatabaseContext';
 
 // Components
 import NoProjectState from './project-data-view/components/EmptyStates/NoProjectState';
@@ -41,6 +42,8 @@ const ProjectDataView = () => {
     handleEditInputChange,
     handleNewRowInputChange
   } = useProjectDataView();
+
+  const { state } = useDatabase();
 
   if (projectLoading) {
     return (
