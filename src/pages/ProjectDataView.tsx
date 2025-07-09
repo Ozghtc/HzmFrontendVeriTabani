@@ -44,6 +44,17 @@ const ProjectDataView = () => {
   } = useProjectDataView();
 
   const { state } = useDatabase();
+  // users dizisini context'ten, yoksa localStorage'dan al
+  let users = [];
+  if (state && Array.isArray((state as any).users)) {
+    users = (state as any).users;
+  } else {
+    try {
+      users = JSON.parse(localStorage.getItem('databaseUsers') || '[]');
+    } catch {
+      users = [];
+    }
+  }
 
   if (projectLoading) {
     return (
@@ -66,6 +77,7 @@ const ProjectDataView = () => {
       <ProjectHeader 
         project={project} 
         onNavigateBack={() => navigate('/projects')} 
+        users={users}
       />
 
       <main className="container mx-auto p-4">
