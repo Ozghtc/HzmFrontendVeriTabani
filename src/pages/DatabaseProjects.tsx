@@ -73,6 +73,7 @@ const DatabaseProjects = () => {
               onDelete={() => handleDeleteProject(project)}
               onNavigateToData={() => navigate(`/projects/${project.id}/data`)}
               onNavigateToEdit={() => navigate(`/projects/${project.id}`)}
+              users={users}
             />
           ))}
         </div>

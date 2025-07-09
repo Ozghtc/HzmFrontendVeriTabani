@@ -10,6 +10,7 @@ interface ProjectCardProps {
   onDelete: () => void;
   onNavigateToData: () => void;
   onNavigateToEdit: () => void;
+  users: any[]; // eklendi
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -19,7 +20,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onCopyApiKey,
   onDelete,
   onNavigateToData,
-  onNavigateToEdit
+  onNavigateToEdit,
+  users // eklendi
 }) => {
   const { Database, User, Table, FileText, Calendar, Key, Eye, EyeOff, Copy, Trash2 } = icons;
   const projectApiKey = project?.apiKey || '';
@@ -34,7 +36,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               <h3 className="text-lg font-semibold text-gray-800">{project.name || 'İsimsiz Proje'}</h3>
               <p className="text-sm text-gray-500 flex items-center mt-1">
                 <User size={14} className="mr-1" />
-                {getUserName(project)}
+                {getUserName(project, users)}
               </p>
             </div>
           </div>

@@ -1,5 +1,7 @@
-export const getUserName = (project: any) => {
-  return project?.userName || 'Bilinmeyen Kullanıcı';
+export const getUserName = (project: any, users: any[] = []) => {
+  if (project?.userName) return project.userName;
+  const user = users.find(u => u.id === project.userId);
+  return user ? user.name : 'Bilinmeyen Kullanıcı';
 };
 
 export const getTotalTables = (project: any) => {
