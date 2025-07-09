@@ -3,6 +3,7 @@ import { useUsersManagement } from './database-users/hooks/useUsersManagement';
 import { filterUsers } from './database-users/utils/userHelpers';
 import { icons } from './database-users/constants/userConstants';
 import { DEFAULT_USER_DATA } from './database-users/constants/userConstants';
+import { FaDatabase } from 'react-icons/fa'; // fallback ikon
 
 // Components
 import UsersLoading from './database-users/components/UsersLoading';
@@ -48,6 +49,9 @@ const DatabaseUsers = () => {
     cancelDeleteUser
   } = useUsersManagement();
 
+  // users undefined/null kontrolü
+  const safeUsers = users || [];
+  console.log('users:', safeUsers);
   const { Database } = icons;
 
   // Loading state
@@ -55,8 +59,9 @@ const DatabaseUsers = () => {
     return <UsersLoading />;
   }
 
-  // Filter users based on search and status
-  const filteredUsers = filterUsers(users, searchTerm, filterStatus);
+  // filterUsers fonksiyonunu da güvenli hale getir
+  const filteredUsers = filterUsers(safeUsers as any, searchTerm, filterStatus);
+  console.log('filteredUsers:', filteredUsers);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -93,7 +98,7 @@ const DatabaseUsers = () => {
 
         {filteredUsers.length === 0 && (
           <div className="text-center py-12 bg-white rounded-lg shadow-md mt-6">
-            <Database className="mx-auto text-gray-400 mb-4" size={64} />
+            <FaDatabase className="mx-auto text-gray-400 mb-4" size={64} />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Kullanıcı bulunamadı</h3>
             <p className="text-gray-500">Arama kriterlerinize uygun kullanıcı bulunmamaktadır.</p>
           </div>
