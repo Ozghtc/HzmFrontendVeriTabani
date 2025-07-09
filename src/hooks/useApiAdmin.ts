@@ -255,8 +255,9 @@ export const useApiAdminProjects = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Admin projects loaded:', data.projects?.length || 0, 'projects');
-        setProjects(data.projects || []);
+        const backendProjects = data.data?.projects || data.projects || [];
+        console.log('✅ Admin projects loaded:', backendProjects.length, 'projects');
+        setProjects(backendProjects);
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to fetch projects');
