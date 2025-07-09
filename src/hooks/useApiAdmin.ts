@@ -52,8 +52,8 @@ export const useApiUsers = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Admin users loaded from backend:', data.users?.length || 0, 'users');
-        const backendUsers = data.users || [];
+        const backendUsers = data.data?.users || data.users || [];
+        console.log('✅ Admin users loaded from backend:', backendUsers.length, 'users');
         setUsers(backendUsers);
         
         // Also save to localStorage for fallback operations
