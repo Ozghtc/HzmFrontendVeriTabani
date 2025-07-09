@@ -44,7 +44,7 @@ const ProjectDataView = () => {
   } = useProjectDataView();
 
   const { state } = useDatabase();
-  // users dizisini context'ten, yoksa localStorage'dan al
+  // users dizisini context, localStorage veya admin panelinden fallback ile al
   let users = [];
   if (state && Array.isArray((state as any).users)) {
     users = (state as any).users;
