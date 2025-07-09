@@ -355,7 +355,22 @@ export const useProjectDataView = () => {
   // Eğer context'te tablo yoksa, loadProject'i tekrar tetikle (admin paneli için de çalışsın)
   useEffect(() => {
     if (project && (!project.tables || project.tables.length === 0)) {
-      loadProject();
+      // API'den tablo/alanları doğrudan çek
+      const token = getAuthToken();
+      if (token && project.id) {
+        fetch(`${API_URL}/tables/project/${project.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.data && data.data.tables) {
+              setProject((prev: any) => ({ ...prev, tables: data.data.tables }));
+            }
+          });
+      }
     }
   }, [project]);
 
