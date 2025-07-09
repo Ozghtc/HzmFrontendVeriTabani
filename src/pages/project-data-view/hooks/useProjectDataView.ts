@@ -352,7 +352,7 @@ export const useProjectDataView = () => {
     loadProject();
   }, [parsedProjectId]);
 
-  // Eğer context'te tablo yoksa, loadProject'i tekrar tetikle
+  // Eğer context'te tablo yoksa, loadProject'i tekrar tetikle (admin paneli için de çalışsın)
   useEffect(() => {
     if (project && (!project.tables || project.tables.length === 0)) {
       loadProject();
