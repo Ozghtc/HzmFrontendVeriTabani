@@ -55,19 +55,23 @@ export const useProjectDataView = () => {
         }
       });
       if (response.data.success) {
+        // Doğru parse
+        const projectData = response.data?.data?.project || response.data?.project || {};
+        const tables = response.data?.data?.tables || response.data?.tables || [];
         foundProject = {
           id: parsedProjectId,
-          name: response.data.data.project?.name || '',
-          userId: response.data.data.project?.userId || null,
-          createdAt: response.data.data.project?.createdAt || '',
-          apiKey: response.data.data.project?.apiKey || '',
-          apiKeys: response.data.data.project?.apiKeys || [],
-          isPublic: response.data.data.project?.isPublic || false,
-          settings: response.data.data.project?.settings || {},
-          description: response.data.data.project?.description || '',
-          tables: response.data.data.tables.map((table: any) => ({
-            id: table.id.toString(),
-            name: table.name,
+          name: projectData.name || '',
+          userId: projectData.userId || null,
+          userName: projectData.userName || '',
+          createdAt: projectData.createdAt || '',
+          apiKey: projectData.apiKey || '',
+          apiKeys: projectData.apiKeys || [],
+          isPublic: projectData.isPublic || false,
+          settings: projectData.settings || {},
+          description: projectData.description || '',
+          tables: tables.map((table: any) => ({
+            id: table.id?.toString() || '',
+            name: table.name || '',
             fields: table.fields || []
           }))
         } as any;
