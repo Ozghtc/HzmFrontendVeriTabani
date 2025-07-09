@@ -44,13 +44,13 @@ const ProjectDataView = () => {
   } = useProjectDataView();
 
   const { state } = useDatabase();
-  // users dizisini context, localStorage veya API'den fallback ile al
+  // users dizisini context, sessionStorage veya admin panelinden fallback ile al
   let users = [];
   if (state && Array.isArray((state as any).users)) {
     users = (state as any).users;
   } else {
     try {
-      users = JSON.parse(localStorage.getItem('databaseUsers') || '[]');
+      users = JSON.parse(sessionStorage.getItem('databaseUsers') || '[]');
     } catch {
       users = [];
     }
