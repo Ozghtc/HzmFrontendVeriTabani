@@ -57,9 +57,9 @@ export const useProjectDataView = () => {
       if (response.data.success) {
         foundProject = {
           id: parsedProjectId,
-          name: response.data.data.project?.name || 'e-ticaret',
-          userId: response.data.data.project?.userId || 1,
-          createdAt: response.data.data.project?.createdAt || new Date().toISOString(),
+          name: response.data.data.project?.name || '',
+          userId: response.data.data.project?.userId || null,
+          createdAt: response.data.data.project?.createdAt || '',
           apiKey: response.data.data.project?.apiKey || '',
           apiKeys: response.data.data.project?.apiKeys || [],
           isPublic: response.data.data.project?.isPublic || false,
