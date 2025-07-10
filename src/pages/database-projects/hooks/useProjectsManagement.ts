@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDatabase } from '../../../context/DatabaseContext';
 import { useApiAdminProjects } from '../../../hooks/useApiAdmin';
+import { useApiUsers } from '../../../hooks/useApiAdmin';
 import { NotificationState, ProjectsFilters } from '../types/projectTypes';
 import { NOTIFICATION_TIMEOUT } from '../constants/projectConstants';
+import React from 'react';
 
 export const useProjectsManagement = () => {
   const { state, getAllUsers } = useDatabase();
   const { projects: backendProjects, loading, error, deleteProject: deleteProjectApi, fetchAllProjects } = useApiAdminProjects();
+  const { fetchUsers } = useApiUsers();
   const navigate = useNavigate();
   
   const [filters, setFilters] = useState<ProjectsFilters>({
@@ -29,6 +32,13 @@ export const useProjectsManagement = () => {
   // Use backend projects instead of localStorage with fallback
   const allProjects = backendProjects || [];
   const users = getAllUsers() || [];
+
+  // Eğer users dizisi boşsa, otomatik olarak API'den çek
+  React.useEffect(() => {
+    if (!users || users.length === 0) {
+      fetchUsers();
+    }
+  }, [users, fetchUsers]);
 
   const handleDeleteProject = (project: any) => {
     setDeletingProject(project);
