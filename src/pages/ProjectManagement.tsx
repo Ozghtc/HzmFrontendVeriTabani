@@ -19,6 +19,7 @@ const ProjectManagement = () => {
     loading, 
     error, 
     currentUser, 
+    refreshProject,
     navigateToProjects 
   } = useProjectData();
   
@@ -58,7 +59,7 @@ const ProjectManagement = () => {
       />
 
       <main className="container mx-auto p-4">
-        {activeTab === 'tables' && <TablesTabContent project={project} />}
+        {activeTab === 'tables' && <TablesTabContent project={project} onRefresh={refreshProject} />}
         
         {activeTab === 'api' && <ApiTabContent project={project} />}
         

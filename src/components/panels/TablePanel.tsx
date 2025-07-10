@@ -9,12 +9,14 @@ interface TablePanelProps {
   selectedProject: any | null;
   selectedTable: any | null;
   onTableSelect: (tableId: string) => void;
+  onTableCreated?: () => Promise<void>;
 }
 
 const TablePanel: React.FC<TablePanelProps> = ({ 
   selectedProject, 
   selectedTable, 
-  onTableSelect 
+  onTableSelect,
+  onTableCreated
 }) => {
   const { loading, error, loadTables, createTable, deleteTable } = useTableApi();
   const [deletingTable, setDeletingTable] = useState<string | null>(null);
@@ -68,13 +70,26 @@ const TablePanel: React.FC<TablePanelProps> = ({
     setDeletingTable(null);
   };
 
-  const handleTableAdded = async () => {
-    // Refresh tables after adding
+  const handleTableAdded = async (newTable?: any) => {
+    console.log('🎉 Table added, refreshing local and parent state...');
+    
+    // Refresh local tables
     if (selectedProject?.id) {
       const updatedTables = await loadTables(selectedProject.id.toString());
       if (updatedTables) {
         setTables(updatedTables);
+        
+        // Auto-select the newly created table
+        if (newTable && newTable.id) {
+          console.log('🎯 Auto-selecting newly created table:', newTable.name);
+          handleSelectTable(newTable.id.toString());
+        }
       }
+    }
+    
+    // Call parent callback to refresh project data
+    if (onTableCreated) {
+      await onTableCreated();
     }
   };
 

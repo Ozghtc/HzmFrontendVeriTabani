@@ -47,8 +47,8 @@ export const useTableApi = (): TableApiHookReturn => {
     }
   }, []); // Empty dependency array - stable function
 
-  const createTable = useCallback(async (projectId: string, name: string): Promise<boolean> => {
-    if (!projectId) return false;
+  const createTable = useCallback(async (projectId: string, name: string): Promise<any | null> => {
+    if (!projectId) return null;
     
     try {
       setLoading(true);
@@ -65,16 +65,21 @@ export const useTableApi = (): TableApiHookReturn => {
       
       if (response.success && tableData && tableData.name) {
         console.log('✅ Table created successfully:', tableData.name);
-        return true;
+        // Return the full table data for auto-selection
+        return {
+          id: tableData.id.toString(),
+          name: tableData.name,
+          fields: tableData.fields || []
+        };
       } else {
         console.error('❌ Failed to create table:', response.error);
         setError(response.error || 'Failed to create table');
-        return false;
+        return null;
       }
     } catch (error) {
       console.error('💥 Error creating table:', error);
       setError('Network error while creating table');
-      return false;
+      return null;
     } finally {
       setLoading(false);
     }

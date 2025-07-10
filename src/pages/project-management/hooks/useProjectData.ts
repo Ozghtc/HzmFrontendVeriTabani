@@ -15,82 +15,87 @@ export const useProjectData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadProject = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const loadProject = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Frontend-first approach
-        const parsedProjectId = Number(projectId);
-        console.log('Looking for project:', parsedProjectId, 'in', projects.length, 'projects');
+      // Frontend-first approach
+      const parsedProjectId = Number(projectId);
+      console.log('Looking for project:', parsedProjectId, 'in', projects.length, 'projects');
+      
+      const frontendProject = projects.find(p => {
+        return p.id === parsedProjectId || p.id.toString() === projectId;
+      });
+      
+      if (frontendProject) {
+        console.log('✅ Found project:', frontendProject.name);
         
-        const frontendProject = projects.find(p => {
-          return p.id === parsedProjectId || p.id.toString() === projectId;
-        });
-        
-        if (frontendProject) {
-          console.log('✅ Found project:', frontendProject.name);
+        // Load tables for this project
+        try {
+          console.log('📋 Loading tables for project:', frontendProject.id);
+          const tablesResponse = await apiClient.tables.getTables(frontendProject.id.toString());
           
-          // Load tables for this project
-          try {
-            console.log('📋 Loading tables for project:', frontendProject.id);
-            const tablesResponse = await apiClient.tables.getTables(frontendProject.id.toString());
+          if (tablesResponse.success) {
+            const tablesData = (tablesResponse.data as any).data?.tables || [];
+            console.log('✅ Tables loaded:', tablesData.length, 'tables');
             
-            if (tablesResponse.success) {
-              const tablesData = (tablesResponse.data as any).data?.tables || [];
-              console.log('✅ Tables loaded:', tablesData.length, 'tables');
-              
-              // Combine project with tables
-              const projectWithTables = {
-                ...frontendProject,
-                tables: tablesData.map((table: any) => ({
-                  id: table.id?.toString() || '',
-                  name: table.name || table.tableName || '',
-                  fields: table.fields || []
-                }))
-              };
-              
-              setProject(projectWithTables as any);
-            } else {
-              console.log('❌ Failed to load tables:', tablesResponse.error);
-              // Set project without tables
-              setProject({ ...frontendProject, tables: [] } as any);
-            }
-          } catch (tablesError) {
-            console.error('💥 Error loading tables:', tablesError);
+            // Combine project with tables
+            const projectWithTables = {
+              ...frontendProject,
+              tables: tablesData.map((table: any) => ({
+                id: table.id?.toString() || '',
+                name: table.name || table.tableName || '',
+                fields: table.fields || []
+              }))
+            };
+            
+            setProject(projectWithTables as any);
+          } else {
+            console.log('❌ Failed to load tables:', tablesResponse.error);
             // Set project without tables
             setProject({ ...frontendProject, tables: [] } as any);
           }
-          
-          setLoading(false);
-          return;
+        } catch (tablesError) {
+          console.error('💥 Error loading tables:', tablesError);
+          // Set project without tables
+          setProject({ ...frontendProject, tables: [] } as any);
         }
-
-        if (projectsLoading) {
-          console.log('Projects still loading...');
-          // Don't set loading false here, keep waiting
-          return;
-        }
-
-        // Only if projects have loaded and we still don't find it
-        if (projects.length === 0) {
-          console.log('❌ No projects loaded yet, wait for them');
-          return;
-        }
-
-        console.log('❌ Project not found in frontend list');
-        setError('Project not found');
-        setLoading(false);
         
-      } catch (error: any) {
-        console.error('Failed to load project:', error);
-        setError(error.message || 'Failed to load project');
-      } finally {
         setLoading(false);
+        return;
       }
-    };
 
+      if (projectsLoading) {
+        console.log('Projects still loading...');
+        // Don't set loading false here, keep waiting
+        return;
+      }
+
+      // Only if projects have loaded and we still don't find it
+      if (projects.length === 0) {
+        console.log('❌ No projects loaded yet, wait for them');
+        return;
+      }
+
+      console.log('❌ Project not found in frontend list');
+      setError('Project not found');
+      setLoading(false);
+      
+    } catch (error: any) {
+      console.error('Failed to load project:', error);
+      setError(error.message || 'Failed to load project');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshProject = async () => {
+    console.log('🔄 Refreshing project data...');
+    await loadProject();
+  };
+
+  useEffect(() => {
     loadProject();
   }, [projectId, projects, projectsLoading]);
 
@@ -116,6 +121,7 @@ export const useProjectData = () => {
     error,
     projects,
     setProject,
+    refreshProject,
     currentUser: state.user,
     navigateToProjects
   };

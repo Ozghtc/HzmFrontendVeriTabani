@@ -34,11 +34,11 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
 
     setCreating(true);
     try {
-      const success = await createTable(projectId.toString(), newTableName);
-      if (success) {
+      const newTable = await createTable(projectId.toString(), newTableName);
+      if (newTable) {
         setNewTableName('');
         setValidationError(null);
-        onTableAdded();
+        onTableAdded(newTable); // Pass the new table data
       }
     } finally {
       setCreating(false);

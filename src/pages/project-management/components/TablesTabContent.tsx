@@ -5,9 +5,10 @@ import { Field } from '../../../types';
 
 interface TablesTabContentProps {
   project: any;
+  onRefresh: () => Promise<void>;
 }
 
-const TablesTabContent: React.FC<TablesTabContentProps> = ({ project }) => {
+const TablesTabContent: React.FC<TablesTabContentProps> = ({ project, onRefresh }) => {
   const [selectedTable, setSelectedTable] = useState<any | null>(null);
   const [fields, setFields] = useState<Field[]>([]);
 
@@ -50,6 +51,19 @@ const TablesTabContent: React.FC<TablesTabContentProps> = ({ project }) => {
       console.log('✅ Selected table set:', table);
     } else {
       console.log('❌ Table not found for id:', tableId);
+    }
+  };
+
+  const handleTableCreated = async (newTable?: any) => {
+    console.log('🎉 Table created, refreshing project data...');
+    await onRefresh();
+    
+    // Auto-select the newly created table after refresh
+    if (newTable && newTable.id) {
+      console.log('🎯 Auto-selecting newly created table in TablesTabContent:', newTable.name);
+      setTimeout(() => {
+        handleSelectTable(newTable.id.toString());
+      }, 100); // Small delay to ensure refresh is complete
     }
   };
 
@@ -137,6 +151,7 @@ const TablesTabContent: React.FC<TablesTabContentProps> = ({ project }) => {
         selectedProject={project}
         selectedTable={selectedTable}
         onTableSelect={handleSelectTable}
+        onTableCreated={handleTableCreated}
       />
       <FieldPanel 
         selectedProject={project}

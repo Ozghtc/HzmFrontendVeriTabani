@@ -5,7 +5,7 @@ export interface TableApiHookState {
 
 export interface TableApiHookReturn extends TableApiHookState {
   loadTables: (projectId: string) => Promise<any[] | null>;
-  createTable: (projectId: string, name: string) => Promise<boolean>;
+  createTable: (projectId: string, name: string) => Promise<any | null>;
   deleteTable: (projectId: string, tableId: string) => Promise<boolean>;
 }
 
@@ -22,7 +22,7 @@ export interface AddTableFormProps {
   isDisabled: boolean;
   isLoading: boolean;
   tables?: any[];
-  onTableAdded: () => void;
+  onTableAdded: (newTable?: any) => void;
 }
 
 export interface DeleteTableModalProps {
