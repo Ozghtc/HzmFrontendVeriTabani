@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PlusCircle } from 'lucide-react';
-import { useDatabase } from '../../../../context/DatabaseContext';
 import { AddTableFormProps } from '../types/tableTypes';
 import { validateTableName, checkTableExists } from '../utils/tableValidation';
 import { useTableApi } from '../hooks/useTableApi';
@@ -9,15 +8,18 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
   projectId,
   isDisabled,
   isLoading,
+  tables = [],
   onTableAdded
 }) => {
-  const { state } = useDatabase();
   const { createTable } = useTableApi();
   const [newTableName, setNewTableName] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!projectId || creating) return;
     
     const validation = validateTableName(newTableName);
     if (validation) {
@@ -25,17 +27,21 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
       return;
     }
 
-    const tables = state.selectedProject?.tables || [];
     if (checkTableExists(tables, newTableName)) {
       setValidationError('Bu isimde bir tablo zaten mevcut');
       return;
     }
 
-    const success = await createTable(newTableName);
-    if (success) {
-      setNewTableName('');
-      setValidationError(null);
-      onTableAdded();
+    setCreating(true);
+    try {
+      const success = await createTable(projectId.toString(), newTableName);
+      if (success) {
+        setNewTableName('');
+        setValidationError(null);
+        onTableAdded();
+      }
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -54,7 +60,7 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
             className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${
               validationError ? 'border-red-300' : 'border-gray-300'
             }`}
-            disabled={isDisabled}
+            disabled={isDisabled || creating}
           />
           {validationError && (
             <p className="text-xs text-red-600 mt-1">{validationError}</p>
@@ -63,14 +69,14 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
         <button
           type="submit"
           className={`px-3 py-2 rounded-md transition-colors flex items-center ${
-            isDisabled
+            isDisabled || creating
               ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
               : 'bg-teal-600 text-white hover:bg-teal-700'
           }`}
-          disabled={isDisabled}
+          disabled={isDisabled || creating}
         >
           <PlusCircle size={16} className="mr-1" />
-          {isLoading ? 'Ekliyor...' : 'Ekle'}
+          {creating ? 'Ekliyor...' : 'Ekle'}
         </button>
       </div>
     </form>

@@ -1,27 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { Table } from 'lucide-react';
-import { useDatabase } from '../../context/DatabaseContext';
 import { useTableApi } from './table/hooks/useTableApi';
 import AddTableForm from './table/components/AddTableForm';
 import TableList from './table/components/TableList';
 import DeleteTableModal from './table/components/DeleteTableModal';
 
-const TablePanel: React.FC = () => {
-  const { state, dispatch } = useDatabase();
-  const { loading, error, loadTables, deleteTable } = useTableApi();
+interface TablePanelProps {
+  selectedProject: any | null;
+  selectedTable: any | null;
+  onTableSelect: (tableId: string) => void;
+}
+
+const TablePanel: React.FC<TablePanelProps> = ({ 
+  selectedProject, 
+  selectedTable, 
+  onTableSelect 
+}) => {
+  const { loading, error, loadTables, createTable, deleteTable } = useTableApi();
   const [deletingTable, setDeletingTable] = useState<string | null>(null);
+  const [tables, setTables] = useState<any[]>([]);
   
   // Load tables when project changes
   useEffect(() => {
-    if (state.selectedProject?.id) {
-      console.log('🔄 TablePanel: Project changed, loading tables for:', state.selectedProject.id);
-      loadTables();
+    if (selectedProject?.id) {
+      console.log('🔄 TablePanel: Project changed, loading tables for:', selectedProject.id);
+      loadTables(selectedProject.id.toString()).then(tablesData => {
+        if (tablesData) {
+          setTables(tablesData);
+        }
+      });
+    } else {
+      setTables([]);
     }
-  }, [state.selectedProject?.id]);
+  }, [selectedProject?.id, loadTables]);
 
   const handleSelectTable = (tableId: string) => {
     console.log('🎯 Selecting table:', tableId);
-    dispatch({ type: 'SELECT_TABLE', payload: { tableId } });
+    onTableSelect(tableId);
   };
 
   const handleDeleteTable = (tableId: string, tableName: string) => {
@@ -29,23 +44,44 @@ const TablePanel: React.FC = () => {
   };
 
   const confirmDeleteTable = async () => {
-    if (!deletingTable) return;
+    if (!deletingTable || !selectedProject?.id) return;
     
-    const success = await deleteTable(deletingTable);
+    const success = await deleteTable(selectedProject.id.toString(), deletingTable);
     if (success) {
       setDeletingTable(null);
+      // Refresh tables after deletion
+      const updatedTables = await loadTables(selectedProject.id.toString());
+      if (updatedTables) {
+        setTables(updatedTables);
+      }
     }
   };
 
   const cancelDeleteTable = () => {
     setDeletingTable(null);
   };
+
+  const handleTableAdded = async () => {
+    // Refresh tables after adding
+    if (selectedProject?.id) {
+      const updatedTables = await loadTables(selectedProject.id.toString());
+      if (updatedTables) {
+        setTables(updatedTables);
+      }
+    }
+  };
+
+  const handleRetry = async () => {
+    if (selectedProject?.id) {
+      const updatedTables = await loadTables(selectedProject.id.toString());
+      if (updatedTables) {
+        setTables(updatedTables);
+      }
+    }
+  };
   
   // Determine if the panel should be disabled
-  const isPanelDisabled = !state.selectedProject || loading;
-  
-  // Get tables from context
-  const tables = state.selectedProject?.tables || [];
+  const isPanelDisabled = !selectedProject || loading;
   
   // Get table to delete info
   const tableToDelete = deletingTable 
@@ -58,9 +94,9 @@ const TablePanel: React.FC = () => {
         <h2 className="text-lg font-semibold mb-4 text-teal-700 flex items-center">
           <Table size={20} className="mr-2" />
           Tablolar
-          {state.selectedProject && (
+          {selectedProject && (
             <span className="ml-2 text-sm font-normal text-gray-500">
-              ({state.selectedProject.name})
+              ({selectedProject.name})
             </span>
           )}
           {loading && (
@@ -69,22 +105,23 @@ const TablePanel: React.FC = () => {
         </h2>
         
         <AddTableForm
-          projectId={state.selectedProject?.id}
+          projectId={selectedProject?.id}
           isDisabled={isPanelDisabled}
           isLoading={loading}
-          onTableAdded={() => {}}
+          tables={tables}
+          onTableAdded={handleTableAdded}
         />
         
         <TableList
-          projectId={state.selectedProject?.id}
-          projectName={state.selectedProject?.name}
+          projectId={selectedProject?.id}
+          projectName={selectedProject?.name}
           tables={tables}
-          selectedTableId={state.selectedTable?.id}
+          selectedTableId={selectedTable?.id}
           onSelectTable={handleSelectTable}
           onDeleteTable={handleDeleteTable}
           loading={loading}
           error={error}
-          onRetry={loadTables}
+          onRetry={handleRetry}
         />
       </div>
 

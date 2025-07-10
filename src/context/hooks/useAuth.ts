@@ -1,6 +1,4 @@
 import { DatabaseAction } from '../../types';
-import { loadUsers, saveUsers } from '../utils/storage';
-import { defaultAdminUser } from '../constants/defaultData';
 import { AuthManager } from '../../utils/api/utils/authUtils';
 
 export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) => {
@@ -8,7 +6,6 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
     try {
       console.log('🔑 Attempting backend login for:', email);
       
-      // Try backend API first
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
@@ -31,11 +28,6 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
           console.log('👤 Backend user data:', user);
           console.log('🔒 JWT token saved to sessionStorage:', token.substring(0, 20) + '...');
           
-          // Clear old localStorage data to prevent conflicts
-          localStorage.removeItem('all_projects');
-          localStorage.removeItem('database_state');
-          console.log('🧹 Cleared old localStorage data');
-          
           // Dispatch login with backend user data
           dispatch({ type: 'LOGIN', payload: { user } });
           return true;
@@ -43,23 +35,11 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
       } else {
         const errorData = await response.json();
         console.log('❌ Backend login failed:', errorData.error);
+        return false;
       }
     } catch (error: any) {
       console.log('💥 Backend login error:', error.message);
-      console.log('📦 Falling back to localStorage...');
-      
-      // Fallback to localStorage for development
-      const users = loadUsers();
-      const user = users.find(u => u.email === email);
-      
-      // For admin user, allow login with password 123456
-      if (user && email === 'ozgurhzm@gmail.com' && password === '123456') {
-        console.log('✅ Local admin login successful');
-        dispatch({ type: 'LOGIN', payload: { user } });
-        return true;
-      }
-      
-      console.log('❌ Local login failed');
+      return false;
     }
     return false;
   };
@@ -68,7 +48,6 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
     try {
       console.log('📝 Attempting backend registration for:', email);
       
-      // Try backend API first
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -98,38 +77,11 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
       } else {
         const errorData = await response.json();
         console.log('❌ Backend registration failed:', errorData.error);
+        return false;
       }
     } catch (error: any) {
       console.log('💥 Backend registration error:', error.message);
-      console.log('📦 Falling back to localStorage...');
-      
-      // Fallback to localStorage for development
-      const users = loadUsers();
-      const existingUser = users.find(u => u.email === email);
-      
-      if (existingUser) {
-        console.log('❌ User already exists');
-        return false;
-      }
-      
-      const newUser = {
-        id: Date.now(),
-        email,
-        name,
-        createdAt: new Date().toISOString(),
-        isActive: true,
-        isAdmin: false,
-        subscriptionType: 'free' as const,
-        maxProjects: 2,
-        maxTables: 5,
-      };
-      
-      users.push(newUser);
-      saveUsers(users);
-      
-      console.log('✅ Local registration successful');
-      dispatch({ type: 'REGISTER', payload: { user: newUser } });
-      return true;
+      return false;
     }
     return false;
   };
@@ -137,35 +89,16 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
   const logout = () => {
     // Clear auth token using AuthManager
     AuthManager.removeToken();
-    
-    // Clear ALL localStorage data to prevent fallback issues
-    localStorage.removeItem('database_state');
-    localStorage.removeItem('database_users');
-    localStorage.removeItem('all_projects');
-    
-    // Clear any user-specific project data
-    const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      if (key.startsWith('userProjects_') || key.startsWith('table_data_')) {
-        localStorage.removeItem(key);
-      }
-    });
-    
-    console.log('🧹 Logout: Cleared all localStorage data including fallbacks');
-    
-    // Also clear on login to ensure fresh start
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem('all_projects');
-    }
-    
+    console.log('🧹 Logout: Cleared auth token');
     dispatch({ type: 'LOGOUT' });
   };
   
-  // Yeni: getAllUsers her zaman backend'den çeker
+  // getAllUsers her zaman backend'den çeker
   const getAllUsers = async () => {
     try {
       const token = AuthManager.getToken();
       if (!token) return [];
+      
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/admin/users`, {
         headers: {
@@ -173,12 +106,14 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
           'Content-Type': 'application/json'
         }
       });
+      
       if (response.ok) {
         const data = await response.json();
         return data.data?.users || data.users || [];
       }
       return [];
-    } catch {
+    } catch (error) {
+      console.log('💥 Error fetching users:', error);
       return [];
     }
   };

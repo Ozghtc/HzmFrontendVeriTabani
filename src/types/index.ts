@@ -163,44 +163,15 @@ export interface PricingPlan {
 }
 
 export interface DatabaseState {
-  projects: Project[];
-  selectedProject: Project | null;
-  selectedTable: Table | null;
   user: User | null;
   isAuthenticated: boolean;
-  pricingPlans: PricingPlan[];
-  campaigns: Campaign[];
+  // projects, selectedProject, selectedTable, pricingPlans, campaigns kaldırıldı
+  // Bunlar artık sadece API'den gelecek
 }
 
 export type DatabaseAction =
   | { type: 'LOGIN'; payload: { user: User } }
   | { type: 'LOGOUT' }
-  | { type: 'REGISTER'; payload: { user: User } }
-  | { type: 'SET_PROJECTS'; payload: { projects: Project[] } }
-  | { type: 'ADD_PROJECT'; payload: { name: string; description?: string } }
-  | { type: 'UPDATE_PROJECT'; payload: { projectId: number; name?: string; description?: string; settings?: Partial<Project['settings']> } }
-  | { type: 'SELECT_PROJECT'; payload: { projectId: number } }
-  | { type: 'SET_SELECTED_PROJECT'; payload: { project: Project } }
-  | { type: 'SET_PROJECT_TABLES'; payload: { projectId: number; tables: Table[] } }
-  | { type: 'ADD_TABLE'; payload: { name: string; id?: string } }
-  | { type: 'DELETE_TABLE'; payload: { tableId: string } }
-  | { type: 'SELECT_TABLE'; payload: { tableId: string } }
-  | { type: 'ADD_FIELD'; payload: { name: string; type: string; required: boolean; validation?: FieldValidation; description?: string } }
-  | { type: 'UPDATE_FIELD'; payload: { fieldId: string; name?: string; type?: string; required?: boolean; validation?: FieldValidation; description?: string } }
-  | { type: 'DELETE_FIELD'; payload: { fieldId: string } }
-  | { type: 'REORDER_FIELDS'; payload: { oldIndex: number; newIndex: number } }
-  | { type: 'ADD_FIELD_RELATIONSHIP'; payload: { fieldId: string; relationship: FieldRelationship } }
-  | { type: 'REMOVE_FIELD_RELATIONSHIP'; payload: { fieldId: string; relationshipId: string } }
-  | { type: 'ADD_API_KEY'; payload: { projectId: number; name: string; permissions: ApiKey['permissions']; expiresAt?: string } }
-  | { type: 'UPDATE_API_KEY'; payload: { projectId: number; keyId: string; name?: string; permissions?: ApiKey['permissions']; isActive?: boolean } }
-  | { type: 'DELETE_API_KEY'; payload: { projectId: number; keyId: string } }
-  | { type: 'REGENERATE_MAIN_API_KEY'; payload: { projectId: number } }
-  | { type: 'UPDATE_USER_STATUS'; payload: { userId: string; isActive: boolean } }
-  | { type: 'UPDATE_USER_SUBSCRIPTION'; payload: { userId: string; subscriptionType: User['subscriptionType']; maxProjects: number; maxTables: number } }
-  | { type: 'DELETE_USER'; payload: { userId: string } }
-  | { type: 'ADD_PRICING_PLAN'; payload: { plan: PricingPlan } }
-  | { type: 'UPDATE_PRICING_PLAN'; payload: { plan: PricingPlan } }
-  | { type: 'DELETE_PRICING_PLAN'; payload: { planId: string } }
-  | { type: 'ADD_CAMPAIGN'; payload: { campaign: Campaign } }
-  | { type: 'UPDATE_CAMPAIGN'; payload: { campaign: Campaign } }
-  | { type: 'DELETE_CAMPAIGN'; payload: { campaignId: string } };
+  | { type: 'REGISTER'; payload: { user: User } };
+  // Tüm proje, tablo, field, API key, user management ve pricing action'ları kaldırıldı
+  // Bunlar artık sadece API üzerinden yapılacak

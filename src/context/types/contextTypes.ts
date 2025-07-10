@@ -8,7 +8,7 @@ export type DatabaseContextType = {
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
-  getAllUsers: () => User[];
+  getAllUsers: () => Promise<User[]>; // Promise<User[]> olarak düzeltildi
   saveAuthToken: (token: string) => void;
 };
 

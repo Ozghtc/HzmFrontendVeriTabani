@@ -1,5 +1,4 @@
-import { DatabaseState, DatabaseAction, User } from '../../types';
-import { loadUsers, saveUsers } from '../utils/storage';
+import { DatabaseState, DatabaseAction } from '../../types';
 
 export const authReducer = (state: DatabaseState, action: DatabaseAction): DatabaseState | null => {
   switch (action.type) {
@@ -8,9 +7,6 @@ export const authReducer = (state: DatabaseState, action: DatabaseAction): Datab
         ...state,
         user: action.payload.user,
         isAuthenticated: true,
-        projects: [], // Will be loaded from API
-        selectedProject: null,
-        selectedTable: null,
       };
     }
     
@@ -19,21 +15,14 @@ export const authReducer = (state: DatabaseState, action: DatabaseAction): Datab
         ...state,
         user: null,
         isAuthenticated: false,
-        projects: [],
-        selectedProject: null,
-        selectedTable: null,
       };
     }
     
     case 'REGISTER': {
-      // User is already saved in the register function, just update state
       return {
         ...state,
         user: action.payload.user,
         isAuthenticated: true,
-        projects: [],
-        selectedProject: null,
-        selectedTable: null,
       };
     }
     

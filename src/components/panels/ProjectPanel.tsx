@@ -1,14 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDatabase } from '../../context/DatabaseContext';
 import { Database, ExternalLink } from 'lucide-react';
 
-const ProjectPanel: React.FC = () => {
-  const { state, dispatch } = useDatabase();
+interface ProjectPanelProps {
+  projects: any[];
+  selectedProject: any | null;
+  onSelectProject: (projectId: string) => void;
+}
+
+const ProjectPanel: React.FC<ProjectPanelProps> = ({ 
+  projects, 
+  selectedProject, 
+  onSelectProject 
+}) => {
   const navigate = useNavigate();
   
   const handleSelectProject = (projectId: string) => {
-    dispatch({ type: 'SELECT_PROJECT', payload: { projectId } });
+    onSelectProject(projectId);
   };
   
   return (
@@ -27,30 +35,31 @@ const ProjectPanel: React.FC = () => {
         </button>
       </div>
       
-      <div className="panel-content">
-        {state.projects.length === 0 ? (
-          <p className="text-gray-500 text-sm italic text-center py-4">
-            Henüz hiç proje eklenmemiş. Projeleri göster sayfasından yeni proje ekleyebilirsiniz.
-          </p>
+      <div className="space-y-2">
+        {projects.length === 0 ? (
+          <p className="text-gray-500 text-sm">Henüz proje bulunmuyor</p>
         ) : (
-          <ul className="space-y-2">
-            {state.projects.map((project) => (
-              <li
-                key={project.id}
-                onClick={() => handleSelectProject(project.id)}
-                className={`panel-item p-3 rounded-md cursor-pointer border border-gray-100 hover:border-blue-200 hover:bg-blue-50 ${
-                  state.selectedProject?.id === project.id
-                    ? 'selected bg-blue-100 border-blue-300 font-medium'
-                    : ''
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span>{project.name}</span>
-                  <span className="text-xs text-gray-500">{project.tables.length} tablo</span>
-                </div>
-              </li>
-            ))}
-          </ul>
+          projects.map((project) => (
+            <div
+              key={project.id}
+              className={`p-3 rounded-md cursor-pointer transition-colors ${
+                selectedProject?.id === project.id
+                  ? 'bg-blue-100 border-blue-300 font-medium'
+                  : 'bg-gray-50 hover:bg-blue-50 border-gray-200'
+              } border`}
+              onClick={() => handleSelectProject(project.id.toString())}
+            >
+              <div className="flex justify-between items-center">
+                <span>{project.name}</span>
+                <span className="text-xs text-gray-500">
+                  {project.tables?.length || 0} tablo
+                </span>
+              </div>
+              {project.description && (
+                <p className="text-xs text-gray-600 mt-1">{project.description}</p>
+              )}
+            </div>
+          ))
         )}
       </div>
     </div>
