@@ -19,7 +19,7 @@ import DatabasePricing from './pages/DatabasePricing';
 import UpgradePlanPage from './pages/UpgradePlanPage';
 import ApiTest from './pages/ApiTest';
 import ApiProjects from './pages/ApiProjects';
-import LocalStorageMigration from './pages/LocalStorageMigration';
+
 import './App.css';
 
 function App() {

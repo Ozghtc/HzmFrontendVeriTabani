@@ -10,7 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://hzmbackandveritabani-pr
 export const useProjectDataView = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const { state, dispatch } = useDatabase(); // dispatch eklendi
+  const { state } = useDatabase(); // API-only, no dispatch needed
   
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [tableData, setTableData] = useState<TableData[]>([]);
@@ -40,13 +40,8 @@ export const useProjectDataView = () => {
       if (!token) {
         throw new Error('Authentication required');
       }
-      // Önce context'te doğru projeyi bul
-      let foundProject = state.projects.find(p => p.id === parsedProjectId);
-      if (foundProject) {
-        setProject(foundProject);
-        setProjectLoading(false);
-        return;
-      }
+      // API-only, no context lookup needed
+      let foundProject = null;
       // Yoksa API'den fetch et
       const response = await axios.get(`${API_URL}/tables/project/${parsedProjectId}`, {
         headers: {
@@ -75,7 +70,7 @@ export const useProjectDataView = () => {
             fields: table.fields || []
           }))
         } as any;
-        dispatch({ type: 'SET_PROJECTS', payload: { projects: [ ...state.projects.filter(p => p.id !== foundProject.id), foundProject ] } });
+        // API-only, no context storage needed
         setProject(foundProject);
       } else {
         setProject(null);
@@ -172,13 +167,9 @@ export const useProjectDataView = () => {
     } catch (err: any) {
       console.error('Error adding record:', err);
       
-      // If API fails, save to localStorage
-    const newRow = createNewRow(currentTable.fields, newRowData);
-    const updatedData = [...tableData, newRow];
-    saveTableData(selectedTable!, updatedData);
-    setTableData(updatedData);
-    setAddingRow(false);
-    setNewRowData({});
+      // API-only, no localStorage fallback
+      setAddingRow(false);
+      setNewRowData({});
       
       if (err.response?.status === 401) {
         setError('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
@@ -235,14 +226,9 @@ export const useProjectDataView = () => {
     } catch (err: any) {
       console.error('Error updating record:', err);
       
-      // Fallback to local storage
-    const updatedData = tableData.map(row => 
-        row.id === editingRow ? { ...row, ...editData } : row
-    );
-    saveTableData(selectedTable!, updatedData);
-    setTableData(updatedData);
-    setEditingRow(null);
-    setEditData({});
+      // API-only, no localStorage fallback
+      setEditingRow(null);
+      setEditData({});
       
       if (err.response?.status === 401) {
         setError('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
@@ -299,11 +285,8 @@ export const useProjectDataView = () => {
     } catch (err: any) {
       console.error('Error deleting record:', err);
       
-      // Fallback to local storage
-    const updatedData = tableData.filter(row => row.id !== deletingRow.id);
-    saveTableData(selectedTable!, updatedData);
-    setTableData(updatedData);
-    setDeletingRow(null);
+      // API-only, no localStorage fallback
+      setDeletingRow(null);
       
       if (err.response?.status === 401) {
         setError('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
