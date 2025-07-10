@@ -34,9 +34,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <Database className="text-green-600 mr-3" size={24} />
             <div>
               <h3 className="text-lg font-semibold text-gray-800">{project.name || 'İsimsiz Proje'}</h3>
-              {/* Proje sahibi adı - userName yoksa users dizisinden eşleştir */}
+              {/* Proje sahibi adı - her zaman net şekilde göster */}
               {(project.userName || (users && users.find(u => u.id === project.userId)?.name)) && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1 font-semibold">
                   Sahibi: {project.userName || users.find(u => u.id === project.userId)?.name}
                 </p>
               )}
