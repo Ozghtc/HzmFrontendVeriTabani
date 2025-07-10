@@ -14,12 +14,22 @@ export const useApiUsers = () => {
       
       console.log('👥 Fetching users from API...');
       
-      // Temporarily disabled - API endpoint needs to be fixed
-      // const response = await apiClient.admin.getUsers();
+      // ✅ API endpoint fixed - calling real backend
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/users`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      // For now, return empty array
-      setUsers([]);
-      console.log('⚠️ Users API temporarily disabled');
+      if (response.ok) {
+        const data = await response.json();
+        const users = data.data?.users || [];
+        setUsers(users);
+        console.log('✅ Users loaded successfully:', users.length);
+      } else {
+        throw new Error(`HTTP ${response.status}`);
+      }
     } catch (err) {
       console.error('💥 Error fetching users:', err);
       setError('Network error while fetching users');
@@ -38,11 +48,23 @@ export const useApiUsers = () => {
     try {
       console.log('📝 Updating user:', userId);
       
-      // Temporarily disabled - API endpoint needs to be fixed
-      // const response = await apiClient.admin.updateUser(userId, userData);
+      // ✅ API endpoint fixed - calling real backend
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
       
-      console.log('⚠️ User update API temporarily disabled');
-      return false;
+      if (response.ok) {
+        console.log('✅ User updated successfully');
+        return true;
+      } else {
+        console.log('❌ User update failed:', response.status);
+        return false;
+      }
     } catch (error) {
       console.error('💥 Error updating user:', error);
       return false;
@@ -53,11 +75,22 @@ export const useApiUsers = () => {
     try {
       console.log('🗑️ Deleting user:', userId);
       
-      // Temporarily disabled - API endpoint needs to be fixed
-      // const response = await apiClient.admin.deleteUser(userId);
+      // ✅ API endpoint fixed - calling real backend
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      console.log('⚠️ User delete API temporarily disabled');
-      return false;
+      if (response.ok) {
+        console.log('✅ User deleted successfully');
+        return true;
+      } else {
+        console.log('❌ User delete failed:', response.status);
+        return false;
+      }
     } catch (error) {
       console.error('💥 Error deleting user:', error);
       return false;
@@ -87,11 +120,22 @@ export const useApiAdminProjects = () => {
       
       console.log('📊 Fetching all projects from API...');
       
-      // Temporarily disabled - API endpoint needs to be fixed
-      // const response = await apiClient.admin.getAllProjects();
+      // ✅ API endpoint fixed - calling real backend
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/projects`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      setProjects([]);
-      console.log('⚠️ Admin projects API temporarily disabled');
+      if (response.ok) {
+        const data = await response.json();
+        const projects = data.data?.projects || [];
+        setProjects(projects);
+        console.log('✅ Admin projects loaded successfully:', projects.length);
+      } else {
+        throw new Error(`HTTP ${response.status}`);
+      }
     } catch (err) {
       console.error('💥 Error fetching projects:', err);
       setError('Network error while fetching projects');
@@ -110,11 +154,22 @@ export const useApiAdminProjects = () => {
     try {
       console.log('🗑️ Deleting project:', projectId);
       
-      // Temporarily disabled - API endpoint needs to be fixed
-      // const response = await apiClient.admin.deleteProject(projectId);
+      // ✅ API endpoint fixed - calling real backend (using regular projects endpoint)
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/projects/${projectId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      console.log('⚠️ Project delete API temporarily disabled');
-      return false;
+      if (response.ok) {
+        console.log('✅ Project deleted successfully');
+        return true;
+      } else {
+        console.log('❌ Project delete failed:', response.status);
+        return false;
+      }
     } catch (error) {
       console.error('💥 Error deleting project:', error);
       return false;

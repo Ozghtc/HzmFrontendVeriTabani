@@ -24,6 +24,12 @@ export const getUserRoleColor = (user: User) => {
 };
 
 export const filterUsers = (users: User[], searchTerm: string, filterStatus: FilterStatus) => {
+  // ✅ Safe array handling - prevent undefined filter errors
+  if (!users || !Array.isArray(users)) {
+    console.log('⚠️ Users array is undefined or not an array:', users);
+    return [];
+  }
+  
   return users.filter(user => {
     if (!user) return false;
     const matchesSearch = (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||

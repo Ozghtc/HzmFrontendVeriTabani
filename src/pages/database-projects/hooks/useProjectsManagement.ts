@@ -30,14 +30,14 @@ export const useProjectsManagement = () => {
     setTimeout(() => setNotification(null), NOTIFICATION_TIMEOUT);
   };
 
-  // Use backend projects only - no localStorage fallback
-  const allProjects = backendProjects || [];
+  // ✅ Safe array handling - prevent undefined filter errors
+  const allProjects = Array.isArray(backendProjects) ? backendProjects : [];
   
   // Load users from API
   React.useEffect(() => {
     (async () => {
       const fetchedUsers = await getAllUsers();
-      setUsers(fetchedUsers);
+      setUsers(Array.isArray(fetchedUsers) ? fetchedUsers : []);
     })();
   }, [getAllUsers]);
 
@@ -95,15 +95,17 @@ export const useProjectsManagement = () => {
     }));
   };
 
-  // Filter projects
-  const filteredProjects = allProjects.filter((project: any) => {
-    const matchesSearch = project.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
-    const matchesUser = filters.filterUser === 'all' || project.userId.toString() === filters.filterUser;
+  // ✅ Safe filtering - prevent undefined errors
+  const filteredProjects = Array.isArray(allProjects) ? allProjects.filter((project: any) => {
+    if (!project) return false;
+    const matchesSearch = (project.name || '').toLowerCase().includes(filters.searchTerm.toLowerCase());
+    const matchesUser = filters.filterUser === 'all' || project.userId?.toString() === filters.filterUser;
     return matchesSearch && matchesUser;
-  });
+  }) : [];
 
   return {
     // Data
+    allProjects,
     projects: filteredProjects,
     users,
     loading,

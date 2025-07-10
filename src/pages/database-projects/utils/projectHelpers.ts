@@ -17,6 +17,12 @@ export const getFilteredProjects = (
   searchTerm: string,
   filterUser: string
 ) => {
+  // ✅ Safe array handling - prevent undefined filter errors
+  if (!projects || !Array.isArray(projects)) {
+    console.log('⚠️ Projects array is undefined or not an array:', projects);
+    return [];
+  }
+  
   return projects.filter(project => {
     if (!project) return false;
     const matchesSearch = (project.name || '').toLowerCase().includes(searchTerm.toLowerCase());
