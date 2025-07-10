@@ -16,7 +16,7 @@ export const API_CONFIG = {
     'Accept': 'application/json',
   },
   rateLimiting: {
-    enabled: true,
+    enabled: false, // Rate limiting devre dışı - backend'de handle ediliyor
     maxRequestsPerMinute: 60,
     maxBurst: 10,
   },

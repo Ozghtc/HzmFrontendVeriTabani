@@ -11,7 +11,7 @@ import axios from 'axios';
 export const useProjectList = () => {
   const { state, dispatch } = useDatabase();
   const navigate = useNavigate();
-  const { projects, loading, error, createProject, deleteProject, fetchProjects } = useApiProjects();
+  const { projects, loading, error, createProject, deleteProject, fetchProjects, retryAfterError } = useApiProjects();
   const { notification, showNotification } = useNotification();
   
   const [deletingProject, setDeletingProject] = useState<number | null>(null);
@@ -159,6 +159,7 @@ export const useProjectList = () => {
     navigateToEdit,
     navigateToApi,
     fetchProjects,
+    retryAfterError,
     showNotification,
     setDeleteConfirmName,
     

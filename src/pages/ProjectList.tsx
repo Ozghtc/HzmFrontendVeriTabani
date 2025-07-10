@@ -36,6 +36,7 @@ const ProjectList = () => {
     navigateToEdit,
     navigateToApi,
     fetchProjects,
+    retryAfterError,
     setDeleteConfirmName
   } = useProjectList();
 
@@ -62,7 +63,7 @@ const ProjectList = () => {
           {loading && <LoadingState />}
 
           {/* Error State */}
-          {error && <ErrorState error={error} onRetry={fetchProjects} />}
+          {error && <ErrorState error={error} onRetry={() => { retryAfterError(); fetchProjects(); }} />}
 
           {/* Projects Grid */}
           {!loading && projects.length === 0 ? (

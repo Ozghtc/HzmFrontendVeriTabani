@@ -43,7 +43,9 @@ export const defaultResponseInterceptor: ResponseInterceptor = {
         break;
       
       case 'RATE_LIMIT_EXCEEDED':
-        console.log('⏱️ Rate limit exceeded');
+      case 'HTTP_429':
+        console.log('⏱️ Rate limit exceeded - stopping requests');
+        // Don't retry, just log and stop
         break;
       
       case 'MAINTENANCE':

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../utils/api';
-import { useDatabase } from '../context/DatabaseContext';
 import { AuthManager } from '../utils/api/utils/authUtils';
 
 interface Project {
@@ -22,7 +21,6 @@ export const useApiProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { state, dispatch } = useDatabase();
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -33,8 +31,6 @@ export const useApiProjects = () => {
     if (!token) {
       console.log('❌ No auth token found');
       setProjects([]);
-      // Also clear DatabaseContext projects
-      dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
       setError('Authentication required');
       setLoading(false);
       return;
@@ -66,29 +62,26 @@ export const useApiProjects = () => {
           userIdType: typeof p.userId 
         })));
         console.log('📋 Full projects data:', projects);
-        console.log('👤 Current user:', state.user);
         
-        // Debug: Check if projects are being filtered
-        console.log('🔍 Projects before set:', projects);
-        console.log('🔍 First project userId type:', projects.length > 0 ? typeof projects[0].userId : 'no projects');
-        console.log('🔍 Current user id type:', typeof state.user?.id);
-        
-        // Set projects in both hook state AND DatabaseContext
+        // Set projects - API-only architecture
         setProjects(projects);
-        dispatch({ type: 'SET_PROJECTS', payload: { projects } });
-        console.log('🔄 Projects synced to DatabaseContext');
         
         setError(null);
       } else {
         console.log('❌ Backend projects API failed:', response.error);
         setProjects([]);
-        dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
         setError(response.error || 'Failed to load projects');
       }
     } catch (err: any) {
       console.log('💥 Network error:', err.message);
       setProjects([]);
-      dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
+      
+      // Handle rate limit specifically
+      if (err.response?.status === 429 || err.message?.includes('Too many requests')) {
+        setError('Çok fazla istek gönderildi. Lütfen birkaç dakika bekleyip tekrar deneyin.');
+        return; // Don't retry automatically
+      }
+      
       setError('Network error - please check your connection');
     }
     setLoading(false);
@@ -156,7 +149,6 @@ export const useApiProjects = () => {
     } else {
       // No token means user logged out, clear projects
       setProjects([]);
-      dispatch({ type: 'SET_PROJECTS', payload: { projects: [] } });
       console.log('🔐 No auth token, clearing projects');
     }
   }, []); // Empty dependency array - only run on mount
@@ -184,6 +176,12 @@ export const useApiProjects = () => {
   //   };
   // }, []); // Empty dependency array - only setup listener once
 
+  const retryAfterError = () => {
+    setError(null);
+    setLoading(false);
+    console.log('🔄 Manual retry initiated');
+  };
+
   return {
     projects,
     loading,
@@ -191,5 +189,6 @@ export const useApiProjects = () => {
     fetchProjects,
     createProject,
     deleteProject,
+    retryAfterError,
   };
 }; 
