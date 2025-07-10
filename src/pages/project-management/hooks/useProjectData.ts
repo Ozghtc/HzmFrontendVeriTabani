@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDatabase } from '../../../context/DatabaseContext';
 import { useApiProjects } from '../../../hooks/useApiProjects';
 import { useApiUsers } from '../../../hooks/useApiAdmin';
+import { apiClient } from '../../../utils/api';
 
 export const useProjectData = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -30,7 +31,38 @@ export const useProjectData = () => {
         
         if (frontendProject) {
           console.log('✅ Found project:', frontendProject.name);
-          setProject(frontendProject as any);
+          
+          // Load tables for this project
+          try {
+            console.log('📋 Loading tables for project:', frontendProject.id);
+            const tablesResponse = await apiClient.tables.getTables(frontendProject.id.toString());
+            
+            if (tablesResponse.success) {
+              const tablesData = (tablesResponse.data as any).data?.tables || [];
+              console.log('✅ Tables loaded:', tablesData.length, 'tables');
+              
+              // Combine project with tables
+              const projectWithTables = {
+                ...frontendProject,
+                tables: tablesData.map((table: any) => ({
+                  id: table.id?.toString() || '',
+                  name: table.name || table.tableName || '',
+                  fields: table.fields || []
+                }))
+              };
+              
+              setProject(projectWithTables as any);
+            } else {
+              console.log('❌ Failed to load tables:', tablesResponse.error);
+              // Set project without tables
+              setProject({ ...frontendProject, tables: [] } as any);
+            }
+          } catch (tablesError) {
+            console.error('💥 Error loading tables:', tablesError);
+            // Set project without tables
+            setProject({ ...frontendProject, tables: [] } as any);
+          }
+          
           setLoading(false);
           return;
         }
