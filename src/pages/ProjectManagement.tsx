@@ -13,7 +13,6 @@ import ApiTabContent from './project-management/components/ApiTabContent';
 import SettingsTab from './project-management/components/settings/SettingsTab';
 
 const ProjectManagement = () => {
-  const { dispatch } = useDatabase();
   const { 
     project, 
     projectOwner, 
@@ -34,17 +33,13 @@ const ProjectManagement = () => {
   }
 
   const handleProjectUpdate = (updates: Partial<any>) => {
-    dispatch({
-      type: 'UPDATE_PROJECT',
-      payload: { projectId: project.id, ...updates }
-    });
+    // API-only: Updates will be handled by API calls
+    console.log('Project update:', updates);
   };
 
   const handleSettingsUpdate = (settings: any) => {
-    dispatch({
-      type: 'UPDATE_PROJECT',
-      payload: { projectId: project.id, settings }
-    });
+    // API-only: Settings will be handled by API calls  
+    console.log('Settings update:', settings);
   };
 
   return (
@@ -63,7 +58,7 @@ const ProjectManagement = () => {
       />
 
       <main className="container mx-auto p-4">
-        {activeTab === 'tables' && <TablesTabContent />}
+        {activeTab === 'tables' && <TablesTabContent project={project} />}
         
         {activeTab === 'api' && <ApiTabContent project={project} />}
         

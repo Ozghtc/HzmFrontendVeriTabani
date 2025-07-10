@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useDatabase } from '../../../context/DatabaseContext';
 import { useApiProjects } from '../../../hooks/useApiProjects';
 import { useApiUsers } from '../../../hooks/useApiAdmin';
 
 export const useProjectData = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
+  const { state } = useDatabase();
   const { projects, loading: projectsLoading } = useApiProjects();
   const { users } = useApiUsers();
   const [project, setProject] = useState<any>(null);
@@ -70,12 +73,18 @@ export const useProjectData = () => {
     }
   }
 
+  const navigateToProjects = () => {
+    navigate('/projects');
+  };
+
   return {
     project,
     projectOwner,
     loading,
     error,
     projects,
-    setProject
+    setProject,
+    currentUser: state.user,
+    navigateToProjects
   };
 }; 
