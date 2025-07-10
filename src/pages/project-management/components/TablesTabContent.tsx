@@ -11,26 +11,45 @@ const TablesTabContent: React.FC<TablesTabContentProps> = ({ project }) => {
   const [selectedTable, setSelectedTable] = useState<any | null>(null);
   const [fields, setFields] = useState<Field[]>([]);
 
-  // Auto-select first table when project loads
+  // Auto-select first table when project loads - prevent infinite loop
   useEffect(() => {
     if (project?.tables?.length > 0 && !selectedTable) {
+      console.log('🔄 Auto-selecting first table:', project.tables[0]);
       setSelectedTable(project.tables[0]);
     }
-  }, [project, selectedTable]);
+  }, [project?.tables?.length, project?.id]); // Depend on table count and project ID
 
   // Load fields when table changes
   useEffect(() => {
+    console.log('🔄 TablesTabContent: selectedTable changed:', selectedTable);
     if (selectedTable) {
       setFields(selectedTable.fields || []);
+      console.log('📋 Fields loaded:', selectedTable.fields || []);
     } else {
       setFields([]);
+      console.log('📋 No table selected, clearing fields');
     }
   }, [selectedTable]);
 
   const handleSelectTable = (tableId: string) => {
-    const table = project?.tables?.find((t: any) => t.id.toString() === tableId);
+    console.log('🎯 TablesTabContent: Selecting table:', tableId, typeof tableId);
+    console.log('📋 Available tables:', project?.tables?.map((t: any) => ({ 
+      id: t.id, 
+      idType: typeof t.id,
+      name: t.name 
+    })));
+    
+    // Try both string and number comparison
+    const table = project?.tables?.find((t: any) => 
+      t.id.toString() === tableId || t.id === Number(tableId)
+    );
+    console.log('🔍 Found table:', table);
+    
     if (table) {
       setSelectedTable(table);
+      console.log('✅ Selected table set:', table);
+    } else {
+      console.log('❌ Table not found for id:', tableId);
     }
   };
 
@@ -105,6 +124,12 @@ const TablesTabContent: React.FC<TablesTabContentProps> = ({ project }) => {
       });
     }
   };
+
+  console.log('🎨 TablesTabContent render:', {
+    project: project?.name,
+    selectedTable: selectedTable?.name,
+    fieldsCount: fields.length
+  });
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
