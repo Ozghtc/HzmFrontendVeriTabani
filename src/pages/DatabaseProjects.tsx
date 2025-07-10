@@ -2,6 +2,7 @@ import React from 'react';
 import { useProjectsManagement } from './database-projects/hooks/useProjectsManagement';
 import { getFilteredProjects } from './database-projects/utils/projectHelpers';
 import { icons } from './database-projects/constants/projectConstants';
+import { useApiAdminProjects } from '../hooks/useApiAdmin';
 
 // Components
 import ProjectsLoading from './database-projects/components/ProjectsLoading';
@@ -31,6 +32,14 @@ const DatabaseProjects = () => {
     toggleApiKey,
     copyApiKey
   } = useProjectsManagement();
+  const { fetchAllProjects } = useApiAdminProjects();
+
+  // Projeler context'te boşsa API'den otomatik çek
+  React.useEffect(() => {
+    if (!allProjects || allProjects.length === 0) {
+      fetchAllProjects();
+    }
+  }, [allProjects, fetchAllProjects]);
 
   const { Database } = icons;
 
