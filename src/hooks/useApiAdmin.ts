@@ -56,9 +56,10 @@ export const useApiUsers = () => {
         console.log('✅ Admin users loaded from backend:', backendUsers.length, 'users');
         setUsers(backendUsers);
         
-        // Also save to localStorage for fallback operations
+        // Hem localStorage hem sessionStorage'a kaydet
         localStorage.setItem('databaseUsers', JSON.stringify(backendUsers));
-        console.log('💾 Users synced to localStorage for fallback');
+        sessionStorage.setItem('databaseUsers', JSON.stringify(backendUsers));
+        console.log('💾 Users synced to localStorage and sessionStorage for fallback');
       } else {
         console.log('❌ Backend users API failed, falling back to localStorage');
         // If backend fails, load from localStorage
