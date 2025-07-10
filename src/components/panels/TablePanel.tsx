@@ -20,15 +20,22 @@ const TablePanel: React.FC<TablePanelProps> = ({
   const [deletingTable, setDeletingTable] = useState<string | null>(null);
   const [tables, setTables] = useState<any[]>([]);
   
-  // Load tables when project changes
+  // Load tables when project changes - with error recovery
   useEffect(() => {
     if (selectedProject?.id) {
       console.log('🔄 TablePanel: Project changed, loading tables for:', selectedProject.id);
-      loadTables(selectedProject.id.toString()).then(tablesData => {
-        if (tablesData) {
-          setTables(tablesData);
-        }
-      });
+      loadTables(selectedProject.id.toString())
+        .then(tablesData => {
+          if (tablesData) {
+            setTables(tablesData);
+            console.log('✅ Tables loaded successfully');
+          }
+        })
+        .catch(error => {
+          console.error('💥 Error in TablePanel useEffect:', error);
+          setTables([]);
+          // Don't retry automatically - let user manually retry
+        });
     } else {
       setTables([]);
     }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { apiClient } from '../../../../utils/api';
 import { TableApiHookReturn } from '../types/tableTypes';
 
@@ -6,7 +6,7 @@ export const useTableApi = (): TableApiHookReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadTables = async (projectId: string): Promise<any[] | null> => {
+  const loadTables = useCallback(async (projectId: string): Promise<any[] | null> => {
     if (!projectId) return null;
     
     try {
@@ -45,9 +45,9 @@ export const useTableApi = (): TableApiHookReturn => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Empty dependency array - stable function
 
-  const createTable = async (projectId: string, name: string): Promise<boolean> => {
+  const createTable = useCallback(async (projectId: string, name: string): Promise<boolean> => {
     if (!projectId) return false;
     
     try {
@@ -78,9 +78,9 @@ export const useTableApi = (): TableApiHookReturn => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Empty dependency array - stable function
 
-  const deleteTable = async (projectId: string, tableId: string): Promise<boolean> => {
+  const deleteTable = useCallback(async (projectId: string, tableId: string): Promise<boolean> => {
     if (!projectId) return false;
     
     try {
@@ -109,7 +109,7 @@ export const useTableApi = (): TableApiHookReturn => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Empty dependency array - stable function
 
   return {
     loading,
