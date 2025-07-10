@@ -3,7 +3,6 @@ import { GripVertical, Link, AlertCircle, Edit, Eye, EyeOff, Trash2 } from 'luci
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FieldValidation, FieldRelationship, Field } from '../../../../types';
-import { useDatabase } from '../../../../context/DatabaseContext';
 import { getTypeIcon, dataTypes } from '../constants/fieldConstants';
 
 interface SortableFieldRowProps {
@@ -15,6 +14,7 @@ interface SortableFieldRowProps {
   description?: string;
   relationships?: FieldRelationship[];
   onEdit: (field: Field) => void;
+  onDelete: (fieldId: string) => void;
 }
 
 export const SortableFieldRow: React.FC<SortableFieldRowProps> = ({ 
@@ -25,10 +25,10 @@ export const SortableFieldRow: React.FC<SortableFieldRowProps> = ({
   validation,
   description,
   relationships = [],
-  onEdit
+  onEdit,
+  onDelete
 }) => {
   const [showDetails, setShowDetails] = useState(false);
-  const { dispatch } = useDatabase();
   
   const {
     attributes,
@@ -80,10 +80,7 @@ export const SortableFieldRow: React.FC<SortableFieldRowProps> = ({
 
   const handleDeleteField = () => {
     if (confirm(`"${name}" alanını silmek istediğinizden emin misiniz?`)) {
-      dispatch({
-        type: 'DELETE_FIELD',
-        payload: { fieldId: id }
-      });
+      onDelete(id);
     }
   };
 
@@ -112,38 +109,38 @@ export const SortableFieldRow: React.FC<SortableFieldRowProps> = ({
               <GripVertical size={16} />
             </button>
             <span className="mr-3 text-lg">{getTypeIcon(type)}</span>
-            <div className="flex-1">
-              <div className="flex items-center">
-                <span className="font-medium text-gray-900">{name}</span>
-                {relationships.length > 0 && (
-                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    <Link size={10} className="mr-1" />
-                    {relationships.length}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-900 truncate">{name}</span>
+                {required && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Gerekli
                   </span>
                 )}
-                {required && (
-                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    <AlertCircle size={10} className="mr-1" />
-                    Zorunlu
+                {relationships.length > 0 && (
+                  <span className="text-blue-500" title="Bu alanda ilişkiler var">
+                    <Link size={14} />
                   </span>
                 )}
               </div>
               {description && (
-                <div className="text-xs text-gray-500 mt-1">{description}</div>
-              )}
-              {getValidationSummary(type, validation) && (
-                <div className="text-xs text-blue-600 mt-1 bg-blue-50 px-2 py-1 rounded inline-block">
-                  {getValidationSummary(type, validation)}
-                </div>
+                <p className="text-xs text-gray-500 mt-1 truncate">{description}</p>
               )}
             </div>
           </div>
         </td>
+        
         <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            {dataTypes.find(t => t.value === type)?.label || type}
-          </span>
+          <div className="flex flex-col">
+            <span className="font-medium">{dataTypes.find(dt => dt.value === type)?.label || type}</span>
+            {getValidationSummary(type, validation) && (
+              <span className="text-xs text-gray-400 mt-1">
+                {getValidationSummary(type, validation)}
+              </span>
+            )}
+          </div>
         </td>
+        
         <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
           <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
@@ -173,63 +170,49 @@ export const SortableFieldRow: React.FC<SortableFieldRowProps> = ({
       
       {/* Details Row */}
       {showDetails && (
-        <tr className="bg-gray-50">
+        <tr className="bg-amber-25 border-l-4 border-amber-400">
           <td colSpan={3} className="px-6 py-4">
-            <div className="text-sm space-y-3">
-              <div>
-                <h4 className="font-medium text-gray-800 mb-2">Alan Detayları</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-gray-600">Alan ID:</span>
-                    <span className="ml-2 font-mono text-xs bg-gray-100 px-2 py-1 rounded">{id}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Oluşturulma:</span>
-                    <span className="ml-2 text-gray-800">Bilinmiyor</span>
-                  </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Validation Kuralları</h4>
+                  {validation ? (
+                    <div className="space-y-1">
+                      {Object.entries(validation).map(([key, value]) => (
+                        <div key={key} className="flex text-xs">
+                          <span className="text-gray-500 w-20">{key}:</span>
+                          <span className="text-gray-700 font-mono">{JSON.stringify(value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500 italic">Validation kuralı yok</p>
+                  )}
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">İlişkiler</h4>
+                  {relationships.length > 0 ? (
+                    <div className="space-y-1">
+                      {relationships.map((rel, index) => (
+                        <div key={index} className="flex items-center text-xs">
+                          <Link size={12} className="mr-1 text-blue-500" />
+                          <span className="text-gray-700">
+                            {rel.relationshipType} → {rel.targetTableId}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500 italic">İlişki yok</p>
+                  )}
                 </div>
               </div>
               
-              {validation && Object.keys(validation).length > 0 && (
+              {description && (
                 <div>
-                  <h4 className="font-medium text-gray-800 mb-2">Validation Kuralları</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(validation).map(([key, value]) => (
-                      <div key={key} className="flex justify-between bg-white p-2 rounded">
-                        <span className="text-gray-600 capitalize text-xs">
-                          {key.replace(/([A-Z])/g, ' $1')}:
-                        </span>
-                        <span className="font-medium text-xs">{String(value)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {relationships.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-gray-800 mb-2 flex items-center">
-                    <Link size={16} className="mr-2" />
-                    İlişkiler ({relationships.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {relationships.map((relationship) => (
-                      <div key={relationship.id} className="bg-white p-3 rounded border text-xs">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="font-medium">{relationship.relationshipType}</span>
-                            <span className="text-gray-500 mx-2">→</span>
-                            <span className="text-gray-700">{relationship.targetTableId}</span>
-                          </div>
-                          {relationship.cascadeDelete && (
-                            <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
-                              Cascade
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Açıklama</h4>
+                  <p className="text-xs text-gray-600">{description}</p>
                 </div>
               )}
             </div>

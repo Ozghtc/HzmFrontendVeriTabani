@@ -11,13 +11,15 @@ interface FieldEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (fieldData: Partial<Field>) => void;
+  onRemoveRelationship: (relationshipId: string) => void;
 }
 
 export const FieldEditModal: React.FC<FieldEditModalProps> = ({ 
   field, 
   isOpen, 
   onClose, 
-  onSave 
+  onSave,
+  onRemoveRelationship
 }) => {
   const [editData, setEditData] = useState({
     name: field?.name || '',
@@ -117,6 +119,7 @@ export const FieldEditModal: React.FC<FieldEditModalProps> = ({
           {activeTab === 'relationships' && (
             <RelationshipsTab
               field={field}
+              onRemoveRelationship={onRemoveRelationship}
             />
           )}
         </div>

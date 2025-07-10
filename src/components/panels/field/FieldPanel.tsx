@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDatabase } from '../../../context/DatabaseContext';
 import { FileText, Link } from 'lucide-react';
 import {
   DndContext,
@@ -22,8 +21,29 @@ import { FieldEditModal } from './components/FieldEditModal';
 import { RelationshipModal } from './components/RelationshipModal';
 import { FieldForm } from './components/FieldForm';
 
-const FieldPanel: React.FC = () => {
-  const { state, dispatch } = useDatabase();
+interface FieldPanelProps {
+  selectedProject: any | null;
+  selectedTable: any | null;
+  fields: Field[];
+  onAddField: (field: Field) => void;
+  onUpdateField: (fieldId: string, updates: Partial<Field>) => void;
+  onDeleteField: (fieldId: string) => void;
+  onReorderFields: (oldIndex: number, newIndex: number) => void;
+  onAddRelationship: (fieldId: string, relationship: any) => void;
+  onRemoveRelationship: (fieldId: string, relationshipId: string) => void;
+}
+
+const FieldPanel: React.FC<FieldPanelProps> = ({
+  selectedProject,
+  selectedTable,
+  fields,
+  onAddField,
+  onUpdateField,
+  onDeleteField,
+  onReorderFields,
+  onAddRelationship,
+  onRemoveRelationship,
+}) => {
   const navigate = useNavigate();
   const [showRelationshipModal, setShowRelationshipModal] = useState(false);
   const [editingField, setEditingField] = useState<Field | null>(null);
@@ -40,19 +60,16 @@ const FieldPanel: React.FC = () => {
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
 
-    if (active.id !== over.id && state.selectedTable) {
-      const oldIndex = state.selectedTable.fields.findIndex(field => field.id === active.id);
-      const newIndex = state.selectedTable.fields.findIndex(field => field.id === over.id);
-
-      dispatch({
-        type: 'REORDER_FIELDS',
-        payload: { oldIndex, newIndex },
-      });
+    if (active.id !== over.id && selectedTable) {
+      const oldIndex = fields.findIndex(field => field.id === active.id);
+      const newIndex = fields.findIndex(field => field.id === over.id);
+      
+      onReorderFields(oldIndex, newIndex);
     }
   };
   
   const handleAddField = async (fieldData: any) => {
-    if (!state.selectedProject || !state.selectedTable) return;
+    if (!selectedProject || !selectedTable) return;
     
     try {
       setLoading(true);
@@ -61,18 +78,21 @@ const FieldPanel: React.FC = () => {
       console.log('🔧 Adding field to backend:', fieldData.name);
       
       const response = await apiClient.fields.addField(
-        state.selectedProject.id.toString(), 
-        state.selectedTable.id.toString(), 
+        selectedProject.id.toString(), 
+        selectedTable.id.toString(), 
         fieldData
       );
       
       if (response.success) {
         console.log('✅ Field added to backend successfully');
         
-        dispatch({
-          type: 'ADD_FIELD',
-          payload: fieldData,
-        });
+        // Create field object with ID
+        const newField: Field = {
+          id: response.data?.id || Date.now().toString(),
+          ...fieldData,
+        };
+        
+        onAddField(newField);
         
       } else {
         console.error('❌ Failed to add field:', response.error);
@@ -93,24 +113,23 @@ const FieldPanel: React.FC = () => {
 
   const handleSaveField = (fieldData: Partial<Field>) => {
     if (editingField) {
-      dispatch({
-        type: 'UPDATE_FIELD',
-        payload: {
-          fieldId: editingField.id,
-          ...fieldData,
-        },
-      });
+      onUpdateField(editingField.id, fieldData);
+      setEditingField(null);
     }
   };
 
+  const handleDeleteField = (fieldId: string) => {
+    onDeleteField(fieldId);
+  };
+
   const handleViewData = () => {
-    if (state.selectedProject && state.selectedTable) {
-      navigate(`/projects/${state.selectedProject.id}/data`);
+    if (selectedProject && selectedTable) {
+      navigate(`/projects/${selectedProject.id}/data`);
     }
   };
   
-  const isPanelDisabled = !state.selectedProject || !state.selectedTable;
-  const hasFields = (state.selectedTable?.fields?.length || 0) > 0;
+  const isPanelDisabled = !selectedProject || !selectedTable;
+  const hasFields = fields.length > 0;
   
   return (
     <>
@@ -118,9 +137,9 @@ const FieldPanel: React.FC = () => {
         <h2 className="text-lg font-semibold mb-4 text-amber-700 flex items-center">
           <FileText size={20} className="mr-2" />
           Alanlar
-          {state.selectedTable && (
+          {selectedTable && (
             <span className="ml-2 text-sm font-normal text-gray-500">
-              ({state.selectedTable?.name || 'Bilinmeyen Tablo'})
+              ({selectedTable?.name || 'Bilinmeyen Tablo'})
             </span>
           )}
         </h2>
@@ -144,11 +163,11 @@ const FieldPanel: React.FC = () => {
         />
         
         <div className="panel-content">
-          {!state.selectedProject || !state.selectedTable ? (
+          {!selectedProject || !selectedTable ? (
             <p className="text-gray-500 text-sm italic text-center py-4">
               Lütfen önce bir tablo seçin.
             </p>
-          ) : (state.selectedTable?.fields?.length || 0) === 0 ? (
+          ) : fields.length === 0 ? (
             <p className="text-gray-500 text-sm italic text-center py-4">
               Bu tabloda henüz hiç alan yok. İlk alanınızı ekleyin.
             </p>
@@ -175,10 +194,10 @@ const FieldPanel: React.FC = () => {
                     onDragEnd={handleDragEnd}
                   >
                     <SortableContext
-                      items={state.selectedTable.fields.map(field => field.id)}
+                      items={fields.map(field => field.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      {state.selectedTable.fields.map((field) => (
+                      {fields.map((field) => (
                         <SortableFieldRow
                           key={field.id}
                           id={field.id}
@@ -189,6 +208,7 @@ const FieldPanel: React.FC = () => {
                           description={field.description}
                           relationships={field.relationships}
                           onEdit={handleEditField}
+                          onDelete={handleDeleteField}
                         />
                       ))}
                     </SortableContext>
@@ -216,11 +236,11 @@ const FieldPanel: React.FC = () => {
           <button
             onClick={handleViewData}
             className={`w-full px-4 py-2 rounded-md transition-colors text-sm font-medium ${
-              hasFields && state.selectedProject && state.selectedTable
+              hasFields && selectedProject && selectedTable
                 ? 'bg-green-600 text-white hover:bg-green-700'
                 : 'bg-gray-200 text-gray-700 opacity-60 cursor-not-allowed'
             }`}
-            disabled={!hasFields || !state.selectedProject || !state.selectedTable}
+            disabled={!hasFields || !selectedProject || !selectedTable}
           >
             Verileri Görüntüle
           </button>
@@ -239,6 +259,10 @@ const FieldPanel: React.FC = () => {
       <RelationshipModal
         isOpen={showRelationshipModal}
         onClose={() => setShowRelationshipModal(false)}
+        selectedProject={selectedProject}
+        selectedTable={selectedTable}
+        fields={fields}
+        onAddRelationship={onAddRelationship}
       />
     </>
   );
