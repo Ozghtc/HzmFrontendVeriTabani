@@ -32,7 +32,7 @@ export const useProjectDataView = () => {
     return sessionStorage.getItem('auth_token');
   };
 
-  // Load project from API veya context
+  // Load project from API - proper endpoints
   const loadProject = async () => {
     try {
       setProjectLoading(true);
@@ -40,43 +40,58 @@ export const useProjectDataView = () => {
       if (!token) {
         throw new Error('Authentication required');
       }
-      // API-only, no context lookup needed
-      let foundProject = null;
-      // Yoksa API'den fetch et
-      const response = await axios.get(`${API_URL}/tables/project/${parsedProjectId}`, {
+      
+      console.log(`📋 Loading project ${parsedProjectId} from API...`);
+      
+      // 1. Get project details
+      const projectResponse = await axios.get(`${API_URL}/projects/${parsedProjectId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      if (response.data.success) {
-        // Doğru parse
-        const projectData = response.data?.data?.project || response.data?.project || {};
-        const tables = response.data?.data?.tables || response.data?.tables || [];
-        foundProject = {
-          id: parsedProjectId,
-          name: projectData.name || '',
-          userId: projectData.userId || null,
-          userName: projectData.userName || '',
-          createdAt: projectData.createdAt || '',
-          apiKey: projectData.apiKey || '',
-          apiKeys: projectData.apiKeys || [],
-          isPublic: projectData.isPublic || false,
-          settings: projectData.settings || {},
-          description: projectData.description || '',
-          tables: tables.map((table: any) => ({
-            id: table.id?.toString() || '',
-            name: table.name || '',
-            fields: table.fields || []
-          }))
-        } as any;
-        // API-only, no context storage needed
-        setProject(foundProject);
-      } else {
-        setProject(null);
+      
+      if (!projectResponse.data.success) {
+        throw new Error(projectResponse.data.error || 'Project not found');
       }
+      
+      const projectData = projectResponse.data.data.project;
+      
+      // 2. Get project tables
+      const tablesResponse = await axios.get(`${API_URL}/tables/project/${parsedProjectId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const tables = tablesResponse.data.success ? tablesResponse.data.data.tables : [];
+      
+      // 3. Combine project and tables
+      const foundProject = {
+        id: parsedProjectId,
+        name: projectData.name || '',
+        userId: projectData.user_id || null,
+        userName: projectData.user_name || projectData.userName || '',
+        createdAt: projectData.created_at || '',
+        apiKey: projectData.api_key || '',
+        apiKeys: projectData.api_keys || [],
+        isPublic: projectData.is_public || false,
+        settings: projectData.settings || {},
+        description: projectData.description || '',
+        tables: tables.map((table: any) => ({
+          id: table.id?.toString() || '',
+          name: table.name || table.tableName || '',
+          fields: table.fields || []
+        }))
+      } as any;
+      
+      console.log(`✅ Project loaded:`, foundProject.name, `- ${foundProject.tables.length} tables`);
+      setProject(foundProject);
+      
     } catch (err: any) {
-      setError('Proje bilgileri yüklenirken hata oluştu');
+      console.error('❌ Error loading project:', err);
+      setError(err.response?.data?.error || 'Proje bilgileri yüklenirken hata oluştu');
       setProject(null);
     } finally {
       setProjectLoading(false);
@@ -324,27 +339,7 @@ export const useProjectDataView = () => {
     loadProject();
   }, [parsedProjectId]);
 
-  // Eğer context'te tablo yoksa, loadProject'i tekrar tetikle (admin paneli için de çalışsın)
-  useEffect(() => {
-    if (project && (!project.tables || project.tables.length === 0)) {
-      // API'den tablo/alanları doğrudan çek
-      const token = getAuthToken();
-      if (token && project.id) {
-        fetch(`${API_URL}/tables/project/${project.id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success && data.data && data.data.tables) {
-              setProject((prev: any) => ({ ...prev, tables: data.data.tables }));
-            }
-          });
-      }
-    }
-  }, [project]);
+  // Removed secondary table loading - now handled in loadProject
 
   // Auto-select first table when project loads
   useEffect(() => {
