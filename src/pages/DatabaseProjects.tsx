@@ -29,17 +29,17 @@ const DatabaseProjects = () => {
     handleDeleteProject,
     confirmDeleteProject,
     cancelDeleteProject,
-    toggleApiKey,
-    copyApiKey
+    toggleApiKeyVisibility: toggleApiKey,
+    // copyApiKey - not implemented
   } = useProjectsManagement();
   const { fetchAllProjects } = useApiAdminProjects();
 
-  // Projeler context'te boşsa API'den otomatik çek
-  React.useEffect(() => {
-    if (!allProjects || allProjects.length === 0) {
-      fetchAllProjects();
-    }
-  }, [allProjects, fetchAllProjects]);
+  // ⚠️ TEMPORARILY DISABLED - Preventing infinite loop due to 401 errors
+  // React.useEffect(() => {
+  //   if (!allProjects || allProjects.length === 0) {
+  //     fetchAllProjects();
+  //   }
+  // }, [allProjects, fetchAllProjects]);
 
   const { Database } = icons;
 
@@ -78,7 +78,7 @@ const DatabaseProjects = () => {
               project={project}
               showApiKey={showApiKey[project.id] || false}
               onToggleApiKey={() => toggleApiKey(project.id)}
-              onCopyApiKey={copyApiKey}
+              onCopyApiKey={() => console.log('Copy API key not implemented')}
               onDelete={() => handleDeleteProject(project)}
               onNavigateToData={() => navigate(`/projects/${project.id}/data`)}
               onNavigateToEdit={() => navigate(`/projects/${project.id}`)}

@@ -22,14 +22,19 @@ export const useApiUsers = () => {
         }
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        const users = data.data?.users || [];
-        setUsers(users);
-        console.log('✅ Users loaded successfully:', users.length);
-      } else {
-        throw new Error(`HTTP ${response.status}`);
-      }
+             if (response.ok) {
+         const data = await response.json();
+         const users = data.data?.users || [];
+         setUsers(users);
+         console.log('✅ Users loaded successfully:', users.length);
+       } else if (response.status === 401) {
+         console.error('🔒 Authentication failed - Invalid or expired token');
+         setError('Authentication failed. Please login again.');
+         setUsers([]);
+         return; // STOP retrying on auth failure
+       } else {
+         throw new Error(`HTTP ${response.status}`);
+       }
     } catch (err) {
       console.error('💥 Error fetching users:', err);
       setError('Network error while fetching users');
@@ -39,10 +44,10 @@ export const useApiUsers = () => {
     }
   };
 
-  // Load users on mount
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // ⚠️ TEMPORARILY DISABLED - Preventing infinite loop due to 401 errors
+  // useEffect(() => {
+  //   fetchUsers();
+  // }, []);
 
   const updateUser = async (userId: string, userData: Partial<User>): Promise<boolean> => {
     try {
@@ -128,14 +133,19 @@ export const useApiAdminProjects = () => {
         }
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        const projects = data.data?.projects || [];
-        setProjects(projects);
-        console.log('✅ Admin projects loaded successfully:', projects.length);
-      } else {
-        throw new Error(`HTTP ${response.status}`);
-      }
+             if (response.ok) {
+         const data = await response.json();
+         const projects = data.data?.projects || [];
+         setProjects(projects);
+         console.log('✅ Admin projects loaded successfully:', projects.length);
+       } else if (response.status === 401) {
+         console.error('🔒 Authentication failed - Invalid or expired token');
+         setError('Authentication failed. Please login again.');
+         setProjects([]);
+         return; // STOP retrying on auth failure
+       } else {
+         throw new Error(`HTTP ${response.status}`);
+       }
     } catch (err) {
       console.error('💥 Error fetching projects:', err);
       setError('Network error while fetching projects');
@@ -145,10 +155,10 @@ export const useApiAdminProjects = () => {
     }
   };
 
-  // Load projects on mount
-  useEffect(() => {
-    fetchAllProjects();
-  }, []);
+  // ⚠️ TEMPORARILY DISABLED - Preventing infinite loop due to 401 errors
+  // useEffect(() => {
+  //   fetchAllProjects();
+  // }, []);
 
   const deleteProject = async (projectId: string): Promise<boolean> => {
     try {
