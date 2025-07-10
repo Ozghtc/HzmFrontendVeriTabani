@@ -109,41 +109,10 @@ export const useProjectList = () => {
 
   // Navigation handlers
   const navigateToData = useCallback(async (projectId: number) => {
-    console.log('🔍 Preloading project and tables for project:', projectId);
-    try {
-      const token = sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
-      if (!token) throw new Error('Authentication required');
-      const API_URL = import.meta.env.VITE_API_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
-      const response = await axios.get(`${API_URL}/tables/project/${projectId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.data.success) {
-        const foundProject = {
-          id: projectId,
-          name: response.data.data.project?.name || 'e-ticaret',
-          userId: response.data.data.project?.userId || 1,
-          createdAt: response.data.data.project?.createdAt || new Date().toISOString(),
-          apiKey: response.data.data.project?.apiKey || '',
-          apiKeys: response.data.data.project?.apiKeys || [],
-          isPublic: response.data.data.project?.isPublic || false,
-          settings: response.data.data.project?.settings || {},
-          description: response.data.data.project?.description || '',
-          tables: response.data.data.tables.map((table: any) => ({
-            id: table.id.toString(),
-            name: table.name,
-            fields: table.fields || []
-          }))
-        };
-        dispatch({ type: 'SET_PROJECTS', payload: { projects: [ ...state.projects.filter(p => p.id !== foundProject.id), foundProject ] } });
-      }
-    } catch (err) {
-      console.error('Veriler butonunda preload hatası:', err);
-    }
+    console.log('🔍 Navigating to project data:', projectId);
+    // Just navigate - no preloading needed since we're API-only now
     navigate(`/projects/${projectId}/data`);
-  }, [navigate, dispatch, state.projects]);
+  }, [navigate]);
 
   const navigateToEdit = useCallback((projectId: number) => {
     if (loading) {

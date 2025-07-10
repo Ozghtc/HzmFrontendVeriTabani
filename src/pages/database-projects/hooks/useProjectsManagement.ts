@@ -30,10 +30,10 @@ export const useProjectsManagement = () => {
     setTimeout(() => setNotification(null), NOTIFICATION_TIMEOUT);
   };
 
-  // Use backend projects instead of localStorage with fallback
+  // Use backend projects only - no localStorage fallback
   const allProjects = backendProjects || [];
   
-  // users dizisini backend'den async olarak çek
+  // Load users from API
   React.useEffect(() => {
     (async () => {
       const fetchedUsers = await getAllUsers();
@@ -51,46 +51,34 @@ export const useProjectsManagement = () => {
       try {
         console.log('🗑️ Attempting to delete project:', deletingProject.id, deletingProject.name);
         
-        // Try backend API first
+        // Delete via API only
         const success = await deleteProjectApi(deletingProject.id);
         
-        // Always close modal first
+        // Close modal
         setDeletingProject(null);
         setDeleteConfirmName('');
         
         if (success) {
-          console.log('✅ Project deleted via backend');
+          console.log('✅ Project deleted successfully');
           showNotification('success', 'Proje başarıyla silindi!');
           
           // Refresh projects from backend
           await fetchAllProjects();
         } else {
-          console.log('❌ Backend delete failed, using localStorage fallback');
-          // Fallback to localStorage if backend fails
-          const updatedProjects = allProjects.filter(p => p?.id !== deletingProject.id);
-          localStorage.setItem('all_projects', JSON.stringify(updatedProjects));
-          showNotification('error', 'Proje localStorage\'dan silindi (backend hatası)');
-          
-          // Refresh page to show updated data
-          window.location.reload();
+          console.log('❌ Backend delete failed');
+          showNotification('error', 'Proje silinirken hata oluştu');
         }
       } catch (error) {
         console.error('💥 Error deleting project:', error);
         
-        // Always close modal even on error
+        // Close modal on error
         setDeletingProject(null);
         setDeleteConfirmName('');
         
-        // Fallback to localStorage on error
-        const updatedProjects = allProjects.filter(p => p?.id !== deletingProject.id);
-        localStorage.setItem('all_projects', JSON.stringify(updatedProjects));
-        showNotification('error', 'Network hatası - localStorage\'dan silindi');
-        
-        // Refresh page to show updated data
-        window.location.reload();
+        showNotification('error', 'Network hatası - proje silinemedi');
       }
     } else {
-      // Name doesn't match, show error but don't close modal
+      // Name doesn't match
       showNotification('error', 'Proje adını doğru yazmanız gerekiyor.');
     }
   };
@@ -100,36 +88,46 @@ export const useProjectsManagement = () => {
     setDeleteConfirmName('');
   };
 
-  const toggleApiKey = (projectId: string) => {
-    setShowApiKey(prev => ({ ...prev, [projectId]: !prev[projectId] }));
+  const toggleApiKeyVisibility = (projectId: string) => {
+    setShowApiKey(prev => ({
+      ...prev,
+      [projectId]: !prev[projectId]
+    }));
   };
 
-  const copyApiKey = (apiKey: string) => {
-    navigator.clipboard.writeText(apiKey);
-    showNotification('success', 'API Key kopyalandı!');
-  };
+  // Filter projects
+  const filteredProjects = allProjects.filter((project: any) => {
+    const matchesSearch = project.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
+    const matchesUser = filters.filterUser === 'all' || project.userId.toString() === filters.filterUser;
+    return matchesSearch && matchesUser;
+  });
 
   return {
-    // State
-    allProjects,
+    // Data
+    projects: filteredProjects,
     users,
-    filters,
-    deletingProject,
-    deleteConfirmName,
-    showApiKey,
-    notification,
     loading,
     error,
     
-    // Actions
-    navigate,
+    // Filters
+    filters,
     setFilters,
+    
+    // Delete modal
+    deletingProject,
+    deleteConfirmName,
     setDeleteConfirmName,
     handleDeleteProject,
     confirmDeleteProject,
     cancelDeleteProject,
-    toggleApiKey,
-    copyApiKey,
-    showNotification
+    
+    // UI state
+    showApiKey,
+    toggleApiKeyVisibility,
+    notification,
+    showNotification,
+    
+    // Navigation
+    navigate
   };
 }; 

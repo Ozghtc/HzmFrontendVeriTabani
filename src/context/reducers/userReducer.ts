@@ -1,61 +1,7 @@
-import { DatabaseState, DatabaseAction, Project } from '../../types';
-import { loadUsers, saveUsers } from '../utils/storage';
+import { DatabaseState, DatabaseAction } from '../../types';
 
+// User reducer is no longer used - all user management is API-only now
 export const userReducer = (state: DatabaseState, action: DatabaseAction): DatabaseState | null => {
-  switch (action.type) {
-    case 'UPDATE_USER_STATUS': {
-      const users = loadUsers();
-      const updatedUsers = users.map(user => 
-        user.id === action.payload.userId 
-          ? { ...user, isActive: action.payload.isActive }
-          : user
-      );
-      saveUsers(updatedUsers);
-      
-      return { ...state };
-    }
-    
-    case 'UPDATE_USER_SUBSCRIPTION': {
-      const users = loadUsers();
-      const updatedUsers = users.map(user => 
-        user.id === action.payload.userId 
-          ? { 
-              ...user, 
-              subscriptionType: action.payload.subscriptionType,
-              maxProjects: action.payload.maxProjects,
-              maxTables: action.payload.maxTables,
-              subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
-            }
-          : user
-      );
-      saveUsers(updatedUsers);
-      
-      return { ...state };
-    }
-    
-    case 'DELETE_USER': {
-      const users = loadUsers();
-      const updatedUsers = users.filter(user => user.id !== action.payload.userId);
-      saveUsers(updatedUsers);
-      
-      // localStorage removed - using only backend
-      
-      // If the deleted user is currently logged in, log them out
-      if (state.user?.id === action.payload.userId) {
-        return {
-          ...state,
-          user: null,
-          isAuthenticated: false,
-          projects: [],
-          selectedProject: null,
-          selectedTable: null,
-        };
-      } else {
-        return { ...state };
-      }
-    }
-    
-    default:
-      return null;
-  }
+  // Only auth actions are supported now - this reducer does nothing
+  return null;
 }; 

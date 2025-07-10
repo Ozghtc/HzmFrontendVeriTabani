@@ -27,9 +27,9 @@ export const useProjectDataView = () => {
   // Safe ID comparison - handle both string and number types
   const parsedProjectId = Number(projectId);
 
-  // Get auth token
+  // Get auth token from AuthUtils
   const getAuthToken = () => {
-    return sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
+    return sessionStorage.getItem('auth_token');
   };
 
   // Load project from API veya context
@@ -112,15 +112,13 @@ export const useProjectDataView = () => {
         const records = response.data.data.rows || [];
         setTableData(records);
         
-        // Also save to localStorage as backup
-        saveTableData(tableId, records);
+        // No localStorage backup - API-only
       }
     } catch (err: any) {
       console.error('Error loading data from API:', err);
       
-      // If API fails, fallback to localStorage
-      const localData = loadTableData(tableId);
-      setTableData(localData);
+      // No localStorage fallback - API-only
+      setTableData([]);
       
       if (err.response?.status === 401) {
         setError('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');

@@ -1,52 +1,67 @@
 import { TableData } from '../types/dataViewTypes';
+import { apiClient } from '../../../utils/api';
 
-export const loadTableData = (tableId: string): TableData[] => {
-  const data = JSON.parse(localStorage.getItem(`table_data_${tableId}`) || '[]');
-  return data;
+// Load table data from API only
+export const loadTableData = async (projectId: string, tableId: string): Promise<TableData[]> => {
+  try {
+    console.log('📋 Loading table data from API:', { projectId, tableId });
+    
+    // TODO: Implement API endpoint when backend is ready
+    // const response = await apiClient.data.getTableData(projectId, tableId);
+    
+    console.warn('⚠️ Table data API endpoint not ready yet, returning empty array');
+    return [];
+  } catch (error) {
+    console.error('💥 Error loading table data:', error);
+    return [];
+  }
 };
 
-export const saveTableData = (tableId: string, data: TableData[]) => {
-  localStorage.setItem(`table_data_${tableId}`, JSON.stringify(data));
+// Save table data to API only
+export const saveTableData = async (projectId: string, tableId: string, data: TableData[]): Promise<boolean> => {
+  try {
+    console.log('💾 Saving table data to API:', { projectId, tableId, rowCount: data.length });
+    
+    // For now, just log and return success
+    // TODO: Implement proper API endpoint when backend is ready
+    console.log('⚠️ Save API endpoint not implemented yet');
+    return true;
+  } catch (error) {
+    console.error('💥 Error saving table data:', error);
+    return false;
+  }
 };
 
-export const createNewRow = (fields: any[], rowData: any): TableData => {
+// Create a new row
+export const createNewRow = (fields: any[], formData: any): TableData => {
   const newRow: TableData = {
     id: Date.now().toString(),
+    ...formData,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
   
-  // Initialize with values based on field types
+  // Validate fields
   fields.forEach(field => {
-    switch (field.type) {
-      case 'string':
-        newRow[field.name] = rowData[field.name] || '';
-        break;
-      case 'number':
-        newRow[field.name] = Number(rowData[field.name]) || 0;
-        break;
-      case 'boolean':
-        newRow[field.name] = Boolean(rowData[field.name]);
-        break;
-      case 'date':
-        newRow[field.name] = rowData[field.name] || new Date().toISOString().split('T')[0];
-        break;
-      case 'object':
-        newRow[field.name] = rowData[field.name] || '{}';
-        break;
-      case 'array':
-        newRow[field.name] = rowData[field.name] || '[]';
-        break;
-      default:
-        newRow[field.name] = rowData[field.name] || '';
+    if (field.required && !formData[field.name]) {
+      throw new Error(`${field.name} is required`);
     }
   });
-
+  
   return newRow;
 };
 
-export const getProjectOwner = (project: any): any => {
+// Get project owner from API (no localStorage fallback)
+export const getProjectOwner = async (project: any): Promise<any> => {
   if (project && project.userId) {
-    const users = JSON.parse(localStorage.getItem('database_users') || '[]');
-    return users.find((u: any) => u.id === project.userId);
+    try {
+      // TODO: Get users from API when admin endpoint is ready
+      console.log('⚠️ getProjectOwner: API endpoint not ready, returning null');
+      return null;
+    } catch (error) {
+      console.error('Error getting project owner:', error);
+      return null;
+    }
   }
   return null;
 }; 

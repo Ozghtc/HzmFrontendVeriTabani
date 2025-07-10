@@ -1,25 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useDatabase } from '../../../context/DatabaseContext';
+import { useParams } from 'react-router-dom';
 import { useApiProjects } from '../../../hooks/useApiProjects';
-import { apiClient } from '../../../utils/api';
+import { useApiUsers } from '../../../hooks/useApiAdmin';
 
 export const useProjectData = () => {
-  const { projectId } = useParams();
-  const navigate = useNavigate();
-  const { state, dispatch } = useDatabase();
+  const { projectId } = useParams<{ projectId: string }>();
   const { projects, loading: projectsLoading } = useApiProjects();
+  const { users } = useApiUsers();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadProject = async () => {
-      if (!projectId) {
-        setLoading(false);
-        return;
-      }
-
       try {
         setLoading(true);
         setError(null);
@@ -35,8 +28,6 @@ export const useProjectData = () => {
         if (frontendProject) {
           console.log('✅ Found project:', frontendProject.name);
           setProject(frontendProject as any);
-          dispatch({ type: 'SELECT_PROJECT', payload: { projectId: parsedProjectId } });
-          dispatch({ type: 'SET_SELECTED_PROJECT', payload: { project: frontendProject as any } });
           setLoading(false);
           return;
         }
@@ -66,15 +57,15 @@ export const useProjectData = () => {
     };
 
     loadProject();
-  }, [projectId, projects, projectsLoading, dispatch]);  // ✅ FIXED - include all dependencies
+  }, [projectId, projects, projectsLoading]);
 
-  // Find project owner
+  // Find project owner using API
   let projectOwner = null;
   if (project) {
     if (project.owner) {
       projectOwner = project.owner;
     } else if (project.userId) {
-      const users = JSON.parse(localStorage.getItem('database_users') || '[]');
+      // Use users from API instead of localStorage
       projectOwner = users.find((u: any) => u.id === project.userId);
     }
   }
@@ -84,7 +75,7 @@ export const useProjectData = () => {
     projectOwner,
     loading,
     error,
-    currentUser: state.user,
-    navigateToProjects: () => navigate('/projects')
+    projects,
+    setProject
   };
 }; 

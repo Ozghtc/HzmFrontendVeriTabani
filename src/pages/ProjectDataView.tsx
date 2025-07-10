@@ -44,17 +44,8 @@ const ProjectDataView = () => {
   } = useProjectDataView();
 
   const { state } = useDatabase();
-  // users dizisini context, sessionStorage veya admin panelinden fallback ile al
-  let users = [];
-  if (state && Array.isArray((state as any).users)) {
-    users = (state as any).users;
-  } else {
-    try {
-      users = JSON.parse(sessionStorage.getItem('databaseUsers') || '[]');
-    } catch {
-      users = [];
-    }
-  }
+  // No localStorage/sessionStorage fallback - users will come from API
+  const users: any[] = [];
 
   // project objesinin userId ve userName alanlarını users dizisinden doldur
   if (project && (!project.userId || !project.userName)) {
