@@ -22,6 +22,7 @@ export const useProjectsManagement = () => {
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [showApiKey, setShowApiKey] = useState<Record<string, boolean>>({});
   const [notification, setNotification] = useState<NotificationState | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
 
   // Show notification with auto-hide
   const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
@@ -31,14 +32,14 @@ export const useProjectsManagement = () => {
 
   // Use backend projects instead of localStorage with fallback
   const allProjects = backendProjects || [];
-  const users = getAllUsers() || [];
-
-  // Eğer users dizisi boşsa, otomatik olarak API'den çek
+  
+  // users dizisini backend'den async olarak çek
   React.useEffect(() => {
-    if (!users || users.length === 0) {
-      fetchUsers();
-    }
-  }, [users, fetchUsers]);
+    (async () => {
+      const fetchedUsers = await getAllUsers();
+      setUsers(fetchedUsers);
+    })();
+  }, [getAllUsers]);
 
   const handleDeleteProject = (project: any) => {
     setDeletingProject(project);

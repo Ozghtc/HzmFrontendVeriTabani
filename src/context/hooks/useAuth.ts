@@ -161,8 +161,26 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
     dispatch({ type: 'LOGOUT' });
   };
   
-  const getAllUsers = () => {
-    return loadUsers();
+  // Yeni: getAllUsers her zaman backend'den çeker
+  const getAllUsers = async () => {
+    try {
+      const token = AuthManager.getToken();
+      if (!token) return [];
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
+      const response = await fetch(`${API_BASE_URL}/admin/users`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.data?.users || data.users || [];
+      }
+      return [];
+    } catch {
+      return [];
+    }
   };
   
   // Save auth token for API calls
