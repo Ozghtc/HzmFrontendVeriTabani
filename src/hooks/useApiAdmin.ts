@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../utils/api';
+import { AuthManager } from '../utils/api/utils/authUtils';
 import { User } from '../types';
 
 export const useApiUsers = () => {
@@ -14,10 +15,15 @@ export const useApiUsers = () => {
       
       console.log('👥 Fetching users from API...');
       
-      // ✅ API endpoint fixed - calling real backend
+      // ✅ API endpoint fixed - using AuthManager for proper token handling
+      const authHeaders = AuthManager.getAuthHeaders();
+      if (!authHeaders.Authorization) {
+        throw new Error('No valid authentication token found');
+      }
+      
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/users`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          ...authHeaders,
           'Content-Type': 'application/json'
         }
       });
@@ -44,20 +50,25 @@ export const useApiUsers = () => {
     }
   };
 
-  // ⚠️ TEMPORARILY DISABLED - Preventing infinite loop due to 401 errors
-  // useEffect(() => {
-  //   fetchUsers();
-  // }, []);
+  // ✅ Re-enabled with proper token handling
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const updateUser = async (userId: string, userData: Partial<User>): Promise<boolean> => {
     try {
       console.log('📝 Updating user:', userId);
       
-      // ✅ API endpoint fixed - calling real backend
+      // ✅ API endpoint fixed - using AuthManager for proper token handling
+      const authHeaders = AuthManager.getAuthHeaders();
+      if (!authHeaders.Authorization) {
+        throw new Error('No valid authentication token found');
+      }
+      
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          ...authHeaders,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(userData)
@@ -80,11 +91,16 @@ export const useApiUsers = () => {
     try {
       console.log('🗑️ Deleting user:', userId);
       
-      // ✅ API endpoint fixed - calling real backend
+      // ✅ API endpoint fixed - using AuthManager for proper token handling
+      const authHeaders = AuthManager.getAuthHeaders();
+      if (!authHeaders.Authorization) {
+        throw new Error('No valid authentication token found');
+      }
+      
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          ...authHeaders,
           'Content-Type': 'application/json'
         }
       });
@@ -125,10 +141,15 @@ export const useApiAdminProjects = () => {
       
       console.log('📊 Fetching all projects from API...');
       
-      // ✅ API endpoint fixed - calling real backend
+      // ✅ API endpoint fixed - using AuthManager for proper token handling
+      const authHeaders = AuthManager.getAuthHeaders();
+      if (!authHeaders.Authorization) {
+        throw new Error('No valid authentication token found');
+      }
+      
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/projects`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          ...authHeaders,
           'Content-Type': 'application/json'
         }
       });
@@ -155,20 +176,25 @@ export const useApiAdminProjects = () => {
     }
   };
 
-  // ⚠️ TEMPORARILY DISABLED - Preventing infinite loop due to 401 errors
-  // useEffect(() => {
-  //   fetchAllProjects();
-  // }, []);
+  // ✅ Re-enabled with proper token handling
+  useEffect(() => {
+    fetchAllProjects();
+  }, []);
 
   const deleteProject = async (projectId: string): Promise<boolean> => {
     try {
       console.log('🗑️ Deleting project:', projectId);
       
-      // ✅ API endpoint fixed - calling real backend (using regular projects endpoint)
+      // ✅ API endpoint fixed - using AuthManager for proper token handling
+      const authHeaders = AuthManager.getAuthHeaders();
+      if (!authHeaders.Authorization) {
+        throw new Error('No valid authentication token found');
+      }
+      
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/projects/${projectId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          ...authHeaders,
           'Content-Type': 'application/json'
         }
       });

@@ -34,12 +34,12 @@ const DatabaseProjects = () => {
   } = useProjectsManagement();
   const { fetchAllProjects } = useApiAdminProjects();
 
-  // ⚠️ TEMPORARILY DISABLED - Preventing infinite loop due to 401 errors
-  // React.useEffect(() => {
-  //   if (!allProjects || allProjects.length === 0) {
-  //     fetchAllProjects();
-  //   }
-  // }, [allProjects, fetchAllProjects]);
+  // ✅ Re-enabled with proper token handling
+  React.useEffect(() => {
+    if (!allProjects || allProjects.length === 0) {
+      fetchAllProjects();
+    }
+  }, [allProjects, fetchAllProjects]);
 
   const { Database } = icons;
 
