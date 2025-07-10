@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDatabase } from '../../../context/DatabaseContext';
 import { TableData, RowFormData } from '../types/dataViewTypes';
 import { loadTableData, saveTableData, createNewRow } from '../utils/dataHandlers';
+import { AuthManager } from '../../../utils/api/utils/authUtils';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
@@ -27,9 +28,9 @@ export const useProjectDataView = () => {
   // Safe ID comparison - handle both string and number types
   const parsedProjectId = Number(projectId);
 
-  // Get auth token from AuthUtils
+  // Get auth token from AuthManager
   const getAuthToken = () => {
-    return sessionStorage.getItem('auth_token');
+    return AuthManager.getToken();
   };
 
   // Load project from API - proper endpoints
