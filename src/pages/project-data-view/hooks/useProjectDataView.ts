@@ -44,19 +44,36 @@ export const useProjectDataView = () => {
       
       console.log(`📋 Loading project ${parsedProjectId} from API...`);
       
-      // 1. Get project details
-      const projectResponse = await axios.get(`${API_URL}/projects/${parsedProjectId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // ✅ ADMIN BYPASS: Admin ise backend'den direkt admin endpoint'ini çağır
+      let projectResponse;
+      if (state.user?.isAdmin) {
+        console.log('🔐 Admin access detected - using admin endpoint');
+        projectResponse = await axios.get(`${API_URL}/admin/projects/${parsedProjectId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      } else {
+        console.log('👤 Normal user access - using user endpoint');
+        projectResponse = await axios.get(`${API_URL}/projects/${parsedProjectId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
       
       if (!projectResponse.data.success) {
         throw new Error(projectResponse.data.error || 'Project not found');
       }
       
-      const projectData = projectResponse.data.data.project;
+      // ✅ ADMIN BYPASS: Response yapısı farklı olabilir
+      const projectData = state.user?.isAdmin 
+        ? projectResponse.data.data.project 
+        : projectResponse.data.data.project;
+      
+      console.log('📊 Project data loaded:', projectData);
       
       // 2. Get project tables
       const tablesResponse = await axios.get(`${API_URL}/tables/project/${parsedProjectId}`, {
@@ -68,16 +85,17 @@ export const useProjectDataView = () => {
       
       const tables = tablesResponse.data.success ? tablesResponse.data.data.tables : [];
       
-      // 3. Combine project and tables
+      // 3. Combine project and tables with proper field mapping
       const foundProject = {
         id: parsedProjectId,
         name: projectData.name || '',
-        userId: projectData.user_id || null,
+        userId: projectData.user_id || projectData.userId || null,
         userName: projectData.user_name || projectData.userName || '',
-        createdAt: projectData.created_at || '',
-        apiKey: projectData.api_key || '',
-        apiKeys: projectData.api_keys || [],
-        isPublic: projectData.is_public || false,
+        userEmail: projectData.user_email || projectData.userEmail || '',
+        createdAt: projectData.created_at || projectData.createdAt || '',
+        apiKey: projectData.api_key || projectData.apiKey || '',
+        apiKeys: projectData.api_keys || projectData.apiKeys || [],
+        isPublic: projectData.is_public || projectData.isPublic || false,
         settings: projectData.settings || {},
         description: projectData.description || '',
         tables: tables.map((table: any) => ({
@@ -88,6 +106,7 @@ export const useProjectDataView = () => {
       } as any;
       
       console.log(`✅ Project loaded:`, foundProject.name, `- ${foundProject.tables.length} tables`);
+      console.log('👤 Project owner:', foundProject.userName || 'Unknown');
       setProject(foundProject);
       
     } catch (err: any) {

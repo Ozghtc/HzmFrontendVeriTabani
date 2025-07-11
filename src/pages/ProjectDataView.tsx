@@ -86,6 +86,7 @@ const ProjectDataView = () => {
         project={project} 
         onNavigateBack={() => navigate('/projects')} 
         users={users}
+        currentUser={state.user} // ✅ Admin kullanıcı bilgileri eklendi
       />
 
       <main className="container mx-auto p-4">
