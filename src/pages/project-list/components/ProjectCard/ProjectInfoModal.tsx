@@ -59,25 +59,36 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
     return `# ${project.name} - API Dokümantasyonu
 
 ## 🔐 Kimlik Doğrulama
-Tüm API isteklerinde \`X-API-Key\` header'ı kullanılmalıdır.
+API'miz **iki farklı kimlik doğrulama yöntemi** destekler:
+
+### 1. API Key Authentication (Önerilen)
+Tüm API isteklerinde \`X-API-Key\` header'ı kullanın:
 **API Key:** \`${apiInfo.apiKey}\`
+
+### 2. JWT Token Authentication  
+\`Authorization: Bearer <token>\` header'ı ile giriş yapılmış kullanıcılar için
+
+⚠️ **Önemli:** API Key ile sadece **kendi projenize** erişebilirsiniz (Proje ID: ${apiInfo.projectId})
 
 ## 📋 Temel Bilgiler
 - **Base URL:** \`${apiInfo.baseUrl}\`
 - **Proje ID:** \`${apiInfo.projectId}\`
-- **Rate Limit:** 300 istek/15 dakika
+- **Rate Limit:** Şu anda aktif limit yok (gelecekte eklenebilir)
+- **API Key Kısıtı:** Bu key sadece "${project.name}" projesine erişim sağlar
 
 ## 🔄 Temel Workflow
-1. Proje'de tablo oluşturun
-2. Tabloya field'lar ekleyin
-3. Field'lara veri ekleyin
-4. Veriyi okuyun/güncelleyin
+1. API Key ile kimlik doğrulaması yapın
+2. Proje'de tablo oluşturun
+3. Tabloya field'lar ekleyin
+4. Field'lara veri ekleyin
+5. Veriyi okuyun/güncelleyin
 
 ## 🛠️ Field Türleri
-- **string:** Metin veriler
-- **number:** Sayısal veriler
+- **string:** Metin veriler (max 255 karakter)
+- **number:** Sayısal veriler (integer/decimal)
 - **boolean:** true/false değerleri
-- **date:** Tarih ve saat
+- **date:** Tarih ve saat (ISO format)
+- **text:** Uzun metin veriler (sınırsız)
 
 ## 📊 CRUD Operasyonları
 
@@ -103,6 +114,7 @@ X-API-Key: ${apiInfo.apiKey}
       "name": "hastaneler",
       "projectId": ${apiInfo.projectId},
       "fields": [],
+      "physicalTableName": "user_data.project_${apiInfo.projectId}_hastaneler_1641234567890",
       "createdAt": "2025-01-11T10:30:00Z"
     }
   }
@@ -119,7 +131,26 @@ X-API-Key: ${apiInfo.apiKey}
   "name": "hastane_adi",
   "type": "string",
   "isRequired": true,
-  "description": "Hastane adı"
+  "description": "Hastane adı",
+  "maxLength": 100
+}
+\`\`\`
+
+**Response:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "field": {
+      "id": "1752214830211",
+      "name": "hastane_adi",
+      "type": "string",
+      "columnName": "hastane_adi",
+      "isRequired": true,
+      "maxLength": 100
+    },
+    "totalFields": 1
+  }
 }
 \`\`\`
 
@@ -132,7 +163,26 @@ X-API-Key: ${apiInfo.apiKey}
 {
   "hastane_adi": "Acıbadem Hastanesi",
   "il": "İstanbul",
-  "aktif_mi": true
+  "aktif_mi": true,
+  "kurulis_tarihi": "2010-05-15T00:00:00Z"
+}
+\`\`\`
+
+**Response:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "row": {
+      "id": 1,
+      "hastane_adi": "Acıbadem Hastanesi",
+      "il": "İstanbul",
+      "aktif_mi": true,
+      "kurulis_tarihi": "2010-05-15T00:00:00Z",
+      "created_at": "2025-01-11T10:35:00Z",
+      "updated_at": "2025-01-11T10:35:00Z"
+    }
+  }
 }
 \`\`\`
 
@@ -143,10 +193,39 @@ X-API-Key: ${apiInfo.apiKey}
 \`\`\`
 
 **Query Parameters:**
-- \`page=1\` - Sayfa numarası
-- \`limit=50\` - Sayfa başına kayıt
-- \`sort=id\` - Sıralama alanı
+- \`page=1\` - Sayfa numarası (default: 1)
+- \`limit=50\` - Sayfa başına kayıt (max: 100)
+- \`sort=id\` - Sıralama alanı (herhangi bir field)
 - \`order=ASC\` - Sıralama yönü (ASC/DESC)
+
+**Response:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "rows": [
+      {
+        "id": 1,
+        "hastane_adi": "Acıbadem Hastanesi",
+        "il": "İstanbul",
+        "aktif_mi": true,
+        "created_at": "2025-01-11T10:35:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 50,
+      "total": 1,
+      "totalPages": 1
+    },
+    "table": {
+      "id": 11,
+      "name": "hastaneler",
+      "fields": [...]
+    }
+  }
+}
+\`\`\`
 
 ### ✏️ Veri Güncelleme
 \`\`\`http
@@ -160,18 +239,48 @@ X-API-Key: ${apiInfo.apiKey}
 }
 \`\`\`
 
+**Response:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "row": {
+      "id": 1,
+      "hastane_adi": "Acıbadem Maslak Hastanesi",
+      "aktif_mi": false,
+      "updated_at": "2025-01-11T11:00:00Z"
+    }
+  }
+}
+\`\`\`
+
 ### 🗑️ Veri Silme
 \`\`\`http
 DELETE /api/v1/data/table/{tableId}/rows/{rowId}
 X-API-Key: ${apiInfo.apiKey}
 \`\`\`
 
+**Response:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "message": "Row deleted successfully",
+    "deletedRow": {
+      "id": 1,
+      "hastane_adi": "Acıbadem Maslak Hastanesi"
+    }
+  }
+}
+\`\`\`
+
 ## 🌐 CORS ve Browser Kullanımı
 
-### Desteklenen Domain'ler:
+### Desteklenen Origin'ler:
 - \`https://hzmfrontendveritabani.netlify.app\`
 - \`https://hzmsoft.com\`
 - \`http://localhost:5173\` (development)
+- \`http://localhost:3000\` (development)
 
 ### JavaScript/Fetch Örneği:
 \`\`\`javascript
@@ -187,11 +296,15 @@ const response = await fetch(
   }
 );
 
+if (!response.ok) {
+  throw new Error(\`HTTP error! status: \${response.status}\`);
+}
+
 const data = await response.json();
 console.log(data.data.rows);
 
 // Veri ekleme
-const response = await fetch(
+const addResponse = await fetch(
   '${apiInfo.baseUrl}/api/v1/data/table/10/rows',
   {
     method: 'POST',
@@ -202,28 +315,107 @@ const response = await fetch(
     body: JSON.stringify({
       "kurum_adi": "Yeni Hastane",
       "kurum_turu": "Özel",
-      "il": "İstanbul"
+      "il": "İstanbul",
+      "aktif_mi": true
     })
   }
 );
 
-const result = await response.json();
+const result = await addResponse.json();
+if (result.success) {
+  console.log('Veri eklendi:', result.data.row);
+} else {
+  console.error('Hata:', result.error);
+}
 \`\`\`
 
-## ⚠️ Hata Kodları
-- **PROJECT_ACCESS_DENIED:** Yanlış proje erişimi
-- **NOT_FOUND:** Kaynak bulunamadı
-- **VALIDATION_ERROR:** Geçersiz veri
-- **429:** Rate limit aşıldı
+## ⚠️ Hata Kodları ve Çözümleri
+
+### Kimlik Doğrulama Hataları:
+- **401 NO_API_KEY:** X-API-Key header'ı eksik
+- **401 INVALID_API_KEY:** API key geçersiz
+- **401 NO_AUTH:** Ne JWT ne de API key sağlanmış
+- **403 PROJECT_ACCESS_DENIED:** Bu API key başka projeye erişmeye çalışıyor
+
+### Veri Hataları:
+- **404 NOT_FOUND:** Tablo/kayıt bulunamadı
+- **400 VALIDATION_ERROR:** Geçersiz veri formatı
+- **409 CONFLICT:** Aynı isimde tablo zaten var
+- **400 MISSING_REQUIRED_FIELDS:** Zorunlu alanlar eksik
+
+### Sunucu Hataları:
+- **500 INTERNAL_SERVER_ERROR:** Sunucu hatası
+- **503 SERVICE_UNAVAILABLE:** Servis geçici olarak kullanılamıyor
+
+### Örnek Hata Response:
+\`\`\`json
+{
+  "success": false,
+  "error": "Table not found",
+  "code": "NOT_FOUND",
+  "details": {
+    "tableId": "123",
+    "projectId": "${apiInfo.projectId}"
+  }
+}
+\`\`\`
+
+## 🔒 Güvenlik ve Limitler
+
+### API Key Güvenliği:
+- API key'inizi **asla frontend kodunda** saklamayın
+- Server-side proxy kullanın veya environment variables'da saklayın
+- API key'i yalnızca HTTPS üzerinden gönderin
+
+### Veri Limitleri:
+- **String field:** Max 255 karakter (text field sınırsız)
+- **Number field:** PostgreSQL numeric limitlerinde
+- **Array field:** Max 100 eleman
+- **File upload:** Şu anda desteklenmiyor
+
+### Performans Önerileri:
+- Pagination kullanın (limit=50 önerilir)
+- Gereksiz field'ları sorgularmayın
+- Toplu işlemler için bulk endpoint'leri kullanın
+
+## 🔄 Bulk Operations (Toplu İşlemler)
+
+### Toplu Veri Ekleme:
+\`\`\`http
+POST /api/v1/data/table/{tableId}/bulk
+Content-Type: application/json
+X-API-Key: ${apiInfo.apiKey}
+
+{
+  "operation": "create",
+  "rows": [
+    {
+      "hastane_adi": "Hastane 1",
+      "il": "İstanbul"
+    },
+    {
+      "hastane_adi": "Hastane 2", 
+      "il": "Ankara"
+    }
+  ]
+}
+\`\`\`
 
 ## 📞 Destek İletişim
 - **Email:** ozgurhzm@gmail.com
 - **Proje:** ${project.name}
 - **Proje ID:** ${project.id}
+- **API Key:** ${project.apiKey.substring(0, 20)}...
 - **Base URL:** ${apiInfo.baseUrl}
 
+## 🚀 Versiyonlama
+- **Mevcut Versiyon:** v1
+- **API Prefix:** /api/v1/
+- **Backward Compatibility:** Garantili (major versiyon değişikliği dışında)
+
 ---
-*Bu dokümantasyon ${new Date().toLocaleDateString('tr-TR')} tarihinde oluşturulmuştur.*`;
+*Bu dokümantasyon ${new Date().toLocaleDateString('tr-TR')} tarihinde oluşturulmuştur.*
+*Son güncelleme: ${new Date().toLocaleString('tr-TR')} - API Key authentication düzeltmesi*`;
   };
 
   if (!isOpen) return null;
@@ -738,6 +930,10 @@ const response = await fetch(
   }
 );
 
+if (!response.ok) {
+  throw new Error(\`HTTP error! status: \${response.status}\`);
+}
+
 const data = await response.json();
 console.log(data.data.rows);`}</pre>
                   </div>
@@ -756,12 +952,19 @@ const response = await fetch(
     body: JSON.stringify({
       "kurum_adi": "Yeni Hastane",
       "kurum_turu": "Özel",
-      "il": "İstanbul"
+      "il": "İstanbul",
+      "aktif_mi": true
     })
   }
 );
 
-const result = await response.json();`}</pre>
+const result = await response.json();
+if (result.success) {
+  console.log('Veri eklendi:', result.data.row);
+} else {
+  console.error('Hata:', result.error);
+}
+\`}</pre>
                   </div>
                 </div>
               </div>
@@ -795,4 +998,4 @@ const result = await response.json();`}</pre>
   );
 };
 
-export default ProjectInfoModal; 
+export default ProjectInfoModal;
