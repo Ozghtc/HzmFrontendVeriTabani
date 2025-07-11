@@ -73,7 +73,7 @@ Tüm API isteklerinde \`X-API-Key\` header'ı kullanın:
 ## 📋 Temel Bilgiler
 - **Base URL:** \`${apiInfo.baseUrl}\`
 - **Proje ID:** \`${apiInfo.projectId}\`
-- **Rate Limit:** Şu anda aktif limit yok (gelecekte eklenebilir)
+- **Rate Limit:** 300 istek/15 dakika (admin kullanıcılar için bypass)
 - **API Key Kısıtı:** Bu key sadece "${project.name}" projesine erişim sağlar
 
 ## 🔄 Temel Workflow
@@ -84,11 +84,11 @@ Tüm API isteklerinde \`X-API-Key\` header'ı kullanın:
 5. Veriyi okuyun/güncelleyin
 
 ## 🛠️ Field Türleri
-- **string:** Metin veriler (max 255 karakter)
-- **number:** Sayısal veriler (integer/decimal)
+- **string:** Metin veriler (maxLength belirlenmezse sınırsız)
+- **number:** Sayısal veriler (PostgreSQL NUMERIC)
 - **boolean:** true/false değerleri
 - **date:** Tarih ve saat (ISO format)
-- **text:** Uzun metin veriler (sınırsız)
+- **currency:** Para birimi (JSONB format: {amount, currency, symbol})
 
 ## 📊 CRUD Operasyonları
 
@@ -131,8 +131,7 @@ X-API-Key: ${apiInfo.apiKey}
   "name": "hastane_adi",
   "type": "string",
   "isRequired": true,
-  "description": "Hastane adı",
-  "maxLength": 100
+  "description": "Hastane adı"
 }
 \`\`\`
 
@@ -146,8 +145,7 @@ X-API-Key: ${apiInfo.apiKey}
       "name": "hastane_adi",
       "type": "string",
       "columnName": "hastane_adi",
-      "isRequired": true,
-      "maxLength": 100
+      "isRequired": true
     },
     "totalFields": 1
   }
@@ -280,7 +278,7 @@ X-API-Key: ${apiInfo.apiKey}
 - \`https://hzmfrontendveritabani.netlify.app\`
 - \`https://hzmsoft.com\`
 - \`http://localhost:5173\` (development)
-- \`http://localhost:3000\` (development)
+- \`http://localhost:5174\` (development)
 
 ### JavaScript/Fetch Örneği:
 \`\`\`javascript
@@ -346,6 +344,7 @@ if (result.success) {
 ### Sunucu Hataları:
 - **500 INTERNAL_SERVER_ERROR:** Sunucu hatası
 - **503 SERVICE_UNAVAILABLE:** Servis geçici olarak kullanılamıyor
+- **429 TOO_MANY_REQUESTS:** Rate limit aşıldı (300 req/15dk)
 
 ### Örnek Hata Response:
 \`\`\`json
@@ -368,38 +367,17 @@ if (result.success) {
 - API key'i yalnızca HTTPS üzerinden gönderin
 
 ### Veri Limitleri:
-- **String field:** Max 255 karakter (text field sınırsız)
-- **Number field:** PostgreSQL numeric limitlerinde
-- **Array field:** Max 100 eleman
+- **String field:** maxLength belirtilmezse sınırsız (TEXT)
+- **Number field:** PostgreSQL NUMERIC limitlerinde
+- **Boolean field:** true/false değerleri
+- **Date field:** ISO 8601 format gerekli
 - **File upload:** Şu anda desteklenmiyor
 
 ### Performans Önerileri:
-- Pagination kullanın (limit=50 önerilir)
+- Pagination kullanın (limit=50 önerilir, max=100)
 - Gereksiz field'ları sorgularmayın
-- Toplu işlemler için bulk endpoint'leri kullanın
-
-## 🔄 Bulk Operations (Toplu İşlemler)
-
-### Toplu Veri Ekleme:
-\`\`\`http
-POST /api/v1/data/table/{tableId}/bulk
-Content-Type: application/json
-X-API-Key: ${apiInfo.apiKey}
-
-{
-  "operation": "create",
-  "rows": [
-    {
-      "hastane_adi": "Hastane 1",
-      "il": "İstanbul"
-    },
-    {
-      "hastane_adi": "Hastane 2", 
-      "il": "Ankara"
-    }
-  ]
-}
-\`\`\`
+- Rate limit'i aşmamaya dikkat edin
+- Connection pooling otomatik (max 20 connection)
 
 ## 📞 Destek İletişim
 - **Email:** ozgurhzm@gmail.com
@@ -415,7 +393,7 @@ X-API-Key: ${apiInfo.apiKey}
 
 ---
 *Bu dokümantasyon ${new Date().toLocaleDateString('tr-TR')} tarihinde oluşturulmuştur.*
-*Son güncelleme: ${new Date().toLocaleString('tr-TR')} - API Key authentication düzeltmesi*`;
+*Son güncelleme: ${new Date().toLocaleString('tr-TR')} - Yanıltıcı bilgiler düzeltildi*`;
   };
 
   if (!isOpen) return null;
