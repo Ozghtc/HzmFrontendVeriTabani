@@ -353,9 +353,225 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
                   <div>
                     <h4 className="font-medium text-gray-700 mb-2">5. Rate Limiting</h4>
                     <p className="text-gray-600">
-                      API'ye saniyede maksimum 10 istek gönderebilirsiniz.
+                      API'ye dakikada maksimum 300 istek gönderebilirsiniz.
                       Limit aşıldığında 429 hatası alırsınız.
                     </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* CRUD Operasyonları */}
+              <div className="bg-emerald-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <Code2 className="mr-2 text-emerald-600" size={20} />
+                  CRUD Operasyonları
+                </h3>
+                
+                <div className="space-y-6 text-sm">
+                  {/* Tablo Oluşturma */}
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">📋 Tablo Oluşturma</h4>
+                    <div className="bg-gray-100 p-3 rounded">
+                      <p><strong>POST</strong> <code>/api/v1/tables/project/{apiInfo.projectId}</code></p>
+                      <p className="mt-2"><strong>Request Body:</strong></p>
+                      <pre className="bg-gray-800 text-green-400 p-2 rounded text-xs mt-1">{`{
+  "name": "hastaneler",
+  "description": "Hastane bilgileri tablosu"
+}`}</pre>
+                      <p className="mt-2"><strong>Response:</strong></p>
+                      <pre className="bg-gray-800 text-green-400 p-2 rounded text-xs mt-1">{`{
+  "success": true,
+  "data": {
+    "table": {
+      "id": 11,
+      "name": "hastaneler",
+      "projectId": ${apiInfo.projectId},
+      "fields": [],
+      "createdAt": "2025-01-11T10:30:00Z"
+    }
+  }
+}`}</pre>
+                    </div>
+                  </div>
+                  
+                  {/* Field Ekleme */}
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">⚡ Field Ekleme</h4>
+                    <div className="bg-gray-100 p-3 rounded">
+                      <p><strong>POST</strong> <code>/api/v1/tables/project/{apiInfo.projectId}/{'{tableId}'}/fields</code></p>
+                      <p className="mt-2"><strong>Request Body:</strong></p>
+                      <pre className="bg-gray-800 text-green-400 p-2 rounded text-xs mt-1">{`{
+  "name": "hastane_adi",
+  "type": "string",
+  "isRequired": true,
+  "description": "Hastane adı"
+}`}</pre>
+                      <p className="mt-2"><strong>Response:</strong></p>
+                      <pre className="bg-gray-800 text-green-400 p-2 rounded text-xs mt-1">{`{
+  "success": true,
+  "data": {
+    "field": {
+      "id": "1752214830211",
+      "name": "hastane_adi",
+      "type": "string",
+      "isRequired": true
+    },
+    "totalFields": 1
+  }
+}`}</pre>
+                    </div>
+                  </div>
+                  
+                  {/* Veri Ekleme */}
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">💾 Veri Ekleme</h4>
+                    <div className="bg-gray-100 p-3 rounded">
+                      <p><strong>POST</strong> <code>/api/v1/data/table/{'{tableId}'}/rows</code></p>
+                      <p className="mt-2"><strong>Request Body:</strong></p>
+                      <pre className="bg-gray-800 text-green-400 p-2 rounded text-xs mt-1">{`{
+  "hastane_adi": "Acıbadem Hastanesi",
+  "il": "İstanbul",
+  "aktif_mi": true
+}`}</pre>
+                      <p className="mt-2"><strong>Response:</strong></p>
+                      <pre className="bg-gray-800 text-green-400 p-2 rounded text-xs mt-1">{`{
+  "success": true,
+  "data": {
+    "row": {
+      "id": 1,
+      "hastane_adi": "Acıbadem Hastanesi",
+      "il": "İstanbul",
+      "aktif_mi": true,
+      "created_at": "2025-01-11T10:35:00Z"
+    }
+  }
+}`}</pre>
+                    </div>
+                  </div>
+                  
+                  {/* Veri Okuma */}
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">📖 Veri Okuma</h4>
+                    <div className="bg-gray-100 p-3 rounded">
+                      <p><strong>GET</strong> <code>/api/v1/data/table/{'{tableId}'}</code></p>
+                      <p className="mt-2"><strong>Query Parameters:</strong></p>
+                      <ul className="list-disc list-inside text-gray-600 mt-1">
+                        <li><code>page=1</code> - Sayfa numarası</li>
+                        <li><code>limit=50</code> - Sayfa başına kayıt</li>
+                        <li><code>sort=id</code> - Sıralama alanı</li>
+                        <li><code>order=ASC</code> - Sıralama yönü</li>
+                      </ul>
+                      <p className="mt-2"><strong>Response:</strong></p>
+                      <pre className="bg-gray-800 text-green-400 p-2 rounded text-xs mt-1">{`{
+  "success": true,
+  "data": {
+    "rows": [
+      {
+        "id": 1,
+        "hastane_adi": "Acıbadem Hastanesi",
+        "il": "İstanbul",
+        "aktif_mi": true
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 50,
+      "total": 1,
+      "totalPages": 1
+    }
+  }
+}`}</pre>
+                    </div>
+                  </div>
+                  
+                  {/* Veri Güncelleme */}
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">✏️ Veri Güncelleme</h4>
+                    <div className="bg-gray-100 p-3 rounded">
+                      <p><strong>PUT</strong> <code>/api/v1/data/table/{'{tableId}'}/rows/{'{rowId}'}</code></p>
+                      <p className="mt-2"><strong>Request Body:</strong></p>
+                      <pre className="bg-gray-800 text-green-400 p-2 rounded text-xs mt-1">{`{
+  "hastane_adi": "Acıbadem Maslak Hastanesi",
+  "aktif_mi": false
+}`}</pre>
+                    </div>
+                  </div>
+                  
+                  {/* Veri Silme */}
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">🗑️ Veri Silme</h4>
+                    <div className="bg-gray-100 p-3 rounded">
+                      <p><strong>DELETE</strong> <code>/api/v1/data/table/{'{tableId}'}/rows/{'{rowId}'}</code></p>
+                      <p className="mt-2"><strong>Response:</strong></p>
+                      <pre className="bg-gray-800 text-green-400 p-2 rounded text-xs mt-1">{`{
+  "success": true,
+  "data": {
+    "message": "Row deleted successfully"
+  }
+}`}</pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* CORS ve Browser Kullanımı */}
+              <div className="bg-yellow-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <Info className="mr-2 text-yellow-600" size={20} />
+                  CORS ve Browser Kullanımı
+                </h3>
+                
+                <div className="space-y-4 text-sm">
+                  <div>
+                    <h4 className="font-medium text-gray-700 mb-2">🌐 CORS Ayarları</h4>
+                    <p className="text-gray-600 mb-2">
+                      API'miz şu domain'lerden gelen istekleri kabul eder:
+                    </p>
+                    <ul className="list-disc list-inside text-gray-600 space-y-1">
+                      <li><code>https://hzmfrontendveritabani.netlify.app</code></li>
+                      <li><code>https://hzmsoft.com</code></li>
+                      <li><code>http://localhost:5173</code> (development)</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-gray-700 mb-2">💻 JavaScript/Fetch Örneği</h4>
+                    <pre className="bg-gray-800 text-green-400 p-3 rounded text-xs overflow-x-auto">{`// Veri okuma örneği
+const response = await fetch(
+  '${apiInfo.baseUrl}/api/v1/data/table/10',
+  {
+    method: 'GET',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'Content-Type': 'application/json'
+    }
+  }
+);
+
+const data = await response.json();
+console.log(data.data.rows);`}</pre>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-gray-700 mb-2">📝 Veri Ekleme JavaScript Örneği</h4>
+                    <pre className="bg-gray-800 text-green-400 p-3 rounded text-xs overflow-x-auto">{`// Yeni kayıt ekleme
+const response = await fetch(
+  '${apiInfo.baseUrl}/api/v1/data/table/10/rows',
+  {
+    method: 'POST',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      "kurum_adi": "Yeni Hastane",
+      "kurum_turu": "Özel",
+      "il": "İstanbul"
+    })
+  }
+);
+
+const result = await response.json();`}</pre>
                   </div>
                 </div>
               </div>
@@ -368,6 +584,7 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
                   <p><strong>Proje:</strong> {project.name}</p>
                   <p><strong>Proje ID:</strong> {project.id}</p>
                   <p><strong>API Key:</strong> {project.apiKey.substring(0, 20)}...</p>
+                  <p><strong>Base URL:</strong> {apiInfo.baseUrl}</p>
                 </div>
               </div>
             </div>
