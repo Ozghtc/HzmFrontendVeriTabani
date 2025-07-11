@@ -36,24 +36,25 @@ export const useProjectData = () => {
 
           if (response.ok) {
             const result = await response.json();
-            const adminProject = result.data;
+            const adminProject = result.data.project; // ✅ FIXED: data.project olarak düzeltildi
             
-            console.log('✅ Admin project loaded successfully:', adminProject.name);
+            console.log('✅ Admin project loaded successfully:', adminProject?.name || 'Unknown');
+            console.log('📊 Admin project details:', adminProject);
             
             // Format project data for frontend
             const formattedProject = {
               id: adminProject.id,
               name: adminProject.name,
               description: adminProject.description,
-              apiKey: adminProject.apiKey,
-              userId: adminProject.userId,
-              userEmail: adminProject.userEmail,
-              userName: adminProject.userName,
-              tableCount: adminProject.tableCount,
-              isPublic: adminProject.isPublic,
+              apiKey: adminProject.api_key || adminProject.apiKey,
+              userId: adminProject.user_id || adminProject.userId,
+              userEmail: adminProject.user_email || adminProject.userEmail,
+              userName: adminProject.user_name || adminProject.userName,
+              tableCount: adminProject.tableCount || (adminProject.tables ? adminProject.tables.length : 0),
+              isPublic: adminProject.is_public || adminProject.isPublic || false,
               settings: adminProject.settings || {},
-              createdAt: adminProject.createdAt,
-              updatedAt: adminProject.updatedAt,
+              createdAt: adminProject.created_at || adminProject.createdAt,
+              updatedAt: adminProject.updated_at || adminProject.updatedAt,
               tables: adminProject.tables || []
             };
 
@@ -156,9 +157,20 @@ export const useProjectData = () => {
   if (project) {
     if (project.owner) {
       projectOwner = project.owner;
+    } else if (project.userName || project.userEmail) {
+      // ✅ ADMIN BYPASS: Admin project'te userName ve userEmail direkt geliyorsa kullan
+      projectOwner = {
+        id: project.userId,
+        name: project.userName,
+        email: project.userEmail
+      };
+      console.log('✅ Admin project owner set:', projectOwner);
     } else if (project.userId) {
       // Use users from API instead of localStorage
       projectOwner = users.find((u: any) => u.id === project.userId);
+      if (projectOwner) {
+        console.log('✅ Project owner found from users API:', projectOwner);
+      }
     }
   }
 
