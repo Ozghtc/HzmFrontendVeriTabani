@@ -1,0 +1,224 @@
+import React, { useState } from 'react';
+import { X, Copy, Check, Info, Code2, Database, Key } from 'lucide-react';
+
+interface ProjectInfoModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  project: {
+    id: string | number;
+    name: string;
+    apiKey: string;
+  };
+}
+
+const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, project }) => {
+  const [copiedItems, setCopiedItems] = useState<Record<string, boolean>>({});
+
+  const handleCopy = async (text: string, key: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedItems(prev => ({ ...prev, [key]: true }));
+      setTimeout(() => {
+        setCopiedItems(prev => ({ ...prev, [key]: false }));
+      }, 2000);
+    } catch (error) {
+      console.error('Kopyalama hatası:', error);
+    }
+  };
+
+  const apiInfo = {
+    baseUrl: 'https://hzmbackandveritabani-production-c660.up.railway.app',
+    projectId: project.id.toString(),
+    apiKey: project.apiKey,
+    endpoints: {
+      tableCreate: '/api/v1/tables/create',
+      sqlExecute: '/api/v1/sql/execute',
+      tableList: '/api/v1/tables/list',
+      dataInsert: '/api/v1/data/insert',
+      dataSelect: '/api/v1/data/select'
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center space-x-3">
+            <Info className="text-blue-600" size={24} />
+            <h2 className="text-xl font-semibold text-gray-800">
+              {project.name} - API Bilgileri
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Temel Bilgiler */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="font-medium text-gray-800 mb-4 flex items-center">
+              <Database className="mr-2 text-blue-600" size={20} />
+              Temel Bilgiler
+            </h3>
+            <div className="grid grid-cols-1 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Base URL</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={apiInfo.baseUrl}
+                    readOnly
+                    className="flex-1 p-2 border border-gray-300 rounded-md bg-white text-sm font-mono"
+                  />
+                  <button
+                    onClick={() => handleCopy(apiInfo.baseUrl, 'baseUrl')}
+                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                  >
+                    {copiedItems.baseUrl ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Proje ID</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={apiInfo.projectId}
+                    readOnly
+                    className="flex-1 p-2 border border-gray-300 rounded-md bg-white text-sm font-mono"
+                  />
+                  <button
+                    onClick={() => handleCopy(apiInfo.projectId, 'projectId')}
+                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                  >
+                    {copiedItems.projectId ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* API Key */}
+          <div className="bg-green-50 rounded-lg p-4">
+            <h3 className="font-medium text-gray-800 mb-4 flex items-center">
+              <Key className="mr-2 text-green-600" size={20} />
+              API Key
+            </h3>
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={apiInfo.apiKey}
+                readOnly
+                className="flex-1 p-2 border border-gray-300 rounded-md bg-white text-sm font-mono"
+              />
+              <button
+                onClick={() => handleCopy(apiInfo.apiKey, 'apiKey')}
+                className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-100 rounded-md transition-colors"
+              >
+                {copiedItems.apiKey ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* HTTP Headers */}
+          <div className="bg-purple-50 rounded-lg p-4">
+            <h3 className="font-medium text-gray-800 mb-4 flex items-center">
+              <Code2 className="mr-2 text-purple-600" size={20} />
+              HTTP Headers
+            </h3>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <code className="flex-1 p-2 bg-white border border-gray-300 rounded text-sm">
+                  Content-Type: application/json
+                </code>
+                <button
+                  onClick={() => handleCopy('Content-Type: application/json', 'contentType')}
+                  className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-100 rounded-md transition-colors"
+                >
+                  {copiedItems.contentType ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                </button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <code className="flex-1 p-2 bg-white border border-gray-300 rounded text-sm">
+                  X-API-Key: {apiInfo.apiKey}
+                </code>
+                <button
+                  onClick={() => handleCopy(`X-API-Key: ${apiInfo.apiKey}`, 'apiHeader')}
+                  className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-100 rounded-md transition-colors"
+                >
+                  {copiedItems.apiHeader ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* API Endpoints */}
+          <div className="bg-blue-50 rounded-lg p-4">
+            <h3 className="font-medium text-gray-800 mb-4 flex items-center">
+              <Code2 className="mr-2 text-blue-600" size={20} />
+              API Endpoints
+            </h3>
+            <div className="space-y-2">
+              {Object.entries(apiInfo.endpoints).map(([key, endpoint]) => (
+                <div key={key} className="flex items-center space-x-2">
+                  <code className="flex-1 p-2 bg-white border border-gray-300 rounded text-sm">
+                    {endpoint}
+                  </code>
+                  <button
+                    onClick={() => handleCopy(endpoint, key)}
+                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+                  >
+                    {copiedItems[key] ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Örnek Kullanım */}
+          <div className="bg-orange-50 rounded-lg p-4">
+            <h3 className="font-medium text-gray-800 mb-4">Örnek Kullanım (cURL)</h3>
+            <div className="bg-gray-900 text-green-400 p-4 rounded-md text-sm font-mono overflow-x-auto">
+              <pre>{`curl -X POST \\
+  ${apiInfo.baseUrl}/api/v1/tables/create \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -d '{"name": "hastaneler", "description": "Hastane bilgileri"}'`}</pre>
+            </div>
+            <button
+              onClick={() => handleCopy(`curl -X POST \\
+  ${apiInfo.baseUrl}/api/v1/tables/create \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -d '{"name": "hastaneler", "description": "Hastane bilgileri"}'`, 'curlExample')}
+              className="mt-2 px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 transition-colors flex items-center"
+            >
+              {copiedItems.curlExample ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
+              Örnek Kodu Kopyala
+            </button>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end p-6 border-t border-gray-200">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+          >
+            Kapat
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProjectInfoModal; 

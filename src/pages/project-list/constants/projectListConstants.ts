@@ -14,7 +14,8 @@ import {
   EyeOff,
   Code,
   CheckCircle,
-  XCircle
+  XCircle,
+  Info
 } from 'lucide-react';
 
 export const icons = {
@@ -33,7 +34,8 @@ export const icons = {
   EyeOff,
   Code,
   CheckCircle,
-  XCircle
+  XCircle,
+  Info
 };
 
 export const NOTIFICATION_DURATION = 3000; // 3 seconds
