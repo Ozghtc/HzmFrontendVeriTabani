@@ -1,3 +1,5 @@
+import { formatCurrencyValue, parseCurrencyValue, getDefaultCurrencyValue } from '../../../utils/currencyUtils';
+
 export const formatDisplayValue = (value: any, type: string): string => {
   if (value === null || value === undefined) return '-';
   
@@ -6,6 +8,9 @@ export const formatDisplayValue = (value: any, type: string): string => {
       return value ? 'Evet' : 'Hayır';
     case 'date':
       return new Date(value).toLocaleDateString('tr-TR');
+    case 'currency':
+      const currencyValue = parseCurrencyValue(value);
+      return formatCurrencyValue(currencyValue);
     case 'object':
     case 'array':
       return typeof value === 'string' ? value : JSON.stringify(value);
@@ -22,6 +27,8 @@ export const parseFieldValue = (value: any, type: string): any => {
       return Boolean(value);
     case 'date':
       return value || new Date().toISOString().split('T')[0];
+    case 'currency':
+      return parseCurrencyValue(value) || getDefaultCurrencyValue();
     case 'object':
     case 'array':
       return value || (type === 'object' ? '{}' : '[]');
@@ -40,6 +47,8 @@ export const createDefaultValue = (field: any): any => {
       return false;
     case 'date':
       return new Date().toISOString().split('T')[0];
+    case 'currency':
+      return getDefaultCurrencyValue();
     case 'object':
       return '{}';
     case 'array':

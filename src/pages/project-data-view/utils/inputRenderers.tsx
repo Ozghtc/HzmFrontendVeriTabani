@@ -1,5 +1,7 @@
 import React from 'react';
 import { INPUT_BASE_CLASSES } from '../constants/dataViewConstants';
+import CurrencyInput from '../../../components/CurrencyInput';
+import { parseCurrencyValue, CurrencyValue } from '../../../utils/currencyUtils';
 
 export const renderInput = (
   field: any, 
@@ -37,6 +39,22 @@ export const renderInput = (
           onChange={(e) => onChange(e.target.value)}
           className={INPUT_BASE_CLASSES}
           required={isRequired}
+        />
+      );
+    case 'currency':
+      return (
+        <CurrencyInput
+          value={parseCurrencyValue(value)}
+          onChange={(currencyValue: CurrencyValue | null) => {
+            // Backend'e JSON olarak gönder
+            onChange(currencyValue ? {
+              amount: currencyValue.amount,
+              currency: currencyValue.currency,
+              symbol: currencyValue.symbol
+            } : null);
+          }}
+          required={isRequired}
+          placeholder="0.00"
         />
       );
     case 'object':
