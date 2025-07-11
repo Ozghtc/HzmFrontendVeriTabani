@@ -55,6 +55,177 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
     }
   };
 
+  const generateFullDocumentation = () => {
+    return `# ${project.name} - API Dokümantasyonu
+
+## 🔐 Kimlik Doğrulama
+Tüm API isteklerinde \`X-API-Key\` header'ı kullanılmalıdır.
+**API Key:** \`${apiInfo.apiKey}\`
+
+## 📋 Temel Bilgiler
+- **Base URL:** \`${apiInfo.baseUrl}\`
+- **Proje ID:** \`${apiInfo.projectId}\`
+- **Rate Limit:** 300 istek/15 dakika
+
+## 🔄 Temel Workflow
+1. Proje'de tablo oluşturun
+2. Tabloya field'lar ekleyin
+3. Field'lara veri ekleyin
+4. Veriyi okuyun/güncelleyin
+
+## 🛠️ Field Türleri
+- **string:** Metin veriler
+- **number:** Sayısal veriler
+- **boolean:** true/false değerleri
+- **date:** Tarih ve saat
+
+## 📊 CRUD Operasyonları
+
+### 📋 Tablo Oluşturma
+\`\`\`http
+POST /api/v1/tables/project/${apiInfo.projectId}
+Content-Type: application/json
+X-API-Key: ${apiInfo.apiKey}
+
+{
+  "name": "hastaneler",
+  "description": "Hastane bilgileri tablosu"
+}
+\`\`\`
+
+**Response:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "table": {
+      "id": 11,
+      "name": "hastaneler",
+      "projectId": ${apiInfo.projectId},
+      "fields": [],
+      "createdAt": "2025-01-11T10:30:00Z"
+    }
+  }
+}
+\`\`\`
+
+### ⚡ Field Ekleme
+\`\`\`http
+POST /api/v1/tables/project/${apiInfo.projectId}/{tableId}/fields
+Content-Type: application/json
+X-API-Key: ${apiInfo.apiKey}
+
+{
+  "name": "hastane_adi",
+  "type": "string",
+  "isRequired": true,
+  "description": "Hastane adı"
+}
+\`\`\`
+
+### 💾 Veri Ekleme
+\`\`\`http
+POST /api/v1/data/table/{tableId}/rows
+Content-Type: application/json
+X-API-Key: ${apiInfo.apiKey}
+
+{
+  "hastane_adi": "Acıbadem Hastanesi",
+  "il": "İstanbul",
+  "aktif_mi": true
+}
+\`\`\`
+
+### 📖 Veri Okuma
+\`\`\`http
+GET /api/v1/data/table/{tableId}?page=1&limit=50&sort=id&order=ASC
+X-API-Key: ${apiInfo.apiKey}
+\`\`\`
+
+**Query Parameters:**
+- \`page=1\` - Sayfa numarası
+- \`limit=50\` - Sayfa başına kayıt
+- \`sort=id\` - Sıralama alanı
+- \`order=ASC\` - Sıralama yönü (ASC/DESC)
+
+### ✏️ Veri Güncelleme
+\`\`\`http
+PUT /api/v1/data/table/{tableId}/rows/{rowId}
+Content-Type: application/json
+X-API-Key: ${apiInfo.apiKey}
+
+{
+  "hastane_adi": "Acıbadem Maslak Hastanesi",
+  "aktif_mi": false
+}
+\`\`\`
+
+### 🗑️ Veri Silme
+\`\`\`http
+DELETE /api/v1/data/table/{tableId}/rows/{rowId}
+X-API-Key: ${apiInfo.apiKey}
+\`\`\`
+
+## 🌐 CORS ve Browser Kullanımı
+
+### Desteklenen Domain'ler:
+- \`https://hzmfrontendveritabani.netlify.app\`
+- \`https://hzmsoft.com\`
+- \`http://localhost:5173\` (development)
+
+### JavaScript/Fetch Örneği:
+\`\`\`javascript
+// Veri okuma
+const response = await fetch(
+  '${apiInfo.baseUrl}/api/v1/data/table/10',
+  {
+    method: 'GET',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'Content-Type': 'application/json'
+    }
+  }
+);
+
+const data = await response.json();
+console.log(data.data.rows);
+
+// Veri ekleme
+const response = await fetch(
+  '${apiInfo.baseUrl}/api/v1/data/table/10/rows',
+  {
+    method: 'POST',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      "kurum_adi": "Yeni Hastane",
+      "kurum_turu": "Özel",
+      "il": "İstanbul"
+    })
+  }
+);
+
+const result = await response.json();
+\`\`\`
+
+## ⚠️ Hata Kodları
+- **PROJECT_ACCESS_DENIED:** Yanlış proje erişimi
+- **NOT_FOUND:** Kaynak bulunamadı
+- **VALIDATION_ERROR:** Geçersiz veri
+- **429:** Rate limit aşıldı
+
+## 📞 Destek İletişim
+- **Email:** ozgurhzm@gmail.com
+- **Proje:** ${project.name}
+- **Proje ID:** ${project.id}
+- **Base URL:** ${apiInfo.baseUrl}
+
+---
+*Bu dokümantasyon ${new Date().toLocaleDateString('tr-TR')} tarihinde oluşturulmuştur.*`;
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -307,10 +478,29 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
             <div className="space-y-6">
               {/* Dokümantasyon İçeriği */}
               <div className="bg-blue-50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                  <FileText className="mr-2 text-blue-600" size={20} />
-                  API Kullanım Kılavuzu
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                    <FileText className="mr-2 text-blue-600" size={20} />
+                    API Kullanım Kılavuzu
+                  </h3>
+                  <button
+                    onClick={() => handleCopy(generateFullDocumentation(), 'fullDocumentation')}
+                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded-md transition-colors flex items-center space-x-1"
+                    title="Tüm dokümantasyonu kopyala"
+                  >
+                    {copiedItems.fullDocumentation ? (
+                      <>
+                        <Check size={16} className="text-green-500" />
+                        <span className="text-xs text-green-600 font-medium">Kopyalandı!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={16} />
+                        <span className="text-xs font-medium">Tümünü Kopyala</span>
+                      </>
+                    )}
+                  </button>
+                </div>
                 
                 <div className="space-y-4 text-sm">
                   <div>
