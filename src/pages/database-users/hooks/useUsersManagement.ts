@@ -73,16 +73,17 @@ export const useUsersManagement = () => {
 
   const handleSaveUser = async (userId: string) => {
     try {
-      // Prepare user data for backend update
-      const plan = state.pricingPlans.find(p => p.name.toLowerCase() === editUserData.subscriptionType);
+      // ✅ Safe pricing plans access - prevent undefined error
+      const plan = state.pricingPlans?.find(p => p.name.toLowerCase() === editUserData.subscriptionType);
       
       const userData = {
         name: editUserData.name,
         email: editUserData.email,
         isActive: editUserData.isActive,
+        isAdmin: editUserData.subscriptionType === 'admin', // ✅ Admin logic fix
         subscriptionType: editUserData.subscriptionType,
-        maxProjects: plan ? plan.maxProjects : 2,
-        maxTables: plan ? plan.maxTables : 5
+        maxProjects: plan ? plan.maxProjects : (editUserData.subscriptionType === 'premium' ? 100 : 2),
+        maxTables: plan ? plan.maxTables : (editUserData.subscriptionType === 'premium' ? 100 : 5)
       };
 
       console.log('🔄 Attempting to update user:', userId, userData);
@@ -91,6 +92,8 @@ export const useUsersManagement = () => {
       const success = await updateUser(userId, userData);
       
       if (success) {
+        // ✅ Refresh users after successful update
+        await fetchUsers();
         setEditingUser(null);
         showNotification('success', 'Kullanıcı başarıyla güncellendi!');
         console.log('✅ User update UI completed successfully');
