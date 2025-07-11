@@ -35,6 +35,11 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
       tablesList: `/api/v1/tables/project/${project.id.toString()}`,
       tableCreate: `/api/v1/tables/project/${project.id.toString()}`,
       
+      // Field yönetimi (KURUMLAR tablosu için Table ID: 10)
+      fieldAdd: `/api/v1/tables/project/${project.id.toString()}/10/fields`,
+      fieldUpdate: `/api/v1/tables/project/${project.id.toString()}/10/fields/:fieldId`,
+      fieldDelete: `/api/v1/tables/project/${project.id.toString()}/10/fields/:fieldId`,
+      
       // Veri yönetimi  
       dataGet: `/api/v1/data/table/:tableId`,
       dataInsert: `/api/v1/data/table/:tableId/rows`,
@@ -219,9 +224,21 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
                 </div>
               </div>
               
+              {/* Field Ekleme */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">3. Field Ekleme (Kurumlar Tablosu):</h4>
+                <div className="bg-gray-900 text-green-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
+                  <pre>{`curl -X POST \\
+  ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}/10/fields \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -d '{"name": "adres", "type": "string", "isRequired": false}'`}</pre>
+                </div>
+              </div>
+              
               {/* Tablo Listesi */}
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">3. Tablo Listesi:</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">4. Tablo Listesi:</h4>
                 <div className="bg-gray-900 text-green-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
                   <pre>{`curl -X GET \\
   ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId} \\
@@ -240,6 +257,18 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
             >
               {copiedItems.curlExample ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
               Tablo Oluşturma Kodunu Kopyala
+            </button>
+            
+            <button
+              onClick={() => handleCopy(`curl -X POST \\
+  ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}/10/fields \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -d '{"name": "adres", "type": "string", "isRequired": false}'`, 'fieldExample')}
+              className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors flex items-center"
+            >
+              {copiedItems.fieldExample ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
+              Field Ekleme Kodunu Kopyala
             </button>
           </div>
         </div>
