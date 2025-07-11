@@ -31,11 +31,21 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
     projectId: project.id.toString(),
     apiKey: project.apiKey,
     endpoints: {
-      tableCreate: '/api/v1/tables/create',
-      sqlExecute: '/api/v1/sql/execute',
-      tableList: '/api/v1/tables/list',
-      dataInsert: '/api/v1/data/insert',
-      dataSelect: '/api/v1/data/select'
+      // Tablo yönetimi
+      tablesList: `/api/v1/tables/project/${project.id.toString()}`,
+      tableCreate: `/api/v1/tables/project/${project.id.toString()}`,
+      
+      // Veri yönetimi  
+      dataGet: `/api/v1/data/table/:tableId`,
+      dataInsert: `/api/v1/data/table/:tableId/rows`,
+      dataUpdate: `/api/v1/data/table/:tableId/rows/:rowId`,
+      dataDelete: `/api/v1/data/table/:tableId/rows/:rowId`,
+      
+      // API key test
+      apiKeyTest: `/api/v1/tables/api-key-info`,
+      
+      // Proje bilgileri
+      projectInfo: `/api/v1/projects/${project.id.toString()}`
     }
   };
 
@@ -186,23 +196,50 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
           {/* Örnek Kullanım */}
           <div className="bg-orange-50 rounded-lg p-4">
             <h3 className="font-medium text-gray-800 mb-4">Örnek Kullanım (cURL)</h3>
-            <div className="bg-gray-900 text-green-400 p-4 rounded-md text-sm font-mono overflow-x-auto">
-              <pre>{`curl -X POST \\
-  ${apiInfo.baseUrl}/api/v1/tables/create \\
+            <div className="space-y-4">
+              {/* Tablo Oluşturma */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">1. Tablo Oluşturma:</h4>
+                <div className="bg-gray-900 text-green-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
+                  <pre>{`curl -X POST \\
+  ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId} \\
   -H "Content-Type: application/json" \\
   -H "X-API-Key: ${apiInfo.apiKey}" \\
   -d '{"name": "hastaneler", "description": "Hastane bilgileri"}'`}</pre>
+                </div>
+              </div>
+              
+              {/* API Key Test */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">2. API Key Test:</h4>
+                <div className="bg-gray-900 text-green-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
+                  <pre>{`curl -X GET \\
+  ${apiInfo.baseUrl}/api/v1/tables/api-key-info \\
+  -H "X-API-Key: ${apiInfo.apiKey}"`}</pre>
+                </div>
+              </div>
+              
+              {/* Tablo Listesi */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">3. Tablo Listesi:</h4>
+                <div className="bg-gray-900 text-green-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
+                  <pre>{`curl -X GET \\
+  ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId} \\
+  -H "X-API-Key: ${apiInfo.apiKey}"`}</pre>
+                </div>
+              </div>
             </div>
+            
             <button
               onClick={() => handleCopy(`curl -X POST \\
-  ${apiInfo.baseUrl}/api/v1/tables/create \\
+  ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId} \\
   -H "Content-Type: application/json" \\
   -H "X-API-Key: ${apiInfo.apiKey}" \\
   -d '{"name": "hastaneler", "description": "Hastane bilgileri"}'`, 'curlExample')}
-              className="mt-2 px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 transition-colors flex items-center"
+              className="mt-3 px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 transition-colors flex items-center"
             >
               {copiedItems.curlExample ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
-              Örnek Kodu Kopyala
+              Tablo Oluşturma Kodunu Kopyala
             </button>
           </div>
         </div>
