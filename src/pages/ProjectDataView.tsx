@@ -47,6 +47,20 @@ const ProjectDataView = () => {
   // No localStorage/sessionStorage fallback - users will come from API
   const users: any[] = [];
 
+  // ✅ Admin context kontrolü için geri navigasyon fonksiyonu
+  const handleNavigateBack = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromAdmin = urlParams.get('from') === 'admin';
+    
+    if (fromAdmin) {
+      console.log('🔙 Returning to admin panel from project data view');
+      navigate('/database/projects');
+    } else {
+      console.log('🔙 Returning to user projects from project data view');
+      navigate('/projects');
+    }
+  };
+
   // project objesinin userId ve userName alanlarını users dizisinden doldur
   if (project && (!project.userId || !project.userName)) {
     const user = users.find((u: any) => u.id === project.userId);
@@ -76,7 +90,7 @@ const ProjectDataView = () => {
   }
 
   if (!project) {
-    return <NoProjectState onNavigate={() => navigate('/projects')} />;
+    return <NoProjectState onNavigate={handleNavigateBack} />;
   }
 
   return (
@@ -84,7 +98,7 @@ const ProjectDataView = () => {
       {/* Header */}
       <ProjectHeader 
         project={project} 
-        onNavigateBack={() => navigate('/projects')} 
+        onNavigateBack={handleNavigateBack} 
         users={users}
         currentUser={state.user} // ✅ Admin kullanıcı bilgileri eklendi
       />

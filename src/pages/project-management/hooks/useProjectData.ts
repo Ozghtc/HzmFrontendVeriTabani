@@ -175,7 +175,17 @@ export const useProjectData = () => {
   }
 
   const navigateToProjects = () => {
-    navigate('/projects');
+    // ✅ Admin context kontrolü - query parameter'dan geldiği sayfayı anla
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromAdmin = urlParams.get('from') === 'admin';
+    
+    if (fromAdmin) {
+      console.log('🔙 Returning to admin panel from project management');
+      navigate('/database/projects');
+    } else {
+      console.log('🔙 Returning to user projects from project management');
+      navigate('/projects');
+    }
   };
 
   return {

@@ -80,8 +80,8 @@ const DatabaseProjects = () => {
               onToggleApiKey={() => toggleApiKey(project.id)}
               onCopyApiKey={() => console.log('Copy API key not implemented')}
               onDelete={() => handleDeleteProject(project)}
-              onNavigateToData={() => navigate(`/projects/${project.id}/data`)}
-              onNavigateToEdit={() => navigate(`/projects/${project.id}`)}
+              onNavigateToData={() => navigate(`/projects/${project.id}/data?from=admin`)}
+              onNavigateToEdit={() => navigate(`/projects/${project.id}?from=admin`)}
               users={users}
             />
           ))}
