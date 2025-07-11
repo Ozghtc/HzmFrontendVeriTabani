@@ -14,6 +14,7 @@ interface ProjectInfoModalProps {
 const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, project }) => {
   const [copiedItems, setCopiedItems] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<'api' | 'docs'>('api');
+  const [copySuccess, setCopySuccess] = useState('');
 
   const handleCopy = async (text: string, key: string) => {
     try {
@@ -52,6 +53,73 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
       
       // Proje bilgileri
       projectInfo: `/api/v1/projects/${project.id.toString()}`
+    }
+  };
+
+  const generateApiInfo = () => {
+    return `# ${project.name} - API Bilgileri
+
+## 🔗 Temel Bilgiler
+- **Base URL:** \`${apiInfo.baseUrl}\`
+- **Proje ID:** \`${apiInfo.projectId}\`
+- **API Key:** \`${apiInfo.apiKey}\`
+
+## 📋 HTTP Headers
+\`\`\`
+Content-Type: application/json
+X-API-Key: ${apiInfo.apiKey}
+\`\`\`
+
+## 🔧 API Endpoints
+
+### Tablo Yönetimi
+- **GET** \`/api/v1/tables/project/${apiInfo.projectId}\` - Proje tablolarını listele
+- **POST** \`/api/v1/tables/project/${apiInfo.projectId}\` - Yeni tablo oluştur
+
+### Field Yönetimi  
+- **POST** \`/api/v1/tables/project/${apiInfo.projectId}/{tableId}/fields\` - Tabloya field ekle
+- **PUT** \`/api/v1/tables/{tableId}/fields/{fieldId}\` - Field güncelle
+- **DELETE** \`/api/v1/tables/{tableId}/fields/{fieldId}\` - Field sil
+
+### Veri Yönetimi
+- **GET** \`/api/v1/data/table/{tableId}\` - Tablo verisini oku
+- **POST** \`/api/v1/data/table/{tableId}/rows\` - Yeni veri ekle
+- **PUT** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Veri güncelle
+- **DELETE** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Veri sil
+- **GET** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Tekil veri oku
+- **POST** \`/api/v1/data/table/{tableId}/bulk\` - Toplu işlemler
+
+## 📞 Hızlı Test
+\`\`\`bash
+# Proje tablolarını listele
+curl -X GET \\
+  "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}" \\
+  -H "X-API-Key: ${apiInfo.apiKey}"
+
+# Yeni tablo oluştur
+curl -X POST \\
+  "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -d '{"name": "test_tablosu", "description": "Test için tablo"}'
+\`\`\`
+
+---
+*${project.name} - API Bilgileri*
+*Oluşturulma: ${new Date().toLocaleString('tr-TR')}*`;
+  };
+
+  const copyApiInfo = async () => {
+    try {
+      const apiInfoText = generateApiInfo();
+      await navigator.clipboard.writeText(apiInfoText);
+      
+      setCopySuccess('API bilgileri kopyalandı!');
+      setTimeout(() => setCopySuccess(''), 2000);
+    } catch (error) {
+      console.error('Kopyalama hatası:', error);
+      setCopySuccess('Kopyalama başarısız!');
+      setTimeout(() => setCopySuccess(''), 2000);
     }
   };
 
@@ -449,10 +517,25 @@ if (result.success) {
             <div className="space-y-6">
               {/* Temel Bilgiler */}
               <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-medium text-gray-800 mb-4 flex items-center">
-                  <Database className="mr-2 text-blue-600" size={20} />
-                  Temel Bilgiler
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-medium text-gray-800 flex items-center">
+                    <Database className="mr-2 text-blue-600" size={20} />
+                    Temel Bilgiler
+                  </h3>
+                  <button
+                    onClick={copyApiInfo}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                  >
+                    <Copy size={16} />
+                    Tümünü Kopyala
+                  </button>
+                </div>
+                
+                {copySuccess && (
+                  <div className="mb-3 p-2 bg-green-100 border border-green-300 rounded text-green-700 text-sm">
+                    {copySuccess}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Base URL</label>
