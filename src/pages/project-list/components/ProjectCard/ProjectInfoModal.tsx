@@ -964,7 +964,7 @@ if (result.success) {
 } else {
   console.error('Hata:', result.error);
 }
-\`}</pre>
+`}</pre>
                   </div>
                 </div>
               </div>
