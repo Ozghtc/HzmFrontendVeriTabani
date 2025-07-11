@@ -4,6 +4,7 @@ import { useDatabase } from '../../../context/DatabaseContext';
 import { useApiProjects } from '../../../hooks/useApiProjects';
 import { useApiUsers } from '../../../hooks/useApiAdmin';
 import { apiClient } from '../../../utils/api';
+import { AuthManager } from '../../../utils/api/utils/authUtils';
 
 export const useProjectData = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -20,7 +21,58 @@ export const useProjectData = () => {
       setLoading(true);
       setError(null);
 
-      // Frontend-first approach
+      // ✅ ADMIN BYPASS: Admin ise backend'den direkt single project API'sini çağır
+      if (state.user?.isAdmin) {
+        console.log('🔐 Admin access detected - fetching project directly from backend');
+        
+        try {
+          const authHeaders = AuthManager.getAuthHeaders();
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/projects/${projectId}`, {
+            headers: {
+              ...authHeaders,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            const adminProject = result.data;
+            
+            console.log('✅ Admin project loaded successfully:', adminProject.name);
+            
+            // Format project data for frontend
+            const formattedProject = {
+              id: adminProject.id,
+              name: adminProject.name,
+              description: adminProject.description,
+              apiKey: adminProject.apiKey,
+              userId: adminProject.userId,
+              userEmail: adminProject.userEmail,
+              userName: adminProject.userName,
+              tableCount: adminProject.tableCount,
+              isPublic: adminProject.isPublic,
+              settings: adminProject.settings || {},
+              createdAt: adminProject.createdAt,
+              updatedAt: adminProject.updatedAt,
+              tables: adminProject.tables || []
+            };
+
+            setProject(formattedProject);
+            setLoading(false);
+            return;
+          } else {
+            console.error('❌ Admin project API failed:', response.status);
+            throw new Error(`Admin project API failed: ${response.status}`);
+          }
+        } catch (adminError: any) {
+          console.error('💥 Admin project load error:', adminError);
+          setError('Admin project load failed: ' + adminError.message);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // ✅ NORMAL USER: Frontend-first approach
       const parsedProjectId = Number(projectId);
       console.log('Looking for project:', parsedProjectId, 'in', projects.length, 'projects');
       
@@ -97,7 +149,7 @@ export const useProjectData = () => {
 
   useEffect(() => {
     loadProject();
-  }, [projectId, projects, projectsLoading]);
+  }, [projectId, projects, projectsLoading, state.user?.isAdmin]);
 
   // Find project owner using API
   let projectOwner = null;
