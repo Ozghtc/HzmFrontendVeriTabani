@@ -46,8 +46,15 @@ const shouldRetry = (error: any, attempt: number, config: RetryConfig): boolean 
     return false;
   }
   
-  // Don't retry on client errors (4xx)
+  // Don't retry on client errors (4xx) - especially 429 (rate limit)
   if (error.status && error.status >= 400 && error.status < 500) {
+    console.log(`⚠️ Client error ${error.status} - not retrying`);
+    return false;
+  }
+  
+  // Don't retry on rate limit errors
+  if (error.status === 429 || error.code === 'RATE_LIMIT_EXCEEDED' || error.code === 'TOO_MANY_REQUESTS') {
+    console.log(`🚫 Rate limit detected - stopping retries`);
     return false;
   }
   

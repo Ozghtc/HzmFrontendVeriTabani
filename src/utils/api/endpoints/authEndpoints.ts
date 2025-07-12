@@ -14,6 +14,10 @@ export class AuthEndpoints implements IAuthEndpoints {
       method: 'POST',
       body: JSON.stringify(data),
       skipAuth: true,
+      retry: {
+        maxRetries: 0,  // Login için retry'ı kapat
+        delay: 0
+      }
     });
     
     if (response.success && response.data) {

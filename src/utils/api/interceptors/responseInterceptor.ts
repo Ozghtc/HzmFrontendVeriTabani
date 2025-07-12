@@ -43,9 +43,12 @@ export const defaultResponseInterceptor: ResponseInterceptor = {
         break;
       
       case 'RATE_LIMIT_EXCEEDED':
+      case 'TOO_MANY_REQUESTS':
       case 'HTTP_429':
-        console.log('⏱️ Rate limit exceeded - stopping requests');
-        // Don't retry, just log and stop
+        console.log('🚫 Rate limit exceeded - please wait 10-15 minutes before trying again');
+        console.log('💡 Too many login attempts detected, temporarily blocked');
+        // Show user-friendly error message
+        error.error = 'Çok fazla deneme yapıldı. Lütfen 10-15 dakika bekleyip tekrar deneyin.';
         break;
       
       case 'MAINTENANCE':

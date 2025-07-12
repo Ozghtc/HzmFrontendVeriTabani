@@ -47,8 +47,9 @@ export class RateLimiter {
     // Update the map with filtered requests
     this.requestCounts.set(key, recentRequests);
 
-    // Check rate limit from server
+    // Check rate limit from server - if we got 429, stop ALL requests
     if (this.rateLimitInfo && this.rateLimitInfo.remaining <= 0) {
+      console.log('🚫 Server rate limit exceeded, blocking all requests');
       return false;
     }
 
@@ -113,17 +114,22 @@ export class RateLimiter {
   // Calculate wait time based on rate limit info
   private getWaitTime(): number {
     if (this.rateLimitInfo?.retryAfter) {
-      return this.rateLimitInfo.retryAfter * 1000;
+      // Backend says wait X seconds
+      const waitTime = this.rateLimitInfo.retryAfter * 1000;
+      console.log(`⏰ Server requested ${this.rateLimitInfo.retryAfter} seconds wait`);
+      return Math.max(waitTime, 300000); // En az 5 dakika bekle
     }
 
     if (this.rateLimitInfo?.reset) {
       const resetTime = this.rateLimitInfo.reset * 1000;
       const waitTime = resetTime - Date.now();
-      return Math.max(waitTime, 1000);
+      console.log(`⏰ Waiting until reset time: ${waitTime}ms`);
+      return Math.max(waitTime, 300000); // En az 5 dakika bekle
     }
 
-    // Default wait time
-    return 60000 / this.maxRequestsPerMinute;
+    // Default wait time - 5 dakika
+    console.log(`⏰ Default rate limit wait: 5 minutes`);
+    return 300000; // 5 dakika
   }
 
   // Get current rate limit info
