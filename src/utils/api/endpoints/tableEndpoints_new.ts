@@ -50,7 +50,7 @@ export class TableEndpointsNew {
   }>> {
     console.log(`🔧 Adding field "${fieldData.name}" to table ${tableId} in project ${projectId}`);
     
-    return await this.request(`/tables-new/${projectId}/${tableId}/fields`, {
+    return await this.request(`/tables/project/${projectId}/${tableId}/fields`, {
       method: 'POST',
       body: JSON.stringify(fieldData),
     });
