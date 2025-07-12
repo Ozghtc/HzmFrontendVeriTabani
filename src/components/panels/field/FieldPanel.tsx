@@ -77,7 +77,7 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
       
       console.log('🔧 Adding field to backend:', fieldData.name);
       
-      const response = await apiClient.fields.addField(
+      const response = await apiClient.tablesNew.addField(
         selectedProject.id.toString(), 
         selectedTable.id.toString(), 
         fieldData
@@ -88,7 +88,7 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
         
         // Create field object with ID
         const newField: Field = {
-          id: response.data?.id || Date.now().toString(),
+          id: response.data?.field?.id || Date.now().toString(),
           ...fieldData,
         };
         
@@ -253,6 +253,9 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
         isOpen={!!editingField}
         onClose={() => setEditingField(null)}
         onSave={handleSaveField}
+        onRemoveRelationship={(relationshipId: string) => 
+          editingField && onRemoveRelationship(editingField.id, relationshipId)
+        }
       />
 
       {/* Relationship Modal */}
