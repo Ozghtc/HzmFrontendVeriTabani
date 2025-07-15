@@ -5,7 +5,7 @@ export const API_CONFIG = {
     'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1',
     // Add more backup URLs if needed
   ],
-  timeout: 30000, // 30 seconds
+  timeout: 60000, // 60 seconds
   retryDefaults: {
     maxRetries: 0, // Retry'ı kapat
     delay: 1000,

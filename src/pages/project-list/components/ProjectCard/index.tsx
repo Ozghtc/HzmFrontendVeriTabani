@@ -21,13 +21,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const { Table } = icons;
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false);
   
-  console.log('🔍 Rendering project:', { 
-    id: project.id, 
-    name: project.name, 
-    type: typeof project.id,
-    fullProject: project 
-  });
-  console.log('🎯 Düzenle button will navigate to:', `/projects/${project.id}`);
+  // Remove excessive logging to prevent console spam
+  // console.log('🔍 Rendering project:', { 
+  //   id: project.id, 
+  //   name: project.name, 
+  //   type: typeof project.id,
+  //   fullProject: project 
+  // });
+  // console.log('🎯 Düzenle button will navigate to:', `/projects/${project.id}`);
   
   return (
     <>
