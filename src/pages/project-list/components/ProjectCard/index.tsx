@@ -15,6 +15,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onNavigateToData,
   onNavigateToEdit,
   onNavigateToApi,
+  onToggleProtection,
   loading
 }) => {
   const { Table } = icons;
@@ -34,6 +35,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <ProjectCardHeader 
           project={project} 
           onDelete={onDelete} 
+          onToggleProtection={onToggleProtection}
         />
         
         <ApiKeySection

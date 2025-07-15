@@ -52,17 +52,54 @@ export class ProjectEndpoints implements IProjectEndpoints {
     });
   }
 
-  async deleteProject(projectId: string): Promise<ApiResponse<void>> {
+  async deleteProject(projectId: string, protectionPassword?: string): Promise<ApiResponse<void>> {
     console.log('🗑️ Deleting project:', projectId);
+    
+    const body = protectionPassword ? { protectionPassword } : undefined;
     
     const response = await this.request(ENDPOINTS.projects.delete(projectId), {
       method: 'DELETE',
+      body: body ? JSON.stringify(body) : undefined,
     });
     
     if (response.success) {
       console.log('✅ Project deleted successfully');
     } else {
       console.log('❌ Project deletion failed:', response.error);
+    }
+    
+    return response;
+  }
+
+  async enableProjectProtection(projectId: string, password: string): Promise<ApiResponse<void>> {
+    console.log('🔒 Enabling project protection:', projectId);
+    
+    const response = await this.request(ENDPOINTS.projects.enableProtection(projectId), {
+      method: 'PUT',
+      body: JSON.stringify({ password }),
+    });
+    
+    if (response.success) {
+      console.log('✅ Project protection enabled successfully');
+    } else {
+      console.log('❌ Project protection failed:', response.error);
+    }
+    
+    return response;
+  }
+
+  async removeProjectProtection(projectId: string, password: string): Promise<ApiResponse<void>> {
+    console.log('🔓 Removing project protection:', projectId);
+    
+    const response = await this.request(ENDPOINTS.projects.removeProtection(projectId), {
+      method: 'DELETE',
+      body: JSON.stringify({ password }),
+    });
+    
+    if (response.success) {
+      console.log('✅ Project protection removed successfully');
+    } else {
+      console.log('❌ Project protection removal failed:', response.error);
     }
     
     return response;

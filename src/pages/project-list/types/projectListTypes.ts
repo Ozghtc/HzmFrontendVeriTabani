@@ -6,6 +6,7 @@ export interface Project {
   tableCount: number;
   createdAt: string;
   updatedAt: string;
+  isProtected?: boolean;
 }
 
 export interface NotificationState {
@@ -40,6 +41,7 @@ export interface ProjectCardProps {
   onNavigateToData: () => void;
   onNavigateToEdit: () => void;
   onNavigateToApi: () => void;
+  onToggleProtection: () => void;
   loading: boolean;
 }
 

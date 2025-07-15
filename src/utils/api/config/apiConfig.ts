@@ -36,6 +36,8 @@ export const ENDPOINTS = {
     create: '/projects',
     update: (id: string) => `/projects/${id}`,
     delete: (id: string) => `/projects/${id}`,
+    enableProtection: (id: string) => `/projects/${id}/protection`,
+    removeProtection: (id: string) => `/projects/${id}/protection`,
   },
   tables: {
     list: (projectId: string) => `/tables/project/${projectId}`,

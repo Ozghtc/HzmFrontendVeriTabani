@@ -5,10 +5,11 @@ import { Project } from '../../types/projectListTypes';
 interface ProjectCardHeaderProps {
   project: Project;
   onDelete: () => void;
+  onToggleProtection: () => void;
 }
 
-const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({ project, onDelete }) => {
-  const { Database, Calendar, Table, Trash2 } = icons;
+const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({ project, onDelete, onToggleProtection }) => {
+  const { Database, Calendar, Table, Trash2, Lock, Unlock } = icons;
   
   return (
     <div className="p-6 border-b border-gray-100">
@@ -32,13 +33,26 @@ const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({ project, onDelete
             </div>
           </div>
         </div>
-        <button
-          onClick={onDelete}
-          className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
-          title="Projeyi Sil"
-        >
-          <Trash2 size={18} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onToggleProtection}
+            className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
+              project.isProtected 
+                ? 'text-green-500 hover:text-green-700 hover:bg-green-50' 
+                : 'text-orange-500 hover:text-orange-700 hover:bg-orange-50'
+            }`}
+            title={project.isProtected ? 'Proje Korumalı' : 'Proje Korumasız'}
+          >
+            {project.isProtected ? <Lock size={18} /> : <Unlock size={18} />}
+          </button>
+          <button
+            onClick={onDelete}
+            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+            title="Projeyi Sil"
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
       </div>
       
       {/* Project Stats */}

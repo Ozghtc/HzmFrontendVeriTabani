@@ -10,6 +10,7 @@ import ErrorState from './project-list/components/States/ErrorState';
 import EmptyState from './project-list/components/States/EmptyState';
 import ProjectCard from './project-list/components/ProjectCard';
 import DeleteProjectModal from './project-list/components/DeleteProjectModal';
+import ProjectProtectionModal from './project-list/components/ProjectProtectionModal';
 
 const ProjectList = () => {
   const {
@@ -24,6 +25,11 @@ const ProjectList = () => {
     showApiKey,
     notification,
     
+    // Protection state
+    protectionModalOpen,
+    protectionProjectId,
+    protectionLoading,
+    
     // Actions
     navigate,
     handleAddProject,
@@ -37,7 +43,12 @@ const ProjectList = () => {
     navigateToApi,
     fetchProjects,
     retryAfterError,
-    setDeleteConfirmName
+    setDeleteConfirmName,
+    
+    // Protection actions
+    handleToggleProtection,
+    handleProtectionSubmit,
+    handleProtectionCancel
   } = useProjectList();
 
   return (
@@ -81,6 +92,7 @@ const ProjectList = () => {
                   onNavigateToData={() => navigateToData(project.id)}
                   onNavigateToEdit={() => navigateToEdit(project.id)}
                   onNavigateToApi={() => navigateToApi(project.id)}
+                  onToggleProtection={() => handleToggleProtection(project.id)}
                   loading={loading}
                 />
               ))}
@@ -97,6 +109,15 @@ const ProjectList = () => {
         onConfirm={confirmDeleteProject}
         onCancel={cancelDeleteProject}
         onNameChange={setDeleteConfirmName}
+      />
+
+      <ProjectProtectionModal
+        isOpen={protectionModalOpen}
+        onClose={handleProtectionCancel}
+        onSubmit={handleProtectionSubmit}
+        isProtected={protectionProjectId ? (projects.find(p => p.id === protectionProjectId) as any)?.isProtected ?? false : false}
+        projectName={protectionProjectId ? (projects.find(p => p.id === protectionProjectId)?.name ?? '') : ''}
+        loading={protectionLoading}
       />
     </>
   );

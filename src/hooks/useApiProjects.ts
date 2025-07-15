@@ -114,13 +114,13 @@ export const useApiProjects = () => {
     }
   };
 
-  const deleteProject = async (projectId: string) => {
+  const deleteProject = async (projectId: string, protectionPassword?: string) => {
     setLoading(true);
     setError(null);
     
     try {
       console.log('🗑️ Deleting project via backend...');
-      const response = await apiClient.projects.deleteProject(projectId);
+      const response = await apiClient.projects.deleteProject(projectId, protectionPassword);
       
       if (response.success) {
         console.log('✅ Project deleted via backend');
@@ -182,6 +182,60 @@ export const useApiProjects = () => {
     console.log('🔄 Manual retry initiated');
   };
 
+  const enableProjectProtection = async (projectId: string, password: string) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('🔒 Enabling project protection...');
+      const response = await apiClient.projects.enableProjectProtection(projectId, password);
+      
+      if (response.success) {
+        console.log('✅ Project protection enabled');
+        // Refresh projects list
+        await fetchProjects();
+        return true;
+      } else {
+        console.log('❌ Project protection failed:', response.error);
+        setError(response.error || 'Failed to enable project protection');
+        setLoading(false);
+        return false;
+      }
+    } catch (err: any) {
+      console.log('💥 Backend error:', err.message);
+      setError('Network error - please check your connection');
+      setLoading(false);
+      return false;
+    }
+  };
+
+  const removeProjectProtection = async (projectId: string, password: string) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('🔓 Removing project protection...');
+      const response = await apiClient.projects.removeProjectProtection(projectId, password);
+      
+      if (response.success) {
+        console.log('✅ Project protection removed');
+        // Refresh projects list
+        await fetchProjects();
+        return true;
+      } else {
+        console.log('❌ Project protection removal failed:', response.error);
+        setError(response.error || 'Failed to remove project protection');
+        setLoading(false);
+        return false;
+      }
+    } catch (err: any) {
+      console.log('💥 Backend error:', err.message);
+      setError('Network error - please check your connection');
+      setLoading(false);
+      return false;
+    }
+  };
+
   return {
     projects,
     loading,
@@ -189,6 +243,8 @@ export const useApiProjects = () => {
     fetchProjects,
     createProject,
     deleteProject,
+    enableProjectProtection,
+    removeProjectProtection,
     retryAfterError,
   };
 }; 

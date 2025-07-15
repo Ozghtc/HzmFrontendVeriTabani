@@ -11,13 +11,18 @@ import axios from 'axios';
 export const useProjectList = () => {
   const { state, dispatch } = useDatabase();
   const navigate = useNavigate();
-  const { projects, loading, error, createProject, deleteProject, fetchProjects, retryAfterError } = useApiProjects();
+  const { projects, loading, error, createProject, deleteProject, fetchProjects, retryAfterError, enableProjectProtection, removeProjectProtection } = useApiProjects();
   const { notification, showNotification } = useNotification();
   
   const [deletingProject, setDeletingProject] = useState<number | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [showApiKey, setShowApiKey] = useState<ApiKeyVisibility>({});
   const [creating, setCreating] = useState(false);
+  
+  // Protection modal state
+  const [protectionModalOpen, setProtectionModalOpen] = useState(false);
+  const [protectionProjectId, setProtectionProjectId] = useState<number | null>(null);
+  const [protectionLoading, setProtectionLoading] = useState(false);
 
   // Handle add project
   const handleAddProject = useCallback(async (formData: ProjectFormData) => {
@@ -135,6 +140,54 @@ export const useProjectList = () => {
     }
   }, [projects]);
 
+  // Protection handlers
+  const handleToggleProtection = useCallback((projectId: number) => {
+    setProtectionProjectId(projectId);
+    setProtectionModalOpen(true);
+  }, []);
+
+  const handleProtectionSubmit = useCallback(async (password: string) => {
+    if (!protectionProjectId) return;
+    
+    setProtectionLoading(true);
+    
+    try {
+      const project = projects.find(p => p.id === protectionProjectId);
+      if (!project) return;
+      
+      let success = false;
+      
+      if ((project as any).isProtected ?? false) {
+        // Remove protection
+        success = await removeProjectProtection(protectionProjectId.toString(), password);
+        if (success) {
+          showNotification('success', 'Proje koruması kaldırıldı');
+        }
+      } else {
+        // Enable protection
+        success = await enableProjectProtection(protectionProjectId.toString(), password);
+        if (success) {
+          showNotification('success', 'Proje koruması etkinleştirildi');
+        }
+      }
+      
+      if (success) {
+        setProtectionModalOpen(false);
+        setProtectionProjectId(null);
+      }
+    } catch (error) {
+      showNotification('error', 'Bir hata oluştu');
+    } finally {
+      setProtectionLoading(false);
+    }
+  }, [protectionProjectId, projects, enableProjectProtection, removeProjectProtection, showNotification]);
+
+  const handleProtectionCancel = useCallback(() => {
+    setProtectionModalOpen(false);
+    setProtectionProjectId(null);
+    setProtectionLoading(false);
+  }, []);
+
   return {
     // State
     state,
@@ -146,6 +199,11 @@ export const useProjectList = () => {
     deleteConfirmName,
     showApiKey,
     notification,
+    
+    // Protection state
+    protectionModalOpen,
+    protectionProjectId,
+    protectionLoading,
     
     // Actions
     navigate,
@@ -162,6 +220,11 @@ export const useProjectList = () => {
     retryAfterError,
     showNotification,
     setDeleteConfirmName,
+    
+    // Protection actions
+    handleToggleProtection,
+    handleProtectionSubmit,
+    handleProtectionCancel,
     
     // Utils
     ApiKeyGenerator

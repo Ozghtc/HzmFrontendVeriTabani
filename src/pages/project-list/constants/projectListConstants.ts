@@ -15,7 +15,9 @@ import {
   Code,
   CheckCircle,
   XCircle,
-  Info
+  Info,
+  Lock,
+  Unlock
 } from 'lucide-react';
 
 export const icons = {
@@ -35,7 +37,9 @@ export const icons = {
   Code,
   CheckCircle,
   XCircle,
-  Info
+  Info,
+  Lock,
+  Unlock
 };
 
 export const NOTIFICATION_DURATION = 3000; // 3 seconds
