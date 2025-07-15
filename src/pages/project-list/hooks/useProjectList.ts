@@ -16,6 +16,7 @@ export const useProjectList = () => {
   
   const [deletingProject, setDeletingProject] = useState<number | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
+  const [deleteProtectionPassword, setDeleteProtectionPassword] = useState('');
   const [showApiKey, setShowApiKey] = useState<ApiKeyVisibility>({});
   const [creating, setCreating] = useState(false);
   
@@ -70,11 +71,12 @@ export const useProjectList = () => {
     try {
       console.log('🗑️ Attempting to delete project:', deletingProject, projectToDelete.name);
       
-      const success = await deleteProject(deletingProject.toString());
+      const success = await deleteProject(deletingProject.toString(), deleteProtectionPassword || undefined);
       
       // Always close modal first
       setDeletingProject(null);
       setDeleteConfirmName('');
+      setDeleteProtectionPassword('');
       
       if (success) {
         console.log('✅ Project deleted successfully');
@@ -96,6 +98,7 @@ export const useProjectList = () => {
   const cancelDeleteProject = useCallback(() => {
     setDeletingProject(null);
     setDeleteConfirmName('');
+    setDeleteProtectionPassword('');
   }, []);
 
   // Handle copy API key
@@ -146,7 +149,7 @@ export const useProjectList = () => {
     setProtectionModalOpen(true);
   }, []);
 
-  const handleProtectionSubmit = useCallback(async (password: string) => {
+  const handleProtectionSubmit = useCallback(async (password: string, newPassword?: string) => {
     if (!protectionProjectId) return;
     
     setProtectionLoading(true);
@@ -157,7 +160,16 @@ export const useProjectList = () => {
       
       let success = false;
       
-      if ((project as any).isProtected ?? false) {
+      if (newPassword) {
+        // Change password mode
+        success = await removeProjectProtection(protectionProjectId.toString(), password);
+        if (success) {
+          success = await enableProjectProtection(protectionProjectId.toString(), newPassword);
+          if (success) {
+            showNotification('success', 'Proje şifresi başarıyla değiştirildi');
+          }
+        }
+      } else if ((project as any).isProtected ?? false) {
         // Remove protection
         success = await removeProjectProtection(protectionProjectId.toString(), password);
         if (success) {
@@ -197,6 +209,7 @@ export const useProjectList = () => {
     creating,
     deletingProject,
     deleteConfirmName,
+    deleteProtectionPassword,
     showApiKey,
     notification,
     
@@ -220,6 +233,7 @@ export const useProjectList = () => {
     retryAfterError,
     showNotification,
     setDeleteConfirmName,
+    setDeleteProtectionPassword,
     
     // Protection actions
     handleToggleProtection,

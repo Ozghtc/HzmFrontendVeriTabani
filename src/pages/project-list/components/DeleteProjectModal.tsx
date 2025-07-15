@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { icons } from '../constants/projectListConstants';
 import { DeleteProjectModalProps } from '../types/projectListTypes';
 import { ApiKeyGenerator } from '../../../utils/apiKeyGenerator';
@@ -7,11 +7,14 @@ const DeleteProjectModal: React.FC<DeleteProjectModalProps> = ({
   projectId,
   projects,
   deleteConfirmName,
+  protectionPassword,
   onConfirm,
   onCancel,
-  onNameChange
+  onNameChange,
+  onPasswordChange
 }) => {
-  const { AlertTriangle, Trash2 } = icons;
+  const { AlertTriangle, Trash2, Eye, EyeOff } = icons;
+  const [showPassword, setShowPassword] = useState(false);
   
   if (!projectId) return null;
   
@@ -48,17 +51,44 @@ const DeleteProjectModal: React.FC<DeleteProjectModalProps> = ({
             </p>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Onaylamak için proje adını tam olarak yazın: <strong>{projectToDelete.name}</strong>
-            </label>
-            <input
-              type="text"
-              value={deleteConfirmName}
-              onChange={(e) => onNameChange(e.target.value)}
-              placeholder={projectToDelete.name}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Onaylamak için proje adını tam olarak yazın: <strong>{projectToDelete.name}</strong>
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmName}
+                onChange={(e) => onNameChange(e.target.value)}
+                placeholder={projectToDelete.name}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            
+            {/* Protection Password Field */}
+            {(projectToDelete as any).isProtected && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🔒 Bu proje korumalı. Silmek için koruma şifresini girin:
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={protectionPassword}
+                    onChange={(e) => onPasswordChange(e.target.value)}
+                    placeholder="Koruma şifrenizi girin"
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -71,7 +101,10 @@ const DeleteProjectModal: React.FC<DeleteProjectModalProps> = ({
           </button>
           <button
             onClick={onConfirm}
-            disabled={deleteConfirmName !== projectToDelete.name}
+            disabled={
+              deleteConfirmName !== projectToDelete.name ||
+              ((projectToDelete as any).isProtected && !protectionPassword.trim())
+            }
             className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
           >
             <Trash2 size={16} className="mr-2" />

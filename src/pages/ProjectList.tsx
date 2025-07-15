@@ -22,6 +22,7 @@ const ProjectList = () => {
     creating,
     deletingProject,
     deleteConfirmName,
+    deleteProtectionPassword,
     showApiKey,
     notification,
     
@@ -44,6 +45,7 @@ const ProjectList = () => {
     fetchProjects,
     retryAfterError,
     setDeleteConfirmName,
+    setDeleteProtectionPassword,
     
     // Protection actions
     handleToggleProtection,
@@ -106,9 +108,11 @@ const ProjectList = () => {
         projectId={deletingProject}
         projects={projects}
         deleteConfirmName={deleteConfirmName}
+        protectionPassword={deleteProtectionPassword}
         onConfirm={confirmDeleteProject}
         onCancel={cancelDeleteProject}
         onNameChange={setDeleteConfirmName}
+        onPasswordChange={setDeleteProtectionPassword}
       />
 
       <ProjectProtectionModal

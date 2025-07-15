@@ -27,9 +27,11 @@ export interface DeleteProjectModalProps {
   projectId: number | null;
   projects: Project[];
   deleteConfirmName: string;
+  protectionPassword: string;
   onConfirm: () => Promise<void>;
   onCancel: () => void;
   onNameChange: (name: string) => void;
+  onPasswordChange: (password: string) => void;
 }
 
 export interface ProjectCardProps {
