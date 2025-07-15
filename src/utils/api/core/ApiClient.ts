@@ -169,11 +169,17 @@ export class ApiClient {
         let errorCode = 'NETWORK_ERROR';
 
         if (error.name === 'AbortError' || error.message?.includes('timeout')) {
-          errorMessage = 'Request timeout - please check your internet connection';
+          errorMessage = 'Request timeout - SSL connection issues detected. Please try again.';
           errorCode = 'TIMEOUT_ERROR';
+          console.log('🚨 SSL timeout detected, trying backup URLs...');
         } else if (error.message?.includes('Failed to fetch')) {
-          errorMessage = 'Unable to connect to server - please check your internet connection';
+          errorMessage = 'Unable to connect to server - SSL certificate issues possible';
           errorCode = 'CONNECTION_ERROR';
+          console.log('🚨 Connection failed, SSL issues possible');
+        } else if (error.message?.includes('SSL') || error.message?.includes('certificate')) {
+          errorMessage = 'SSL certificate error - trying alternative connection';
+          errorCode = 'SSL_ERROR';
+          console.log('🚨 SSL certificate error detected');
         }
 
         const apiError: ApiError = {

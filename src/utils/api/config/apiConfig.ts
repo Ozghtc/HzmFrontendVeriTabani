@@ -3,9 +3,10 @@ export const API_CONFIG = {
   baseURL: import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1',
   backupURLs: [
     'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1',
+    'http://hzmbackandveritabani-production-c660.up.railway.app/api/v1', // HTTP fallback for SSL issues
     // Add more backup URLs if needed
   ],
-  timeout: 60000, // 60 seconds
+  timeout: 30000, // 30 seconds - SSL timeout için daha kısa
   retryDefaults: {
     maxRetries: 0, // Retry'ı kapat
     delay: 1000,

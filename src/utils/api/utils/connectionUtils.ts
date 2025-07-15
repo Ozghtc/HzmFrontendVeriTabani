@@ -46,24 +46,34 @@ export class ConnectionManager {
 export const testConnection = async (url: string): Promise<boolean> => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // SSL için daha uzun timeout
 
     const response = await fetch(`${url}/health`, {
       method: 'GET',
       signal: controller.signal,
+      mode: 'cors', // CORS mode explicit
     });
     
     clearTimeout(timeoutId);
     return response.ok;
-  } catch (error) {
+  } catch (error: any) {
     console.log(`Connection test failed for ${url}:`, error);
+    
+    // SSL timeout hatası için özel loglama
+    if (error?.name === 'AbortError') {
+      console.log('🚨 SSL/Connection timeout detected for:', url);
+    }
+    
     return false;
   }
 };
 
 // Find best working URL
 export const findBestUrl = async (): Promise<string> => {
+  console.log('🔄 Testing API connections...');
+  
   // Test primary URL first
+  console.log('🔍 Testing primary URL:', API_CONFIG.baseURL);
   if (await testConnection(API_CONFIG.baseURL)) {
     console.log('✅ Primary API URL working:', API_CONFIG.baseURL);
     return API_CONFIG.baseURL;
@@ -71,12 +81,15 @@ export const findBestUrl = async (): Promise<string> => {
 
   // Test backup URLs
   for (const url of API_CONFIG.backupURLs) {
-    if (url !== API_CONFIG.baseURL && await testConnection(url)) {
-      console.log('✅ Backup API URL working:', url);
-      return url;
+    if (url !== API_CONFIG.baseURL) {
+      console.log('🔍 Testing backup URL:', url);
+      if (await testConnection(url)) {
+        console.log('✅ Backup API URL working:', url);
+        return url;
+      }
     }
   }
 
-  console.log('⚠️ No working API URL found, using primary');
+  console.log('⚠️ No working API URL found, using primary (SSL issues possible)');
   return API_CONFIG.baseURL;
 }; 
