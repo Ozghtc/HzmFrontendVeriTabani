@@ -5,6 +5,7 @@ import ProjectCardHeader from './ProjectCardHeader';
 import ApiKeySection from './ApiKeySection';
 import ProjectActions from './ProjectActions';
 import ProjectInfoModal from './ProjectInfoModal';
+import { ProjectLogsModal } from '../../../../components/modals/ProjectLogsModal';
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
@@ -20,6 +21,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 }) => {
   const { Table } = icons;
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false);
+  const [isProjectLogsOpen, setIsProjectLogsOpen] = useState(false);
   
   // Remove excessive logging to prevent console spam
   // console.log('🔍 Rendering project:', { 
@@ -61,6 +63,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           onNavigateToEdit={onNavigateToEdit}
           onNavigateToApi={onNavigateToApi}
           onShowProjectInfo={() => setIsProjectInfoOpen(true)}
+          onShowProjectLogs={() => setIsProjectLogsOpen(true)}
           loading={loading}
         />
       </div>
@@ -70,6 +73,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         onClose={() => setIsProjectInfoOpen(false)}
         project={project}
       />
+
+      {isProjectLogsOpen && (
+        <ProjectLogsModal
+          project={project}
+          onClose={() => setIsProjectLogsOpen(false)}
+        />
+      )}
     </>
   );
 };

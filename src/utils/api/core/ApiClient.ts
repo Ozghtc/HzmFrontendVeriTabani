@@ -16,6 +16,7 @@ import { FieldEndpoints } from '../endpoints/fieldEndpoints';
 import { DataEndpoints } from '../endpoints/dataEndpoints';
 import { ApiKeyEndpoints } from '../endpoints/apiKeyEndpoints';
 import { HealthEndpoints } from '../endpoints/healthEndpoints';
+import { RailwayEndpoints } from '../endpoints/railwayEndpoints';
 
 export class ApiClient {
   private baseURL: string;
@@ -33,6 +34,7 @@ export class ApiClient {
   public data: DataEndpoints;
   public apiKeys: ApiKeyEndpoints;
   public health: HealthEndpoints;
+  public railway: RailwayEndpoints;
 
   constructor(baseURL: string = API_CONFIG.baseURL) {
     this.baseURL = baseURL;
@@ -51,6 +53,7 @@ export class ApiClient {
     this.data = new DataEndpoints(requestFn);
     this.apiKeys = new ApiKeyEndpoints(requestFn);
     this.health = new HealthEndpoints(requestFn);
+    this.railway = new RailwayEndpoints(requestFn);
   }
 
   // Initialize with best URL
