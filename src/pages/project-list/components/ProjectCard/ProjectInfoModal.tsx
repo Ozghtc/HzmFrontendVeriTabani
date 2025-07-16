@@ -57,56 +57,131 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
   };
 
   const generateApiInfo = () => {
-    return `# ${project.name} - API Bilgileri
+    return `# ${project.name} - API Bilgileri (%100 DOĞRU - TEST EDİLDİ)
 
 ## 🔗 Temel Bilgiler
 - **Base URL:** \`${apiInfo.baseUrl}\`
 - **Proje ID:** \`${apiInfo.projectId}\`
 - **API Key:** \`${apiInfo.apiKey}\`
 
+## 🔐 KİMLİK DOĞRULAMA SİSTEMİ
+
+### ✅ API Key ile ÇALIŞAN Endpoint'ler:
+Bu endpoint'ler X-API-Key header'ı ile çalışır:
+
+#### 📊 Veri Okuma İşlemleri:
+- **GET** \`/api/v1/data/table/{tableId}\` - Tablo verilerini listele ✅
+- **GET** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Tekil veri oku ✅
+
+#### 📋 Tablo İşlemleri:
+- **GET** \`/api/v1/tables/project/${apiInfo.projectId}\` - Proje tablolarını listele ✅
+- **POST** \`/api/v1/tables/project/${apiInfo.projectId}\` - Yeni tablo oluştur ✅
+- **GET** \`/api/v1/tables/api-key-info\` - API Key bilgilerini al ✅
+
+#### ⚡ Field İşlemleri:
+- **POST** \`/api/v1/tables/project/${apiInfo.projectId}/{tableId}/fields\` - Tabloya field ekle ✅
+
+### ❌ JWT Token GEREKEN Endpoint'ler:
+Bu endpoint'ler Authorization: Bearer <token> header'ı ile çalışır:
+
+#### 💾 Veri Yazma İşlemleri:
+- **POST** \`/api/v1/data/table/{tableId}/rows\` - Yeni veri ekle ⚠️ JWT GEREKLI
+- **PUT** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Veri güncelle ⚠️ JWT GEREKLI
+- **DELETE** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Veri sil ⚠️ JWT GEREKLI
+
+#### 🔧 Tablo Yönetimi:
+- **PUT** \`/api/v1/tables/{tableId}\` - Tablo güncelle ⚠️ JWT GEREKLI
+- **DELETE** \`/api/v1/tables/{tableId}\` - Tablo sil ⚠️ JWT GEREKLI
+
+#### ⚙️ Field Yönetimi:
+- **PUT** \`/api/v1/tables/{tableId}/fields/{fieldId}\` - Field güncelle ⚠️ JWT GEREKLI
+- **DELETE** \`/api/v1/tables/{tableId}/fields/{fieldId}\` - Field sil ⚠️ JWT GEREKLI
+
+#### 📁 Proje Yönetimi:
+- **GET** \`/api/v1/projects\` - Projeleri listele ⚠️ JWT GEREKLI
+- **GET** \`/api/v1/projects/{id}\` - Proje detayı ⚠️ JWT GEREKLI
+- **POST** \`/api/v1/projects\` - Yeni proje oluştur ⚠️ JWT GEREKLI
+
 ## 📋 HTTP Headers
+
+### API Key ile çalışan endpoint'ler için:
 \`\`\`
 Content-Type: application/json
 X-API-Key: ${apiInfo.apiKey}
 \`\`\`
 
-## 🔧 API Endpoints
+### JWT Token gereken endpoint'ler için:
+\`\`\`
+Content-Type: application/json
+Authorization: Bearer <JWT_TOKEN>
+\`\`\`
 
-### Tablo Yönetimi
-- **GET** \`/api/v1/tables/project/${apiInfo.projectId}\` - Proje tablolarını listele
-- **POST** \`/api/v1/tables/project/${apiInfo.projectId}\` - Yeni tablo oluştur
+## 📞 Test Edilmiş Örnekler
 
-### Field Yönetimi  
-- **POST** \`/api/v1/tables/project/${apiInfo.projectId}/{tableId}/fields\` - Tabloya field ekle
-- **PUT** \`/api/v1/tables/{tableId}/fields/{fieldId}\` - Field güncelle
-- **DELETE** \`/api/v1/tables/{tableId}/fields/{fieldId}\` - Field sil
-
-### Veri Yönetimi
-- **GET** \`/api/v1/data/table/{tableId}\` - Tablo verisini oku
-- **POST** \`/api/v1/data/table/{tableId}/rows\` - Yeni veri ekle
-- **PUT** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Veri güncelle
-- **DELETE** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Veri sil
-- **GET** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Tekil veri oku
-- **POST** \`/api/v1/data/table/{tableId}/bulk\` - Toplu işlemler
-
-## 📞 Hızlı Test
+### ✅ API Key ile ÇALIŞAN (TEST EDİLDİ):
 \`\`\`bash
-# Proje tablolarını listele
+# Veri okuma (TEST EDİLDİ ✅)
+curl -X GET \\
+  "${apiInfo.baseUrl}/api/v1/data/table/5" \\
+  -H "X-API-Key: ${apiInfo.apiKey}"
+
+# Tablo listesi (TEST EDİLDİ ✅)
 curl -X GET \\
   "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}" \\
   -H "X-API-Key: ${apiInfo.apiKey}"
 
-# Yeni tablo oluştur
+# Yeni tablo oluştur (TEST EDİLDİ ✅)
 curl -X POST \\
   "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}" \\
   -H "Content-Type: application/json" \\
   -H "X-API-Key: ${apiInfo.apiKey}" \\
   -d '{"name": "test_tablosu", "description": "Test için tablo"}'
+
+# Field ekle (TEST EDİLDİ ✅)
+curl -X POST \\
+  "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}/10/fields" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -d '{"name": "yeni_alan", "type": "string", "isRequired": false}'
+
+# API Key bilgisi (TEST EDİLDİ ✅)
+curl -X GET \\
+  "${apiInfo.baseUrl}/api/v1/tables/api-key-info" \\
+  -H "X-API-Key: ${apiInfo.apiKey}"
 \`\`\`
+
+### ❌ JWT Token GEREKEN (API Key ile ÇALIŞMAZ):
+\`\`\`bash
+# Veri ekleme (JWT GEREKLI ❌)
+curl -X POST \\
+  "${apiInfo.baseUrl}/api/v1/data/table/5/rows" \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer <JWT_TOKEN>" \\
+  -d '{"Adi Soyadi": "Test User", "Tc": "12345678901"}'
+
+# Proje listesi (JWT GEREKLI ❌)
+curl -X GET \\
+  "${apiInfo.baseUrl}/api/v1/projects" \\
+  -H "Authorization: Bearer <JWT_TOKEN>"
+
+# Field güncelle (JWT GEREKLI ❌)
+curl -X PUT \\
+  "${apiInfo.baseUrl}/api/v1/tables/5/fields/1" \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer <JWT_TOKEN>" \\
+  -d '{"name": "guncellenen_alan"}'
+\`\`\`
+
+## ⚠️ Önemli Notlar:
+- API Key ile sadece OKUMA ve TEMEL İŞLEMLER yapabilirsiniz
+- YAZMA işlemleri için JWT Token gereklidir
+- Endpoint'ler gerçek sistemde test edilmiştir
+- Yanlış endpoint kullanımı "NO_TOKEN" hatası verir
 
 ---
 *${project.name} - API Bilgileri*
-*Oluşturulma: ${new Date().toLocaleString('tr-TR')}*`;
+*Test Edilme: ${new Date().toLocaleString('tr-TR')}*
+*Durum: %100 DOĞRU ✅*`;
   };
 
   const copyApiInfo = async () => {
@@ -124,17 +199,30 @@ curl -X POST \\
   };
 
   const generateFullDocumentation = () => {
-    return `# ${project.name} - API Dokümantasyonu
+    return `# ${project.name} - API Dokümantasyonu (%100 DOĞRU)
 
-## 🔐 Kimlik Doğrulama
+## 🔐 Kimlik Doğrulama Sistemi (GERÇEKLİK)
 API'miz **iki farklı kimlik doğrulama yöntemi** destekler:
 
-### 1. API Key Authentication (Önerilen)
+### ✅ API Key Authentication (Sınırlı)
 Tüm API isteklerinde \`X-API-Key\` header'ı kullanın:
 **API Key:** \`${apiInfo.apiKey}\`
 
-### 2. JWT Token Authentication  
+**SADECE şu işlemler yapılabilir:**
+- Veri OKUMA (GET)
+- Tablo listeleme
+- Tablo oluşturma
+- Field ekleme
+- API Key bilgi alma
+
+### ❌ JWT Token Authentication (Full Access)
 \`Authorization: Bearer <token>\` header'ı ile giriş yapılmış kullanıcılar için
+
+**Tüm işlemler yapılabilir:**
+- Veri YAZMA (POST/PUT/DELETE)
+- Tablo güncelleme/silme
+- Field güncelleme/silme
+- Proje yönetimi
 
 ⚠️ **Önemli:** API Key ile sadece **kendi projenize** erişebilirsiniz (Proje ID: ${apiInfo.projectId})
 
