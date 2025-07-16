@@ -199,37 +199,53 @@ curl -X PUT \\
   };
 
   const generateFullDocumentation = () => {
-    return `# ${project.name} - API Dokümantasyonu (%100 DOĞRU)
+    return `# ${project.name} - API Dokümantasyonu (%100 DOĞRU - GÜNCELLENDİ)
 
 ## 🔐 Kimlik Doğrulama Sistemi (GERÇEKLİK)
 API'miz **iki farklı kimlik doğrulama yöntemi** destekler:
 
-### ✅ API Key Authentication (Sınırlı)
+### ✅ API Key Authentication (GENİŞ YETKİLER!)
 Tüm API isteklerinde \`X-API-Key\` header'ı kullanın:
 **API Key:** \`${apiInfo.apiKey}\`
 
-**SADECE şu işlemler yapılabilir:**
-- Veri OKUMA (GET)
-- Tablo listeleme
-- Tablo oluşturma
-- Field ekleme
-- API Key bilgi alma
+**API KEY İLE YAPILABİLEN TÜM İŞLEMLER:**
+- ✅ **Tüm Veri CRUD İşlemleri:**
+  - Veri OKUMA (GET /data/table/{tableId})
+  - Veri EKLEME (POST /data/table/{tableId}/rows)
+  - Veri GÜNCELLEME (PUT /data/table/{tableId}/rows/{rowId})
+  - Veri SİLME (DELETE /data/table/{tableId}/rows/{rowId})
+  - Tek veri okuma (GET /data/table/{tableId}/rows/{rowId})
+  - Toplu veri işlemleri (POST /data/table/{tableId}/bulk)
 
-### ❌ JWT Token Authentication (Full Access)
-\`Authorization: Bearer <token>\` header'ı ile giriş yapılmış kullanıcılar için
+- ✅ **Tablo Yönetimi:**
+  - Tablo listesi (GET /tables/project/{projectId})
+  - Tablo oluşturma (POST /tables/project/{projectId})
+  - Field ekleme (POST /tables/project/{projectId}/{tableId}/fields)
+  - API Key bilgisi (GET /tables/api-key-info)
 
-**Tüm işlemler yapılabilir:**
-- Veri YAZMA (POST/PUT/DELETE)
-- Tablo güncelleme/silme
-- Field güncelleme/silme
-- Proje yönetimi
+### ❌ JWT Token Authentication (Tam Yetki)
+\`Authorization: Bearer <token>\` header'ı ile **ek yetkiler:**
+
+**SADECE JWT İLE YAPILABİLEN İŞLEMLER:**
+- Tablo detayları (GET /tables/{projectId}/{tableId})
+- Tablo güncelleme/silme (PUT/DELETE /tables/{tableId})
+- Field güncelleme/silme (PUT/DELETE /tables/{tableId}/fields/{fieldId})
+- Proje yönetimi (GET/POST/PUT/DELETE /projects)
+- Admin işlemleri (tüm /admin endpoints)
 
 ⚠️ **Önemli:** API Key ile sadece **kendi projenize** erişebilirsiniz (Proje ID: ${apiInfo.projectId})
+
+## 🚀 API Key'in Gücü
+API Key'iniz ile **neredeyse tüm veri işlemlerini** yapabilirsiniz:
+- Tablolarınızı yönetebilir
+- Veri ekleyip silebilir
+- Toplu işlemler yapabilirsiniz
+- Sadece proje yönetimi ve admin işlemleri JWT token gerektirir
 
 ## 📋 Temel Bilgiler
 - **Base URL:** \`${apiInfo.baseUrl}\`
 - **Proje ID:** \`${apiInfo.projectId}\`
-- **Rate Limit:** 300 istek/15 dakika (admin kullanıcılar için bypass)
+- **Rate Limit:** 100 istek/15 dakika (admin kullanıcılar için bypass)
 - **API Key Kısıtı:** Bu key sadece "${project.name}" projesine erişim sağlar
 
 ## 🔄 Temel Workflow
@@ -308,7 +324,7 @@ X-API-Key: ${apiInfo.apiKey}
 }
 \`\`\`
 
-### 💾 Veri Ekleme
+### 💾 Veri Ekleme (API Key ile Çalışır!)
 \`\`\`http
 POST /api/v1/data/table/{tableId}/rows
 Content-Type: application/json
@@ -381,7 +397,7 @@ X-API-Key: ${apiInfo.apiKey}
 }
 \`\`\`
 
-### ✏️ Veri Güncelleme
+### ✏️ Veri Güncelleme (API Key ile Çalışır!)
 \`\`\`http
 PUT /api/v1/data/table/{tableId}/rows/{rowId}
 Content-Type: application/json
@@ -408,7 +424,7 @@ X-API-Key: ${apiInfo.apiKey}
 }
 \`\`\`
 
-### 🗑️ Veri Silme
+### 🗑️ Veri Silme (API Key ile Çalışır!)
 \`\`\`http
 DELETE /api/v1/data/table/{tableId}/rows/{rowId}
 X-API-Key: ${apiInfo.apiKey}
@@ -500,7 +516,7 @@ if (result.success) {
 ### Sunucu Hataları:
 - **500 INTERNAL_SERVER_ERROR:** Sunucu hatası
 - **503 SERVICE_UNAVAILABLE:** Servis geçici olarak kullanılamıyor
-- **429 TOO_MANY_REQUESTS:** Rate limit aşıldı (300 req/15dk)
+- **429 TOO_MANY_REQUESTS:** Rate limit aşıldı (100 req/15dk)
 
 ### Örnek Hata Response:
 \`\`\`json
