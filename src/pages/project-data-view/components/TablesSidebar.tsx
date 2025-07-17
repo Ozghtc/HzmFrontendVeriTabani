@@ -40,8 +40,24 @@ const TablesSidebar: React.FC<TablesSidebarProps> = ({ project, selectedTable, o
         }
 
         // Fetch data from the selected table
-        const response = await fetch(`/api/v1/data/table/${table.id}?limit=1000`);
+        console.log('🔍 Loading data for table:', table.name, 'ID:', table.id);
+        console.log('🔑 Using API key:', project.apiKey ? 'Present' : 'Missing');
+        
+        const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://hzmbackendveritabani-production.up.railway.app'}/api/v1/data/table/${table.id}?limit=1000`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': project.apiKey || project.metadata?.projectApiKey || ''
+          }
+        });
         const result = await response.json();
+        
+        console.log('📊 API Response:', result);
+        
+        if (result.success && result.data?.rows) {
+          console.log('✅ Data loaded successfully, rows:', result.data.rows.length);
+        } else {
+          console.log('❌ API response indicates failure:', result);
+        }
         
         if (result.success && result.data?.rows) {
           // Extract unique values from the first column (usually the main identifier)
@@ -64,7 +80,12 @@ const TablesSidebar: React.FC<TablesSidebarProps> = ({ project, selectedTable, o
           setTableData([]);
         }
       } catch (error) {
-        console.error('Error loading table data:', error);
+        console.error('❌ Error loading table data:', error);
+        console.error('📋 Error details:', {
+          tableId: selectedTableFilter,
+          projectId: project?.id,
+          apiKey: project?.apiKey ? 'Present' : 'Missing'
+        });
         setTableData([]);
       } finally {
         setLoading(false);
