@@ -136,12 +136,7 @@ export const useProjectList = () => {
     navigate(`/projects/${projectId}`);
   }, [navigate, loading, projects.length, showNotification]);
 
-  const navigateToApi = useCallback((projectId: number) => {
-    const project = projects.find(p => p.id === projectId);
-    if (project) {
-      alert(`API Endpoint: /api/v1/projects/${projectId}\nAPI Key: ${project.apiKey}`);
-    }
-  }, [projects]);
+
 
   // Protection handlers
   const handleToggleProtection = useCallback((projectId: number) => {
@@ -228,7 +223,6 @@ export const useProjectList = () => {
     toggleApiKeyVisibility,
     navigateToData,
     navigateToEdit,
-    navigateToApi,
     fetchProjects,
     retryAfterError,
     showNotification,

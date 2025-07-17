@@ -42,7 +42,6 @@ export interface ProjectCardProps {
   onDelete: () => void;
   onNavigateToData: () => void;
   onNavigateToEdit: () => void;
-  onNavigateToApi: () => void;
   onToggleProtection: () => void;
   loading: boolean;
 }

@@ -15,7 +15,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onDelete,
   onNavigateToData,
   onNavigateToEdit,
-  onNavigateToApi,
   onToggleProtection,
   loading
 }) => {
@@ -61,7 +60,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <ProjectActions
           onNavigateToData={onNavigateToData}
           onNavigateToEdit={onNavigateToEdit}
-          onNavigateToApi={onNavigateToApi}
           onShowProjectInfo={() => setIsProjectInfoOpen(true)}
           onShowProjectLogs={() => setIsProjectLogsOpen(true)}
           loading={loading}

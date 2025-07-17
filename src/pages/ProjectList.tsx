@@ -93,7 +93,6 @@ const ProjectList = () => {
                   onDelete={() => handleDeleteProject(project.id)}
                   onNavigateToData={() => navigateToData(project.id)}
                   onNavigateToEdit={() => navigateToEdit(project.id)}
-                  onNavigateToApi={() => navigateToApi(project.id)}
                   onToggleProtection={() => handleToggleProtection(project.id)}
                   loading={loading}
                 />
