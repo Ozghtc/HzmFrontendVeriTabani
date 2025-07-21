@@ -35,10 +35,31 @@ export const NewProjectLogsModal: React.FC<NewProjectLogsModalProps> = ({ projec
       const response = await apiClient.railway.getMonitoringCategories(projectName);
 
       console.log('📦 Categories Response:', response);
+      console.log('📦 Raw response.data:', response.data);
+      console.log('📦 response.data type:', typeof response.data);
+      console.log('📦 Is response.data array?', Array.isArray(response.data));
 
       if (response.success) {
-        const categories = Array.isArray(response.data) ? response.data : [];
-        console.log('✅ Setting categories:', categories);
+        let categories = [];
+        
+        // Handle potential double-wrapping
+        const responseData = (response as any).data;
+        if (Array.isArray(responseData)) {
+          categories = responseData;
+        } else if (responseData?.data && Array.isArray(responseData.data)) {
+          categories = responseData.data;
+        } else if (typeof responseData === 'object' && responseData !== null) {
+          console.log('📦 responseData keys:', Object.keys(responseData));
+          // If there's a nested structure, try to find array
+          const values = Object.values(responseData);
+          const foundArray = values.find(val => Array.isArray(val));
+          if (foundArray) {
+            categories = foundArray as any[];
+          }
+        }
+        
+        console.log('✅ Final categories to set:', categories);
+        console.log('✅ Categories count:', categories.length);
         setCategories(categories);
         if (categories.length > 0) {
           setSelectedCategory(categories[0]);
