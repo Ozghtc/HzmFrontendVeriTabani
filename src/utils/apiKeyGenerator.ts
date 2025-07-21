@@ -163,7 +163,18 @@ export class ApiKeyGenerator {
         description: '✅ Proje tablolarını listele (API Key ile ÇALIŞIYOR)'
       },
       
-      // ⚠️ JWT GEREKLİ: Tablo oluşturma
+      // ❌ JWT GEREKLİ: Normal tablo listesi
+      getTablesJWT: {
+        method: 'GET',
+        url: `${baseUrl}/tables/project/${projectId}`,
+        headers: {
+          'Authorization': `Bearer <JWT_TOKEN>`,
+          'Content-Type': 'application/json'
+        },
+        description: '❌ Tablo listesi (JWT TOKEN GEREKLİ - API Key çalışmaz)'
+      },
+      
+      // ❌ JWT GEREKLİ: Tablo oluşturma
       createTable: {
         method: 'POST',
         url: `${baseUrl}/tables/project/${projectId}`,
@@ -175,7 +186,24 @@ export class ApiKeyGenerator {
           name: 'vardiyalar',
           description: 'Vardiya bilgileri tablosu'
         },
-        description: '⚠️ Yeni tablo oluştur (JWT TOKEN GEREKLİ - API Key çalışmaz)'
+        description: '❌ Yeni tablo oluştur (JWT TOKEN GEREKLİ - API Key çalışmaz)'
+      },
+      
+      // ❌ JWT GEREKLİ: Field ekleme
+      addField: {
+        method: 'POST',
+        url: `${baseUrl}/tables/project/${projectId}/{tableId}/fields`,
+        headers: {
+          'Authorization': `Bearer <JWT_TOKEN>`,
+          'Content-Type': 'application/json'
+        },
+        body: {
+          name: 'vardiya_adi',
+          type: 'string',
+          isRequired: true,
+          description: 'Vardiya adı'
+        },
+        description: '❌ Field ekleme (JWT TOKEN GEREKLİ - API Key çalışmaz)'
       }
     };
 
