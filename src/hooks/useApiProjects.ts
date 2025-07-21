@@ -51,8 +51,26 @@ export const useApiProjects = () => {
         console.log('📦 response.data.data:', (response.data as any).data);
         console.log('📦 response.data.data.projects:', (response.data as any).data?.projects);
         console.log('📦 response.data keys:', Object.keys(response.data));
-        // ✅ FIX: Double wrapping - response.data.data.projects
-        const projects = (response.data as any).data?.projects || [];
+        
+        // DEBUG: Try both possible structures
+        let projects = [];
+        
+        // Structure 1: response.data.projects (direct)
+        if ((response.data as any).projects && Array.isArray((response.data as any).projects)) {
+          projects = (response.data as any).projects;
+          console.log('✅ Found projects at response.data.projects');
+        }
+        // Structure 2: response.data.data.projects (nested)
+        else if ((response.data as any).data?.projects && Array.isArray((response.data as any).data.projects)) {
+          projects = (response.data as any).data.projects;
+          console.log('✅ Found projects at response.data.data.projects');
+        }
+        // Fallback
+        else {
+          console.log('❌ Could not find projects in response structure');
+          console.log('📋 Full response for debugging:', JSON.stringify(response, null, 2));
+        }
+        
         console.log('✅ Projects loaded from backend:', projects.length, 'projects');
         console.log('🔍 Backend project IDs:', projects.map((p: any) => ({ 
           id: p.id, 
