@@ -26,7 +26,15 @@ export const useTableApi = (): TableApiHookReturn => {
         const tables = tablesData.map((table: any) => ({
           id: table.id.toString(),
           name: table.name,
-          fields: table.fields || []
+          fields: (table.fields || []).map((field: any) => ({
+            id: field.id.toString(),
+            name: field.name,
+            type: field.type,
+            required: field.isRequired || false,
+            description: field.description || '',
+            validation: field.validation || {},
+            relationships: field.relationships || []
+          }))
         }));
         
         return tables;
