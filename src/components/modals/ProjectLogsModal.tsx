@@ -47,10 +47,28 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
       console.log('📦 Deployments Response Data:', deploymentsResponse.data);
 
       if (deploymentsResponse.success) {
-        const deployments = Array.isArray(deploymentsResponse.data) 
-          ? deploymentsResponse.data 
-          : [];
+        // Handle double-wrapped response structure
+        let deployments = [];
+        const responseData = (deploymentsResponse as any).data;
+        
+        if (Array.isArray(responseData)) {
+          deployments = responseData;
+        } else if (responseData?.data && Array.isArray(responseData.data)) {
+          deployments = responseData.data;
+        } else if (typeof responseData === 'object' && responseData !== null) {
+          // Check if the object itself contains deployment data
+          const dataKeys = Object.keys(responseData);
+          console.log('🔍 Response data keys:', dataKeys);
+          console.log('🔍 Response data values:', responseData);
+          
+          // If response.data is the actual deployment data, wrap it in array
+          if (responseData.id && responseData.status) {
+            deployments = [responseData];
+          }
+        }
+        
         console.log('✅ Setting deployments:', deployments);
+        console.log('✅ Deployments count:', deployments.length);
         setDeployments(deployments);
         if (deployments.length > 0) {
           setSelectedDeployment(deployments[0]);
