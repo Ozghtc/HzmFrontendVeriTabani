@@ -30,10 +30,8 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
     setError(null);
     
     try {
-      // Proje adından Railway project name'ini tahmin et
-      const railwayProjectName = project.name.toLowerCase().includes('backend') 
-        ? 'hzmbackandveritabani' 
-        : 'hzmfrontendveritabani';
+      // Proje adından Railway project name'ini belirle
+      const railwayProjectName = project.name.toLowerCase();
       
       console.log('🔍 Starting Railway API calls for project:', railwayProjectName);
 
@@ -97,7 +95,9 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
   const fetchDeploymentLogs = async (deploymentId: string) => {
     setLogsLoading(true);
     try {
-      const response = await apiClient.railway.getDeploymentLogs(deploymentId);
+      // Pass project name to get project-specific logs
+      const projectName = project.name.toLowerCase();
+      const response = await apiClient.railway.getDeploymentLogs(deploymentId, projectName);
       if (response.success) {
         setLogs(response.data || []);
       } else {

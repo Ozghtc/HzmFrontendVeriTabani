@@ -50,14 +50,14 @@ export class RailwayEndpoints {
   }
 
   // Get deployment logs
-  async getDeploymentLogs(deploymentId: string): Promise<ApiResponse<string[]>> {
+  async getDeploymentLogs(deploymentId: string, projectName?: string): Promise<ApiResponse<string[]>> {
     try {
       const response = await this.request('/railway/deployment-logs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ deploymentId }),
+        body: JSON.stringify({ deploymentId, projectName }),
       });
 
       console.log('📋 Railway Logs API Response:', response);
