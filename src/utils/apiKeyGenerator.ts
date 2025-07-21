@@ -138,6 +138,11 @@ export class ApiKeyGenerator {
 
   /**
    * Generate API endpoint examples
+   * ⚠️ ÖNEMLI: API Key ile SADECE 3 endpoint çalışır:
+   * 1. /tables/api-key-info
+   * 2. /tables/api-project/{projectId} 
+   * 3. /data/api-table/{tableId}
+   * Diğer TÜM işlemler JWT TOKEN gerektirir!
    */
   static generateApiExamples(projectId: string, apiKey: string, tableName?: string) {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
@@ -171,7 +176,7 @@ export class ApiKeyGenerator {
           'Authorization': `Bearer <JWT_TOKEN>`,
           'Content-Type': 'application/json'
         },
-        description: '❌ Tablo listesi (JWT TOKEN GEREKLİ - API Key çalışmaz)'
+        description: '❌ Tablo listesi (JWT TOKEN GEREKLİ - API Key ÇALIŞMAZ)'
       },
       
       // ❌ JWT GEREKLİ: Tablo oluşturma
@@ -186,7 +191,7 @@ export class ApiKeyGenerator {
           name: 'vardiyalar',
           description: 'Vardiya bilgileri tablosu'
         },
-        description: '❌ Yeni tablo oluştur (JWT TOKEN GEREKLİ - API Key çalışmaz)'
+        description: '❌ Yeni tablo oluştur (JWT TOKEN GEREKLİ - API Key ÇALIŞMAZ)'
       },
       
       // ❌ JWT GEREKLİ: Field ekleme
@@ -203,7 +208,7 @@ export class ApiKeyGenerator {
           isRequired: true,
           description: 'Vardiya adı'
         },
-        description: '❌ Field ekleme (JWT TOKEN GEREKLİ - API Key çalışmaz)'
+        description: '❌ Field ekleme (JWT TOKEN GEREKLİ - API Key ÇALIŞMAZ)'
       }
     };
 
@@ -227,7 +232,7 @@ export class ApiKeyGenerator {
           "tc_no": "12345678901",
           "telefon": "05551234567"
         },
-        description: `❌ Veri ekleme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
+        description: `❌ Veri ekleme (JWT TOKEN GEREKLİ - API Key ÇALIŞMAZ)`
       };
 
       examples['updateRecord'] = {
@@ -240,7 +245,7 @@ export class ApiKeyGenerator {
         body: {
           "hasta_adi": "Ahmet Yılmaz (Güncellendi)"
         },
-        description: `❌ Veri güncelleme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
+        description: `❌ Veri güncelleme (JWT TOKEN GEREKLİ - API Key ÇALIŞMAZ)`
       };
 
       examples['deleteRecord'] = {
@@ -250,7 +255,7 @@ export class ApiKeyGenerator {
           'Authorization': `Bearer <JWT_TOKEN>`,
           'Content-Type': 'application/json'
         },
-        description: `❌ Veri silme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
+        description: `❌ Veri silme (JWT TOKEN GEREKLİ - API Key ÇALIŞMAZ)`
       };
     }
 
