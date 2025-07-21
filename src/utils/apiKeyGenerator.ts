@@ -155,15 +155,12 @@ export class ApiKeyGenerator {
         description: '✅ API Key bilgilerini al (ÇALIŞIYOR)'
       },
       
-      // ⚠️ JWT GEREKLİ: Tablo listesi
-      getTables: {
+      // ✅ ÇALIŞAN: Proje tabloları (API Key ile)
+      getProjectTables: {
         method: 'GET',
-        url: `${baseUrl}/tables/project/${projectId}`,
-        headers: {
-          'Authorization': `Bearer <JWT_TOKEN>`,
-          'Content-Type': 'application/json'
-        },
-        description: '⚠️ Tablo listesi (JWT TOKEN GEREKLİ - API Key çalışmaz)'
+        url: `${baseUrl}/tables/api-project/${projectId}`,
+        headers,
+        description: '✅ Proje tablolarını listele (API Key ile ÇALIŞIYOR)'
       },
       
       // ⚠️ JWT GEREKLİ: Tablo oluşturma
@@ -183,14 +180,11 @@ export class ApiKeyGenerator {
     };
 
     if (tableName) {
-      examples['getTableData'] = {
+      examples['getApiTableData'] = {
         method: 'GET',
-        url: `${baseUrl}/data/table/{tableId}`,
-        headers: {
-          'Authorization': `Bearer <JWT_TOKEN>`,
-          'Content-Type': 'application/json'
-        },
-        description: `⚠️ Veri okuma (JWT TOKEN GEREKLİ - API Key çalışmaz)`
+        url: `${baseUrl}/data/api-table/{tableId}`,
+        headers,
+        description: `✅ Veri okuma (API Key ile ÇALIŞIYOR)`
       };
 
       examples['createRecord'] = {
@@ -205,7 +199,7 @@ export class ApiKeyGenerator {
           "tc_no": "12345678901",
           "telefon": "05551234567"
         },
-        description: `⚠️ Veri ekleme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
+        description: `❌ Veri ekleme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
       };
 
       examples['updateRecord'] = {
@@ -218,7 +212,7 @@ export class ApiKeyGenerator {
         body: {
           "hasta_adi": "Ahmet Yılmaz (Güncellendi)"
         },
-        description: `⚠️ Veri güncelleme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
+        description: `❌ Veri güncelleme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
       };
 
       examples['deleteRecord'] = {
@@ -228,7 +222,7 @@ export class ApiKeyGenerator {
           'Authorization': `Bearer <JWT_TOKEN>`,
           'Content-Type': 'application/json'
         },
-        description: `⚠️ Veri silme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
+        description: `❌ Veri silme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
       };
     }
 
