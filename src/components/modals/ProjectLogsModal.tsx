@@ -35,27 +35,38 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
         ? 'hzmbackandveritabani' 
         : 'hzmfrontendveritabani';
       
+      console.log('🔍 Starting Railway API calls for project:', railwayProjectName);
+
       const [deploymentsResponse, healthResponse] = await Promise.all([
         apiClient.railway.getProjectDeployments(railwayProjectName),
         apiClient.railway.getProjectHealth(railwayProjectName)
       ]);
 
+      console.log('📦 Deployments Response:', deploymentsResponse);
+      console.log('📦 Deployments Response Success:', deploymentsResponse.success);
+      console.log('📦 Deployments Response Data:', deploymentsResponse.data);
+
       if (deploymentsResponse.success) {
         const deployments = Array.isArray(deploymentsResponse.data) 
           ? deploymentsResponse.data 
           : [];
+        console.log('✅ Setting deployments:', deployments);
         setDeployments(deployments);
         if (deployments.length > 0) {
           setSelectedDeployment(deployments[0]);
         }
       } else {
-        console.error('Railway deployments API error:', deploymentsResponse.error);
+        console.error('❌ Railway deployments API error:', deploymentsResponse.error);
         setError(deploymentsResponse.error || 'Failed to fetch deployments');
         setDeployments([]); // Ensure array type
       }
 
+      console.log('🏥 Health Response:', healthResponse);
       if (healthResponse.success) {
+        console.log('✅ Setting health data:', healthResponse.data);
         setHealthData(healthResponse.data);
+      } else {
+        console.error('❌ Health response failed:', healthResponse.error);
       }
     } catch (error: any) {
       console.error('Error fetching project data:', error);

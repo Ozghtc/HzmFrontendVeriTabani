@@ -32,8 +32,15 @@ export class RailwayEndpoints {
         body: JSON.stringify({ projectName }),
       });
 
+      console.log('🚂 Railway API Response (full):', response);
+      console.log('🚂 Response success:', response.success);
+      console.log('🚂 Response data:', response.data);
+      console.log('🚂 Response data type:', typeof response.data);
+      console.log('🚂 Is array?', Array.isArray(response.data));
+
       return response;
     } catch (error: any) {
+      console.error('🚂 Railway API Error:', error);
       return {
         success: false,
         error: error.message || 'Failed to fetch Railway deployments',
@@ -53,8 +60,11 @@ export class RailwayEndpoints {
         body: JSON.stringify({ deploymentId }),
       });
 
+      console.log('📋 Railway Logs API Response:', response);
+
       return response;
     } catch (error: any) {
+      console.error('📋 Railway Logs API Error:', error);
       return {
         success: false,
         error: error.message || 'Failed to fetch deployment logs',
@@ -74,8 +84,11 @@ export class RailwayEndpoints {
         body: JSON.stringify({ projectName }),
       });
 
+      console.log('🏥 Railway Health API Response:', response);
+
       return response;
     } catch (error: any) {
+      console.error('🏥 Railway Health API Error:', error);
       return {
         success: false,
         error: error.message || 'Failed to fetch project health',
