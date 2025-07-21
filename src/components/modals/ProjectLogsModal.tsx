@@ -41,12 +41,17 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
       ]);
 
       if (deploymentsResponse.success) {
-        setDeployments(deploymentsResponse.data || []);
-        if (deploymentsResponse.data && deploymentsResponse.data.length > 0) {
-          setSelectedDeployment(deploymentsResponse.data[0]);
+        const deployments = Array.isArray(deploymentsResponse.data) 
+          ? deploymentsResponse.data 
+          : [];
+        setDeployments(deployments);
+        if (deployments.length > 0) {
+          setSelectedDeployment(deployments[0]);
         }
       } else {
+        console.error('Railway deployments API error:', deploymentsResponse.error);
         setError(deploymentsResponse.error || 'Failed to fetch deployments');
+        setDeployments([]); // Ensure array type
       }
 
       if (healthResponse.success) {
@@ -188,7 +193,7 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
               </div>
             ) : (
               <div className="space-y-2">
-                {deployments.slice(0, 10).map((deployment) => (
+                {(Array.isArray(deployments) ? deployments : []).slice(0, 10).map((deployment) => (
                   <div
                     key={deployment.id}
                     onClick={() => {
