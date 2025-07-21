@@ -147,31 +147,38 @@ export class ApiKeyGenerator {
     };
 
     const examples: any = {
-      // API Key endpoints
+      // ✅ ÇALIŞAN: API Key Info
       getApiKeyInfo: {
         method: 'GET',
         url: `${baseUrl}/tables/api-key-info`,
         headers,
-        description: 'Get API Key information and permissions'
+        description: '✅ API Key bilgilerini al (ÇALIŞIYOR)'
       },
       
-      // Table endpoints
+      // ⚠️ JWT GEREKLİ: Tablo listesi
       getTables: {
         method: 'GET',
-        url: `${baseUrl}/tables/api-project/${projectId}`,
-        headers,
-        description: 'Get all tables in the project via API Key'
+        url: `${baseUrl}/tables/project/${projectId}`,
+        headers: {
+          'Authorization': `Bearer <JWT_TOKEN>`,
+          'Content-Type': 'application/json'
+        },
+        description: '⚠️ Tablo listesi (JWT TOKEN GEREKLİ - API Key çalışmaz)'
       },
       
+      // ⚠️ JWT GEREKLİ: Tablo oluşturma
       createTable: {
         method: 'POST',
         url: `${baseUrl}/tables/project/${projectId}`,
-        headers,
-        body: {
-          name: 'users',
-          description: 'User data table'
+        headers: {
+          'Authorization': `Bearer <JWT_TOKEN>`,
+          'Content-Type': 'application/json'
         },
-        description: 'Create a new table'
+        body: {
+          name: 'vardiyalar',
+          description: 'Vardiya bilgileri tablosu'
+        },
+        description: '⚠️ Yeni tablo oluştur (JWT TOKEN GEREKLİ - API Key çalışmaz)'
       }
     };
 

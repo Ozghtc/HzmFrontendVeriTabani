@@ -118,36 +118,39 @@ Authorization: Bearer <JWT_TOKEN>
 
 ## 📞 Test Edilmiş Örnekler
 
-### ✅ API Key ile ÇALIŞAN (TEST EDİLDİ):
+### ✅ API Key ile ÇALIŞAN (SADECE 1 ENDPOINT):
 \`\`\`bash
-# Veri okuma (TEST EDİLDİ ✅)
-curl -X GET \\
-  "${apiInfo.baseUrl}/api/v1/data/table/5" \\
-  -H "X-API-Key: ${apiInfo.apiKey}"
-
-# Tablo listesi (TEST EDİLDİ ✅)
-curl -X GET \\
-  "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}" \\
-  -H "X-API-Key: ${apiInfo.apiKey}"
-
-# Yeni tablo oluştur (TEST EDİLDİ ✅)
-curl -X POST \\
-  "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}" \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-Key: ${apiInfo.apiKey}" \\
-  -d '{"name": "test_tablosu", "description": "Test için tablo"}'
-
-# Field ekle (TEST EDİLDİ ✅)
-curl -X POST \\
-  "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}/10/fields" \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-Key: ${apiInfo.apiKey}" \\
-  -d '{"name": "yeni_alan", "type": "string", "isRequired": false}'
-
-# API Key bilgisi (TEST EDİLDİ ✅)
+# ✅ API Key bilgisi (SADECE BU ÇALIŞIYOR)
 curl -X GET \\
   "${apiInfo.baseUrl}/api/v1/tables/api-key-info" \\
   -H "X-API-Key: ${apiInfo.apiKey}"
+\`\`\`
+
+### ❌ API Key ile ÇALIŞMAYAN (JWT TOKEN GEREKLİ):
+\`\`\`bash
+# ❌ Veri okuma (JWT GEREKLI)
+curl -X GET \\
+  "${apiInfo.baseUrl}/api/v1/data/table/5" \\
+  -H "Authorization: Bearer <JWT_TOKEN>"
+
+# ❌ Tablo listesi (JWT GEREKLI)
+curl -X GET \\
+  "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}" \\
+  -H "Authorization: Bearer <JWT_TOKEN>"
+
+# ❌ Yeni tablo oluştur (JWT GEREKLI)
+curl -X POST \\
+  "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}" \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer <JWT_TOKEN>" \\
+  -d '{"name": "test_tablosu", "description": "Test için tablo"}'
+
+# ❌ Field ekle (JWT GEREKLI)
+curl -X POST \\
+  "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}/10/fields" \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer <JWT_TOKEN>" \\
+  -d '{"name": "yeni_alan", "type": "string", "isRequired": false}'
 \`\`\`
 
 ### ❌ JWT Token GEREKEN (API Key ile ÇALIŞMAZ):
@@ -173,10 +176,11 @@ curl -X PUT \\
 \`\`\`
 
 ## ⚠️ Önemli Notlar:
-- API Key ile sadece OKUMA ve TEMEL İŞLEMLER yapabilirsiniz
-- YAZMA işlemleri için JWT Token gereklidir
-- Endpoint'ler gerçek sistemde test edilmiştir
-- Yanlış endpoint kullanımı "NO_TOKEN" hatası verir
+- API Key ile SADECE api-key-info endpoint'i çalışır ✅
+- Diğer TÜM işlemler için JWT Token gereklidir ❌
+- Veri okuma/yazma JWT ile yapılır
+- Tablo yönetimi JWT ile yapılır
+- API Key kullanımı çok sınırlıdır
 
 ---
 *${project.name} - API Bilgileri*
@@ -208,20 +212,18 @@ API'miz **iki farklı kimlik doğrulama yöntemi** destekler:
 Tüm API isteklerinde \`X-API-Key\` header'ı kullanın:
 **API Key:** \`${apiInfo.apiKey}\`
 
-**API KEY İLE YAPILABİLEN TÜM İŞLEMLER:**
-- ✅ **Tüm Veri CRUD İşlemleri:**
-  - Veri OKUMA (GET /data/table/{tableId})
-  - Veri EKLEME (POST /data/table/{tableId}/rows)
-  - Veri GÜNCELLEME (PUT /data/table/{tableId}/rows/{rowId})
-  - Veri SİLME (DELETE /data/table/{tableId}/rows/{rowId})
-  - Tek veri okuma (GET /data/table/{tableId}/rows/{rowId})
-  - Toplu veri işlemleri (POST /data/table/{tableId}/bulk)
+**⚠️ API KEY İLE SINIRLI İŞLEMLER:**
+- ✅ **Sadece API Key Bilgisi:**
+  - API Key bilgisi (GET /tables/api-key-info) ✅ ÇALIŞIYOR
 
-- ✅ **Tablo Yönetimi:**
-  - Tablo listesi (GET /tables/project/{projectId})
-  - Tablo oluşturma (POST /tables/project/{projectId})
-  - Field ekleme (POST /tables/project/{projectId}/{tableId}/fields)
-  - API Key bilgisi (GET /tables/api-key-info)
+- ❌ **Diğer Tüm İşlemler JWT TOKEN GEREKTİRİR:**
+  - Veri OKUMA (GET /data/table/{tableId}) ❌ JWT GEREKLI
+  - Veri EKLEME (POST /data/table/{tableId}/rows) ❌ JWT GEREKLI
+  - Veri GÜNCELLEME (PUT /data/table/{tableId}/rows/{rowId}) ❌ JWT GEREKLI
+  - Veri SİLME (DELETE /data/table/{tableId}/rows/{rowId}) ❌ JWT GEREKLI
+  - Tablo listesi (GET /tables/project/{projectId}) ❌ JWT GEREKLI
+  - Tablo oluşturma (POST /tables/project/{projectId}) ❌ JWT GEREKLI
+  - Field ekleme (POST /tables/project/{projectId}/{tableId}/fields) ❌ JWT GEREKLI
 
 ### ❌ JWT Token Authentication (Tam Yetki)
 \`Authorization: Bearer <token>\` header'ı ile **ek yetkiler:**
@@ -235,12 +237,12 @@ Tüm API isteklerinde \`X-API-Key\` header'ı kullanın:
 
 ⚠️ **Önemli:** API Key ile sadece **kendi projenize** erişebilirsiniz (Proje ID: ${apiInfo.projectId})
 
-## 🚀 API Key'in Gücü
-API Key'iniz ile **neredeyse tüm veri işlemlerini** yapabilirsiniz:
-- Tablolarınızı yönetebilir
-- Veri ekleyip silebilir
-- Toplu işlemler yapabilirsiniz
-- Sadece proje yönetimi ve admin işlemleri JWT token gerektirir
+## ⚠️ API Key'in Gerçek Durumu
+API Key'iniz ile **sadece API Key bilgisi** alabilirsiniz:
+- Sadece /tables/api-key-info endpoint'i çalışır ✅
+- Diğer tüm işlemler JWT Token gerektirir ❌
+- Veri okuma/yazma JWT ile yapılabilir
+- Tablo yönetimi JWT ile yapılabilir
 
 ## 📋 Temel Bilgiler
 - **Base URL:** \`${apiInfo.baseUrl}\`
