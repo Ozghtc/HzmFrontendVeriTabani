@@ -7,6 +7,9 @@ export const defaultRequestInterceptor: RequestInterceptor = {
     // Add auth headers if not skipped
     if (!config.skipAuth) {
       const authHeaders = AuthManager.getAuthHeaders();
+      console.log('🔐 Auth headers from AuthManager:', authHeaders);
+      console.log('🔑 Has Authorization header:', !!authHeaders.Authorization);
+      
       config.headers = {
         ...config.headers,
         ...authHeaders,
@@ -23,8 +26,8 @@ export const defaultRequestInterceptor: RequestInterceptor = {
     // Log request
     console.log(`🚀 API Request [${requestId}]:`, {
       method: config.method || 'GET',
-      url: config.url,
       headers: config.headers,
+      skipAuth: config.skipAuth,
     });
 
     return config;

@@ -14,6 +14,8 @@ export const fetchWithTimeout = async (
     const response = await fetch(url, {
       ...options,
       signal: controller.signal,
+      mode: 'cors', // Explicit CORS mode
+      credentials: 'include' // Include cookies
     });
     clearTimeout(timeoutId);
     return response;

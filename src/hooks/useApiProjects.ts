@@ -28,6 +28,10 @@ export const useApiProjects = () => {
     
     // Check if user is authenticated
     const token = AuthManager.getToken();
+    console.log('🔐 Auth token exists:', !!token);
+    console.log('🔐 Auth token preview:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
+    console.log('🌐 API Base URL from env:', import.meta.env.VITE_API_BASE_URL);
+    
     if (!token) {
       console.log('❌ No auth token found');
       setProjects([]);
