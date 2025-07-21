@@ -185,37 +185,50 @@ export class ApiKeyGenerator {
     if (tableName) {
       examples['getTableData'] = {
         method: 'GET',
-        url: `${baseUrl}/data/api-table/25`,
-        headers,
-        description: `Get all data from table via API Key`
+        url: `${baseUrl}/data/table/{tableId}`,
+        headers: {
+          'Authorization': `Bearer <JWT_TOKEN>`,
+          'Content-Type': 'application/json'
+        },
+        description: `⚠️ Veri okuma (JWT TOKEN GEREKLİ - API Key çalışmaz)`
       };
 
       examples['createRecord'] = {
         method: 'POST',
-        url: `${baseUrl}/tables/${tableName}/data`,
-        headers,
-        body: {
-          email: 'user@example.com',
-          name: 'John Doe'
+        url: `${baseUrl}/data/table/{tableId}/rows`,
+        headers: {
+          'Authorization': `Bearer <JWT_TOKEN>`,
+          'Content-Type': 'application/json'
         },
-        description: `Create a new record in ${tableName} table`
+        body: {
+          "hasta_adi": "Ahmet Yılmaz",
+          "tc_no": "12345678901",
+          "telefon": "05551234567"
+        },
+        description: `⚠️ Veri ekleme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
       };
 
       examples['updateRecord'] = {
         method: 'PUT',
-        url: `${baseUrl}/tables/${tableName}/data/{id}`,
-        headers,
-        body: {
-          name: 'Jane Doe'
+        url: `${baseUrl}/data/table/{tableId}/rows/{rowId}`,
+        headers: {
+          'Authorization': `Bearer <JWT_TOKEN>`,
+          'Content-Type': 'application/json'
         },
-        description: `Update a record in ${tableName} table`
+        body: {
+          "hasta_adi": "Ahmet Yılmaz (Güncellendi)"
+        },
+        description: `⚠️ Veri güncelleme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
       };
 
       examples['deleteRecord'] = {
         method: 'DELETE',
-        url: `${baseUrl}/tables/${tableName}/data/{id}`,
-        headers,
-        description: `Delete a record from ${tableName} table`
+        url: `${baseUrl}/data/table/{tableId}/rows/{rowId}`,
+        headers: {
+          'Authorization': `Bearer <JWT_TOKEN>`,
+          'Content-Type': 'application/json'
+        },
+        description: `⚠️ Veri silme (JWT TOKEN GEREKLİ - API Key çalışmaz)`
       };
     }
 
