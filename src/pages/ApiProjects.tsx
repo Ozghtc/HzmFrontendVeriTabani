@@ -33,6 +33,12 @@ const ApiProjects = () => {
     setDeleteConfirmName
   } = useApiProjectsPage();
 
+  // DEBUG: Log projects state
+  console.log('🔍 ApiProjects Page - Projects:', projects);
+  console.log('🔍 ApiProjects Page - Loading:', loading);
+  console.log('🔍 ApiProjects Page - Error:', error);
+  console.log('🔍 ApiProjects Page - User:', state.user);
+
   return (
     <AuthGuard isAuthenticated={state.isAuthenticated}>
       <div className="min-h-screen bg-slate-50">
