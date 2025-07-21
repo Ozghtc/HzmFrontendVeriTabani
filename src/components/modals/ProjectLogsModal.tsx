@@ -77,8 +77,9 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status?.toLowerCase()) {
+  const getStatusIcon = (status: string | undefined) => {
+    const statusLower = status?.toLowerCase() || '';
+    switch (statusLower) {
       case 'success':
         return <CheckCircle className="w-4 h-4 text-green-500" />;
       case 'failed':
@@ -92,8 +93,9 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
+  const getStatusColor = (status: string | undefined) => {
+    const statusLower = status?.toLowerCase() || '';
+    switch (statusLower) {
       case 'success':
         return 'text-green-600 bg-green-50';
       case 'failed':
@@ -108,13 +110,19 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('tr-TR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      if (!dateString) return 'No date';
+      return new Date(dateString).toLocaleString('tr-TR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.warn('Date formatting error:', error);
+      return 'Invalid date';
+    }
   };
 
 
@@ -151,15 +159,15 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
             {healthData && (
               <div className="mb-4 p-3 bg-gray-50 rounded">
                 <div className="flex items-center gap-2 mb-2">
-                  {getStatusIcon(healthData.status)}
-                  <span className={`px-2 py-1 rounded text-xs ${getStatusColor(healthData.status)}`}>
-                    {healthData.status.toUpperCase()}
+                  {getStatusIcon(healthData?.status || 'unknown')}
+                  <span className={`px-2 py-1 rounded text-xs ${getStatusColor(healthData?.status || 'unknown')}`}>
+                    {healthData?.status?.toUpperCase() || 'UNKNOWN'}
                   </span>
                 </div>
                 <div className="text-xs text-gray-600">
-                  <div>Total: {healthData.deploymentsCount}</div>
-                  <div>Success: {healthData.successfulDeployments}</div>
-                  <div>Failed: {healthData.failedDeployments}</div>
+                  <div>Total: {healthData?.deploymentsCount || 0}</div>
+                  <div>Success: {healthData?.successfulDeployments || 0}</div>
+                  <div>Failed: {healthData?.failedDeployments || 0}</div>
                 </div>
               </div>
             )}
@@ -194,13 +202,13 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      {getStatusIcon(deployment.status)}
-                      <span className={`px-2 py-1 rounded text-xs ${getStatusColor(deployment.status)}`}>
-                        {deployment.status}
+                      {getStatusIcon(deployment?.status)}
+                      <span className={`px-2 py-1 rounded text-xs ${getStatusColor(deployment?.status)}`}>
+                        {deployment?.status || 'UNKNOWN'}
                       </span>
                     </div>
                     <div className="text-xs text-gray-600">
-                      {formatDate(deployment.createdAt)}
+                      {deployment?.createdAt ? formatDate(deployment.createdAt) : 'No date'}
                     </div>
                     {deployment.url && (
                       <a
