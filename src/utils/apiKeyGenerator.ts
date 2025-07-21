@@ -140,51 +140,47 @@ export class ApiKeyGenerator {
    * Generate API endpoint examples
    */
   static generateApiExamples(projectId: string, apiKey: string, tableName?: string) {
-    const baseUrl = `${window.location.origin}/api/v1/projects/${projectId}`;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
     const headers = {
-      'Authorization': `Bearer ${apiKey}`,
+      'X-API-Key': apiKey,
       'Content-Type': 'application/json'
     };
 
-    const examples = {
-      // Project endpoints
-      getProject: {
+    const examples: any = {
+      // API Key endpoints
+      getApiKeyInfo: {
         method: 'GET',
-        url: baseUrl,
+        url: `${baseUrl}/tables/api-key-info`,
         headers,
-        description: 'Get project information and schema'
+        description: 'Get API Key information and permissions'
       },
       
       // Table endpoints
       getTables: {
         method: 'GET',
-        url: `${baseUrl}/tables`,
+        url: `${baseUrl}/tables/api-project/${projectId}`,
         headers,
-        description: 'Get all tables in the project'
+        description: 'Get all tables in the project via API Key'
       },
       
       createTable: {
         method: 'POST',
-        url: `${baseUrl}/tables`,
+        url: `${baseUrl}/tables/project/${projectId}`,
         headers,
         body: {
           name: 'users',
-          fields: [
-            { name: 'id', type: 'string', required: true },
-            { name: 'email', type: 'string', required: true },
-            { name: 'name', type: 'string', required: false }
-          ]
+          description: 'User data table'
         },
-        description: 'Create a new table with fields'
+        description: 'Create a new table'
       }
     };
 
     if (tableName) {
       examples['getTableData'] = {
         method: 'GET',
-        url: `${baseUrl}/tables/${tableName}/data`,
+        url: `${baseUrl}/data/api-table/25`,
         headers,
-        description: `Get all data from ${tableName} table`
+        description: `Get all data from table via API Key`
       };
 
       examples['createRecord'] = {
