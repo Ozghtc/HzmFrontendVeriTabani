@@ -66,20 +66,20 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
 
 ## 🔐 KİMLİK DOĞRULAMA SİSTEMİ
 
-### ✅ API Key ile ÇALIŞAN Endpoint'ler:
+### ✅ API Key ile ÇALIŞAN Endpoint'ler (SADECE 3 ADET):
 Bu endpoint'ler X-API-Key header'ı ile çalışır:
 
 #### 📊 Veri Okuma İşlemleri:
-- **GET** \`/api/v1/data/table/{tableId}\` - Tablo verilerini listele ✅
-- **GET** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Tekil veri oku ✅
+- **GET** \`/api/v1/data/api-table/{tableId}\` - Tablo verilerini listele ✅
 
 #### 📋 Tablo İşlemleri:
-- **GET** \`/api/v1/tables/project/${apiInfo.projectId}\` - Proje tablolarını listele ✅
-- **POST** \`/api/v1/tables/project/${apiInfo.projectId}\` - Yeni tablo oluştur ✅
+- **GET** \`/api/v1/tables/api-project/${apiInfo.projectId}\` - Proje tablolarını listele ✅
 - **GET** \`/api/v1/tables/api-key-info\` - API Key bilgilerini al ✅
 
-#### ⚡ Field İşlemleri:
-- **POST** \`/api/v1/tables/project/${apiInfo.projectId}/{tableId}/fields\` - Tabloya field ekle ✅
+#### ❌ DİĞER TÜM İŞLEMLER JWT TOKEN GEREKTİRİR:
+- **GET** \`/api/v1/tables/project/${apiInfo.projectId}\` - Normal tablo listesi ❌ JWT GEREKLİ
+- **POST** \`/api/v1/tables/project/${apiInfo.projectId}\` - Yeni tablo oluştur ❌ JWT GEREKLİ
+- **POST** \`/api/v1/tables/project/${apiInfo.projectId}/{tableId}/fields\` - Field ekle ❌ JWT GEREKLİ
 
 ### ❌ JWT Token GEREKEN Endpoint'ler:
 Bu endpoint'ler Authorization: Bearer <token> header'ı ile çalışır:
@@ -126,14 +126,32 @@ curl -X GET \\
   -H "X-API-Key: ${apiInfo.apiKey}"
 \`\`\`
 
+### ✅ API Key ile ÇALIŞAN (SADECE 3 ENDPOINT):
+\`\`\`bash
+# ✅ API Key bilgisi
+curl -X GET \\
+  "${apiInfo.baseUrl}/api/v1/tables/api-key-info" \\
+  -H "X-API-Key: ${apiInfo.apiKey}"
+
+# ✅ Proje tabloları (API Key versiyonu)
+curl -X GET \\
+  "${apiInfo.baseUrl}/api/v1/tables/api-project/${apiInfo.projectId}" \\
+  -H "X-API-Key: ${apiInfo.apiKey}"
+
+# ✅ Veri okuma (API Key versiyonu)
+curl -X GET \\
+  "${apiInfo.baseUrl}/api/v1/data/api-table/{tableId}" \\
+  -H "X-API-Key: ${apiInfo.apiKey}"
+\`\`\`
+
 ### ❌ API Key ile ÇALIŞMAYAN (JWT TOKEN GEREKLİ):
 \`\`\`bash
-# ❌ Veri okuma (JWT GEREKLI)
+# ❌ Normal veri okuma (JWT GEREKLI)
 curl -X GET \\
   "${apiInfo.baseUrl}/api/v1/data/table/5" \\
   -H "Authorization: Bearer <JWT_TOKEN>"
 
-# ❌ Tablo listesi (JWT GEREKLI)
+# ❌ Normal tablo listesi (JWT GEREKLI)
 curl -X GET \\
   "${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}" \\
   -H "Authorization: Bearer <JWT_TOKEN>"
@@ -176,10 +194,13 @@ curl -X PUT \\
 \`\`\`
 
 ## ⚠️ Önemli Notlar:
-- API Key ile SADECE api-key-info endpoint'i çalışır ✅
+- API Key ile SADECE 3 özel endpoint çalışır ✅
+  1. /tables/api-key-info
+  2. /tables/api-project/{projectId} 
+  3. /data/api-table/{tableId}
 - Diğer TÜM işlemler için JWT Token gereklidir ❌
-- Veri okuma/yazma JWT ile yapılır
-- Tablo yönetimi JWT ile yapılır
+- Normal veri okuma/yazma JWT ile yapılır
+- Tablo oluşturma/yönetimi JWT ile yapılır
 - API Key kullanımı çok sınırlıdır
 
 ---
@@ -213,15 +234,17 @@ Tüm API isteklerinde \`X-API-Key\` header'ı kullanın:
 **API Key:** \`${apiInfo.apiKey}\`
 
 **⚠️ API KEY İLE SINIRLI İŞLEMLER:**
-- ✅ **Sadece API Key Bilgisi:**
+- ✅ **API Key ile ÇALIŞAN (SADECE 3 ENDPOINT):**
   - API Key bilgisi (GET /tables/api-key-info) ✅ ÇALIŞIYOR
+  - Proje tabloları (GET /tables/api-project/{projectId}) ✅ ÇALIŞIYOR
+  - Veri okuma (GET /data/api-table/{tableId}) ✅ ÇALIŞIYOR
 
 - ❌ **Diğer Tüm İşlemler JWT TOKEN GEREKTİRİR:**
-  - Veri OKUMA (GET /data/table/{tableId}) ❌ JWT GEREKLI
+  - Normal veri OKUMA (GET /data/table/{tableId}) ❌ JWT GEREKLI
   - Veri EKLEME (POST /data/table/{tableId}/rows) ❌ JWT GEREKLI
   - Veri GÜNCELLEME (PUT /data/table/{tableId}/rows/{rowId}) ❌ JWT GEREKLI
   - Veri SİLME (DELETE /data/table/{tableId}/rows/{rowId}) ❌ JWT GEREKLI
-  - Tablo listesi (GET /tables/project/{projectId}) ❌ JWT GEREKLI
+  - Normal tablo listesi (GET /tables/project/{projectId}) ❌ JWT GEREKLI
   - Tablo oluşturma (POST /tables/project/{projectId}) ❌ JWT GEREKLI
   - Field ekleme (POST /tables/project/{projectId}/{tableId}/fields) ❌ JWT GEREKLI
 
