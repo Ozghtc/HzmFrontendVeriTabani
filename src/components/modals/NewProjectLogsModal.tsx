@@ -174,7 +174,7 @@ export const NewProjectLogsModal: React.FC<NewProjectLogsModalProps> = ({ projec
       return `${time} [${type}] [${source}] ${message}`;
     }).join('\n');
 
-    const fullText = `Railway Monitoring - ${project.name}\n` +
+    const fullText = `HZM Sistem Monitoring - ${project.name}\n` +
                     `Category: ${selectedCategory?.name || 'Unknown'}\n` +
                     `Generated: ${new Date().toLocaleString('tr-TR')}\n` +
                     `Total Logs: ${logs.length}\n\n` +
@@ -202,7 +202,7 @@ export const NewProjectLogsModal: React.FC<NewProjectLogsModalProps> = ({ projec
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <div>
-            <h2 className="text-xl font-semibold">Railway Monitoring</h2>
+            <h2 className="text-xl font-semibold">HZM Sistem Monitoring</h2>
             <p className="text-sm text-gray-600">{project.name}</p>
           </div>
           <div className="flex items-center gap-2">
