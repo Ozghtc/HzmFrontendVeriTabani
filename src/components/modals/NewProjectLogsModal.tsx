@@ -80,10 +80,34 @@ export const NewProjectLogsModal: React.FC<NewProjectLogsModalProps> = ({ projec
     setLogsLoading(true);
     try {
       const projectName = project.name.toLowerCase();
+      console.log('📋 Fetching category logs for:', categoryId, 'project:', projectName);
+      
       const response = await apiClient.railway.getCategoryLogs(categoryId, projectName);
+      
+      console.log('📋 Category logs response:', response);
+      console.log('📋 Response success:', response.success);
+      console.log('📋 Response data:', response.data);
+      
       if (response.success) {
-        setLogs(response.data?.logs || []);
+        // Handle potential double-wrapping
+        const responseData = (response as any).data;
+        let logs = [];
+        
+        if (responseData?.logs && Array.isArray(responseData.logs)) {
+          logs = responseData.logs;
+        } else if (responseData?.data?.logs && Array.isArray(responseData.data.logs)) {
+          logs = responseData.data.logs;
+        } else if (Array.isArray(responseData)) {
+          logs = responseData;
+        } else if (Array.isArray(response.data)) {
+          logs = response.data;
+        }
+        
+        console.log('📋 Final logs to set:', logs);
+        console.log('📋 Logs count:', logs.length);
+        setLogs(logs);
       } else {
+        console.error('❌ Category logs API error:', response.error);
         setError(response.error || 'Failed to fetch logs');
       }
     } catch (error: any) {
@@ -96,6 +120,8 @@ export const NewProjectLogsModal: React.FC<NewProjectLogsModalProps> = ({ projec
 
   const getCategoryIcon = (categoryId: string) => {
     switch (categoryId) {
+      case 'all':
+        return <Clock className="w-4 h-4" />;
       case 'recent':
         return <Activity className="w-4 h-4" />;
       case 'http':
