@@ -66,55 +66,68 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
 
 ## 🔐 KİMLİK DOĞRULAMA SİSTEMİ
 
-### ✅ API Key ile ÇALIŞAN Endpoint'ler (SADECE 3 ADET):
-Bu endpoint'ler X-API-Key header'ı ile çalışır:
+### 🚀 JWT TOKEN İLE TÜM İŞLEMLER (TAM YETKİ):
+Bu endpoint'ler Authorization: Bearer <JWT_TOKEN> header'ı ile çalışır:
 
-#### 📊 Veri Okuma İşlemleri:
-- **GET** \`/api/v1/data/api-table/{tableId}\` - Tablo verilerini listele ✅
+#### 📋 Tablo Yönetimi:
+- **GET** \`/api/v1/tables/project/${apiInfo.projectId}\` - Proje tablolarını listele ✅ JWT İLE
+- **POST** \`/api/v1/tables/project/${apiInfo.projectId}\` - Yeni tablo oluştur ✅ JWT İLE
+- **PUT** \`/api/v1/tables/{tableId}\` - Tablo güncelle ✅ JWT İLE
+- **DELETE** \`/api/v1/tables/{tableId}\` - Tablo sil ✅ JWT İLE
 
-#### 📋 Tablo İşlemleri:
-- **GET** \`/api/v1/tables/api-project/${apiInfo.projectId}\` - Proje tablolarını listele ✅
-- **GET** \`/api/v1/tables/api-key-info\` - API Key bilgilerini al ✅
+#### ⚡ Field Yönetimi:
+- **POST** \`/api/v1/tables/${apiInfo.projectId}/{tableId}/fields\` - Field ekle ✅ JWT İLE
+- **PUT** \`/api/v1/tables/{tableId}/fields/{fieldId}\` - Field güncelle ✅ JWT İLE
+- **DELETE** \`/api/v1/tables/{tableId}/fields/{fieldId}\` - Field sil ✅ JWT İLE
 
-#### ❌ DİĞER TÜM İŞLEMLER JWT TOKEN GEREKTİRİR:
-- **GET** \`/api/v1/tables/project/${apiInfo.projectId}\` - Normal tablo listesi ❌ JWT GEREKLİ
-- **POST** \`/api/v1/tables/project/${apiInfo.projectId}\` - Yeni tablo oluştur ❌ JWT GEREKLİ
-- **POST** \`/api/v1/tables/project/${apiInfo.projectId}/{tableId}/fields\` - Field ekle ❌ JWT GEREKLİ
-
-### ❌ JWT Token GEREKEN Endpoint'ler:
-Bu endpoint'ler Authorization: Bearer <token> header'ı ile çalışır:
-
-#### 💾 Veri Yazma İşlemleri:
-- **POST** \`/api/v1/data/table/{tableId}/rows\` - Yeni veri ekle ⚠️ JWT GEREKLI
-- **PUT** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Veri güncelle ⚠️ JWT GEREKLI
-- **DELETE** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Veri sil ⚠️ JWT GEREKLI
-
-#### 🔧 Tablo Yönetimi:
-- **PUT** \`/api/v1/tables/{tableId}\` - Tablo güncelle ⚠️ JWT GEREKLI
-- **DELETE** \`/api/v1/tables/{tableId}\` - Tablo sil ⚠️ JWT GEREKLI
-
-#### ⚙️ Field Yönetimi:
-- **PUT** \`/api/v1/tables/{tableId}/fields/{fieldId}\` - Field güncelle ⚠️ JWT GEREKLI
-- **DELETE** \`/api/v1/tables/{tableId}/fields/{fieldId}\` - Field sil ⚠️ JWT GEREKLI
+#### 📊 Veri İşlemleri:
+- **GET** \`/api/v1/data/table/{tableId}\` - Veri listele ✅ JWT İLE
+- **POST** \`/api/v1/data/table/{tableId}/rows\` - Veri ekle ✅ JWT İLE
+- **PUT** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Veri güncelle ✅ JWT İLE
+- **DELETE** \`/api/v1/data/table/{tableId}/rows/{rowId}\` - Veri sil ✅ JWT İLE
 
 #### 📁 Proje Yönetimi:
-- **GET** \`/api/v1/projects\` - Projeleri listele ⚠️ JWT GEREKLI
-- **GET** \`/api/v1/projects/{id}\` - Proje detayı ⚠️ JWT GEREKLI
-- **POST** \`/api/v1/projects\` - Yeni proje oluştur ⚠️ JWT GEREKLI
+- **GET** \`/api/v1/projects\` - Projeleri listele ✅ JWT İLE
+- **GET** \`/api/v1/projects/{id}\` - Proje detayı ✅ JWT İLE
+- **POST** \`/api/v1/projects\` - Yeni proje oluştur ✅ JWT İLE
+- **PUT** \`/api/v1/projects/{id}\` - Proje güncelle ✅ JWT İLE
+- **DELETE** \`/api/v1/projects/{id}\` - Proje sil ✅ JWT İLE
+
+### 🔑 JWT TOKEN NASIL ALINIR:
+\`\`\`bash
+# 1. Giriş yapın
+curl -X POST \\
+  "${apiInfo.baseUrl}/auth/login" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "email": "your-email@example.com",
+    "password": "your-password"
+  }'
+
+# Response'dan token'ı alın:
+{
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {...}
+  }
+}
+\`\`\`
 
 ## 📋 HTTP Headers
 
-### API Key ile çalışan endpoint'ler için:
-\`\`\`
-Content-Type: application/json
-X-API-Key: ${apiInfo.apiKey}
-\`\`\`
-
-### JWT Token gereken endpoint'ler için:
+### JWT Token ile tüm işlemler için:
 \`\`\`
 Content-Type: application/json
 Authorization: Bearer <JWT_TOKEN>
 \`\`\`
+
+### Opsiyonel: API Key ile sınırlı okuma işlemleri:
+\`\`\`
+Content-Type: application/json
+X-API-Key: ${apiInfo.apiKey}
+\`\`\`
+*Not: API Key ile sadece 3 endpoint çalışır (api-key-info, api-project, api-table)*
 
 ## 📞 Test Edilmiş Örnekler
 
@@ -194,14 +207,11 @@ curl -X PUT \\
 \`\`\`
 
 ## ⚠️ Önemli Notlar:
-- API Key ile SADECE 3 özel endpoint çalışır ✅
-  1. /tables/api-key-info
-  2. /tables/api-project/{projectId} 
-  3. /data/api-table/{tableId}
-- Diğer TÜM işlemler için JWT Token gereklidir ❌
-- Normal veri okuma/yazma JWT ile yapılır
-- Tablo oluşturma/yönetimi JWT ile yapılır
-- API Key kullanımı çok sınırlıdır
+- **JWT Token ile HER ŞEY yapılabilir** ✅
+- Giriş yapın → Token alın → İstediğiniz her işlemi yapın
+- Tablo oluşturun, field ekleyin, veri yönetin
+- Tam yetki sahibi olun!
+- API Key sadece sınırlı okuma için (opsiyonel)
 
 ---
 *${project.name} - API Bilgileri*
@@ -234,19 +244,19 @@ Tüm API isteklerinde \`X-API-Key\` header'ı kullanın:
 **API Key:** \`${apiInfo.apiKey}\`
 
 **⚠️ API KEY İLE SINIRLI İŞLEMLER:**
-- ✅ **API Key ile ÇALIŞAN (SADECE 3 ENDPOINT):**
-  - API Key bilgisi (GET /tables/api-key-info) ✅ ÇALIŞIYOR
-  - Proje tabloları (GET /tables/api-project/{projectId}) ✅ ÇALIŞIYOR
-  - Veri okuma (GET /data/api-table/{tableId}) ✅ ÇALIŞIYOR
+- ✅ **JWT TOKEN İLE TÜM YETKİLER:**
+  - Giriş yapın ve JWT token alın
+  - Tablo oluşturun, güncelleyin, silin
+  - Field ekleyin, güncelleyin, silin  
+  - Veri okuyun, ekleyin, güncelleyin, silin
+  - Proje yönetin (oluştur, güncelle, sil)
+  - **TAM KONTROL SAHİBİ OLUN!**
 
-- ❌ **Diğer Tüm İşlemler JWT TOKEN GEREKTİRİR:**
-  - Normal veri OKUMA (GET /data/table/{tableId}) ❌ JWT GEREKLI
-  - Veri EKLEME (POST /data/table/{tableId}/rows) ❌ JWT GEREKLI
-  - Veri GÜNCELLEME (PUT /data/table/{tableId}/rows/{rowId}) ❌ JWT GEREKLI
-  - Veri SİLME (DELETE /data/table/{tableId}/rows/{rowId}) ❌ JWT GEREKLI
-  - Normal tablo listesi (GET /tables/project/{projectId}) ❌ JWT GEREKLI
-  - Tablo oluşturma (POST /tables/project/{projectId}) ❌ JWT GEREKLI
-  - Field ekleme (POST /tables/project/{projectId}/{tableId}/fields) ❌ JWT GEREKLI
+- 📋 **Opsiyonel: API Key ile Sınırlı Okuma:**
+  - API Key bilgisi (GET /tables/api-key-info)
+  - Proje tabloları (GET /tables/api-project/{projectId})  
+  - Veri okuma (GET /data/api-table/{tableId})
+  - *Not: Sadece okuma, yazma yok*
 
 ### ❌ JWT Token Authentication (Tam Yetki)
 \`Authorization: Bearer <token>\` header'ı ile **ek yetkiler:**
@@ -273,12 +283,13 @@ API Key'iniz ile **sadece API Key bilgisi** alabilirsiniz:
 - **Rate Limit:** 100 istek/15 dakika (admin kullanıcılar için bypass)
 - **API Key Kısıtı:** Bu key sadece "${project.name}" projesine erişim sağlar
 
-## 🔄 Temel Workflow
-1. API Key ile kimlik doğrulaması yapın
-2. Proje'de tablo oluşturun
-3. Tabloya field'lar ekleyin
-4. Field'lara veri ekleyin
-5. Veriyi okuyun/güncelleyin
+## 🔄 Temel Workflow (JWT Token ile)
+1. Giriş yapın ve JWT token alın
+2. Token ile proje'de tablo oluşturun  
+3. Token ile tabloya field'lar ekleyin
+4. Token ile field'lara veri ekleyin
+5. Token ile veriyi okuyun/güncelleyin/silin
+6. **HER ŞEYİ YAPABİLİRSİNİZ!**
 
 ## 🛠️ Field Türleri
 - **string:** Metin veriler (maxLength belirlenmezse sınırsız)
@@ -293,7 +304,7 @@ API Key'iniz ile **sadece API Key bilgisi** alabilirsiniz:
 \`\`\`http
 POST /api/v1/tables/project/${apiInfo.projectId}
 Content-Type: application/json
-X-API-Key: ${apiInfo.apiKey}
+Authorization: Bearer <JWT_TOKEN>
 
 {
   "name": "hastaneler",
@@ -320,9 +331,9 @@ X-API-Key: ${apiInfo.apiKey}
 
 ### ⚡ Field Ekleme
 \`\`\`http
-POST /api/v1/tables/project/${apiInfo.projectId}/{tableId}/fields
+POST /api/v1/tables/${apiInfo.projectId}/{tableId}/fields
 Content-Type: application/json
-X-API-Key: ${apiInfo.apiKey}
+Authorization: Bearer <JWT_TOKEN>
 
 {
   "name": "hastane_adi",
@@ -349,11 +360,11 @@ X-API-Key: ${apiInfo.apiKey}
 }
 \`\`\`
 
-### 💾 Veri Ekleme (API Key ile Çalışır!)
+### 💾 Veri Ekleme (JWT Token ile)
 \`\`\`http
 POST /api/v1/data/table/{tableId}/rows
 Content-Type: application/json
-X-API-Key: ${apiInfo.apiKey}
+Authorization: Bearer <JWT_TOKEN>
 
 {
   "hastane_adi": "Acıbadem Hastanesi",
@@ -384,7 +395,7 @@ X-API-Key: ${apiInfo.apiKey}
 ### 📖 Veri Okuma
 \`\`\`http
 GET /api/v1/data/table/{tableId}?page=1&limit=50&sort=id&order=ASC
-X-API-Key: ${apiInfo.apiKey}
+Authorization: Bearer <JWT_TOKEN>
 \`\`\`
 
 **Query Parameters:**
@@ -422,11 +433,11 @@ X-API-Key: ${apiInfo.apiKey}
 }
 \`\`\`
 
-### ✏️ Veri Güncelleme (API Key ile Çalışır!)
+### ✏️ Veri Güncelleme (JWT Token ile)
 \`\`\`http
 PUT /api/v1/data/table/{tableId}/rows/{rowId}
 Content-Type: application/json
-X-API-Key: ${apiInfo.apiKey}
+Authorization: Bearer <JWT_TOKEN>
 
 {
   "hastane_adi": "Acıbadem Maslak Hastanesi",
@@ -449,10 +460,10 @@ X-API-Key: ${apiInfo.apiKey}
 }
 \`\`\`
 
-### 🗑️ Veri Silme (API Key ile Çalışır!)
+### 🗑️ Veri Silme (JWT Token ile)
 \`\`\`http
 DELETE /api/v1/data/table/{tableId}/rows/{rowId}
-X-API-Key: ${apiInfo.apiKey}
+Authorization: Bearer <JWT_TOKEN>
 \`\`\`
 
 **Response:**
@@ -479,32 +490,46 @@ X-API-Key: ${apiInfo.apiKey}
 
 ### JavaScript/Fetch Örneği:
 \`\`\`javascript
-// Veri okuma
+// 1. JWT Token alın
+const loginResponse = await fetch(
+  '${apiInfo.baseUrl}/api/v1/auth/login',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email: 'your-email@example.com',
+      password: 'your-password'
+    })
+  }
+);
+
+const loginData = await loginResponse.json();
+const token = loginData.data.token;
+
+// 2. Token ile veri okuma
 const response = await fetch(
   '${apiInfo.baseUrl}/api/v1/data/table/10',
   {
     method: 'GET',
     headers: {
-      'X-API-Key': '${apiInfo.apiKey}',
+      'Authorization': \`Bearer \${token}\`,
       'Content-Type': 'application/json'
     }
   }
 );
 
-if (!response.ok) {
-  throw new Error(\`HTTP error! status: \${response.status}\`);
-}
-
 const data = await response.json();
 console.log(data.data.rows);
 
-// Veri ekleme
+// 3. Token ile veri ekleme
 const addResponse = await fetch(
   '${apiInfo.baseUrl}/api/v1/data/table/10/rows',
   {
     method: 'POST',
     headers: {
-      'X-API-Key': '${apiInfo.apiKey}',
+      'Authorization': \`Bearer \${token}\`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -745,7 +770,18 @@ if (result.success) {
                   </div>
                   <div className="flex items-center space-x-2">
                     <code className="flex-1 p-2 bg-white border border-gray-300 rounded text-sm">
-                      X-API-Key: {apiInfo.apiKey}
+                      Authorization: Bearer &lt;JWT_TOKEN&gt;
+                    </code>
+                    <button
+                      onClick={() => handleCopy('Authorization: Bearer <JWT_TOKEN>', 'jwtHeader')}
+                      className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-100 rounded-md transition-colors"
+                    >
+                      {copiedItems.jwtHeader ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                    </button>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <code className="flex-1 p-2 bg-white border border-gray-300 rounded text-sm text-xs text-gray-500">
+                      X-API-Key: {apiInfo.apiKey} (Sınırlı okuma)
                     </code>
                     <button
                       onClick={() => handleCopy(`X-API-Key: ${apiInfo.apiKey}`, 'apiHeader')}
@@ -784,58 +820,87 @@ if (result.success) {
               <div className="bg-orange-50 rounded-lg p-4">
                 <h3 className="font-medium text-gray-800 mb-4">Örnek Kullanım (cURL)</h3>
                 <div className="space-y-4">
+                  {/* JWT Token Alma */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">1. JWT Token Alma (Giriş):</h4>
+                    <div className="bg-gray-900 text-green-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
+                      <pre>{`curl -X POST \\
+  ${apiInfo.baseUrl}/api/v1/auth/login \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "email": "your-email@example.com",
+    "password": "your-password"
+  }'`}</pre>
+                    </div>
+                  </div>
+
                   {/* Tablo Oluşturma */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">1. Tablo Oluşturma:</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">2. Tablo Oluşturma (JWT ile):</h4>
                     <div className="bg-gray-900 text-green-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
                       <pre>{`curl -X POST \\
   ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId} \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "Authorization: Bearer <JWT_TOKEN>" \\
   -d '{"name": "hastaneler", "description": "Hastane bilgileri"}'`}</pre>
-                    </div>
-                  </div>
-                  
-                  {/* API Key Test */}
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">2. API Key Test:</h4>
-                    <div className="bg-gray-900 text-green-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
-                      <pre>{`curl -X GET \\
-  ${apiInfo.baseUrl}/api/v1/tables/api-key-info \\
-  -H "X-API-Key: ${apiInfo.apiKey}"`}</pre>
                     </div>
                   </div>
                   
                   {/* Field Ekleme */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">3. Field Ekleme (Kurumlar Tablosu):</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">3. Field Ekleme (JWT ile):</h4>
                     <div className="bg-gray-900 text-green-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
                       <pre>{`curl -X POST \\
-  ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}/10/fields \\
+  ${apiInfo.baseUrl}/api/v1/tables/${apiInfo.projectId}/{tableId}/fields \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: ${apiInfo.apiKey}" \\
-  -d '{"name": "adres", "type": "string", "isRequired": false}'`}</pre>
+  -H "Authorization: Bearer <JWT_TOKEN>" \\
+  -d '{
+    "name": "hastane_adi",
+    "type": "string",
+    "isRequired": true,
+    "description": "Hastane adı"
+  }'`}</pre>
                     </div>
                   </div>
-                  
-                  {/* Tablo Listesi */}
+
+                  {/* Veri Ekleme */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">4. Tablo Listesi:</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">4. Veri Ekleme (JWT ile):</h4>
                     <div className="bg-gray-900 text-green-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
-                      <pre>{`curl -X GET \\
-  ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId} \\
-  -H "X-API-Key: ${apiInfo.apiKey}"`}</pre>
+                      <pre>{`curl -X POST \\
+  ${apiInfo.baseUrl}/api/v1/data/table/{tableId}/rows \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer <JWT_TOKEN>" \\
+  -d '{
+    "hastane_adi": "Acıbadem Hastanesi",
+    "il": "İstanbul",
+    "aktif_mi": true
+  }'`}</pre>
                     </div>
                   </div>
                 </div>
                 
                 <button
                   onClick={() => handleCopy(`curl -X POST \\
+  ${apiInfo.baseUrl}/api/v1/auth/login \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "email": "your-email@example.com",
+    "password": "your-password"
+  }'`, 'loginExample')}
+                  className="mt-3 px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors flex items-center"
+                >
+                  {copiedItems.loginExample ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
+                  Giriş Kodunu Kopyala
+                </button>
+
+                <button
+                  onClick={() => handleCopy(`curl -X POST \\
   ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId} \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "Authorization: Bearer <JWT_TOKEN>" \\
   -d '{"name": "hastaneler", "description": "Hastane bilgileri"}'`, 'curlExample')}
-                  className="mt-3 px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 transition-colors flex items-center"
+                  className="mt-2 px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 transition-colors flex items-center"
                 >
                   {copiedItems.curlExample ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
                   Tablo Oluşturma Kodunu Kopyala
@@ -843,10 +908,15 @@ if (result.success) {
                 
                 <button
                   onClick={() => handleCopy(`curl -X POST \\
-  ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId}/10/fields \\
+  ${apiInfo.baseUrl}/api/v1/tables/${apiInfo.projectId}/{tableId}/fields \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: ${apiInfo.apiKey}" \\
-  -d '{"name": "adres", "type": "string", "isRequired": false}'`, 'fieldExample')}
+  -H "Authorization: Bearer <JWT_TOKEN>" \\
+  -d '{
+    "name": "hastane_adi",
+    "type": "string", 
+    "isRequired": true,
+    "description": "Hastane adı"
+  }'`, 'fieldExample')}
                   className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors flex items-center"
                 >
                   {copiedItems.fieldExample ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
