@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertCircle, CheckCircle, Clock, RefreshCw, Activity, Server, Database, Zap, Bug } from 'lucide-react';
+import { X, AlertCircle, CheckCircle, Clock, RefreshCw, Activity, Server, Database, Zap, Bug, Copy } from 'lucide-react';
 import { apiClient } from '../../utils/api';
 
 interface NewProjectLogsModalProps {
@@ -163,6 +163,39 @@ export const NewProjectLogsModal: React.FC<NewProjectLogsModalProps> = ({ projec
     }
   };
 
+  const copyLogsToClipboard = async () => {
+    if (logs.length === 0) return;
+
+    const logText = logs.map(log => {
+      const time = formatTime(log.time);
+      const type = log.type.toUpperCase();
+      const source = log.source;
+      const message = log.message;
+      return `${time} [${type}] [${source}] ${message}`;
+    }).join('\n');
+
+    const fullText = `Railway Monitoring - ${project.name}\n` +
+                    `Category: ${selectedCategory?.name || 'Unknown'}\n` +
+                    `Generated: ${new Date().toLocaleString('tr-TR')}\n` +
+                    `Total Logs: ${logs.length}\n\n` +
+                    `${logText}`;
+
+    try {
+      await navigator.clipboard.writeText(fullText);
+      // Show success feedback (optional)
+      console.log('📋 Logs copied to clipboard successfully');
+    } catch (error) {
+      console.error('Failed to copy logs:', error);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = fullText;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
@@ -244,9 +277,19 @@ export const NewProjectLogsModal: React.FC<NewProjectLogsModalProps> = ({ projec
               <h3 className="font-semibold">
                 {selectedCategory ? selectedCategory.name : 'Select a category'}
               </h3>
-              {selectedCategory && (
-                <div className="text-sm text-gray-600">
-                  {logs.length} logs
+              {selectedCategory && logs.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-gray-600">
+                    {logs.length} logs
+                  </div>
+                  <button
+                    onClick={copyLogsToClipboard}
+                    className="flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                    title="Tüm log'ları kopyala"
+                  >
+                    <Copy className="w-3 h-3" />
+                    Kopyala
+                  </button>
                 </div>
               )}
             </div>
