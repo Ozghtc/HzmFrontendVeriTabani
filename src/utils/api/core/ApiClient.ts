@@ -87,11 +87,25 @@ export class ApiClient {
       config = await this.requestInterceptors.execute(config);
     }
 
+    // Build full URL
     const url = `${this.baseURL}${endpoint}`;
-    const headers: Record<string, string> = {
+    console.log('🌐 Making API request to:', url);
+    
+    // Build headers
+    const headers = {
       ...API_CONFIG.headers,
-      ...(config.headers as Record<string, string>),
+      ...config.headers,
     };
+
+    // Add explicit Accept header for JSON
+    headers['Accept'] = 'application/json';
+    
+    // Log request details
+    console.log('📤 Request details:', {
+      method: config.method || 'GET',
+      headers: headers,
+      timeout: config.timeout || 10000 // Reduced timeout
+    });
 
     // Add auth headers unless skipped
     if (!config.skipAuth) {
@@ -106,7 +120,7 @@ export class ApiClient {
             const res = await fetchWithTimeout(url, {
               ...config,
               headers,
-            }, config.timeout);
+            }, config.timeout || 10000); // Reduced timeout from 30s to 10s
 
             // Update rate limit info
             this.rateLimiter.updateFromHeaders(res.headers);
@@ -119,6 +133,7 @@ export class ApiClient {
         let data;
         try {
           data = await response.json();
+          console.log('📥 Response data:', data);
         } catch (jsonError) {
           console.error('Failed to parse JSON response:', jsonError);
           const error: ApiError = {
@@ -167,22 +182,23 @@ export class ApiClient {
         return successResponse;
       } catch (error: any) {
         console.error('API request failed:', error);
+        console.error('Error type:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
         
         let errorMessage = 'Network error occurred';
         let errorCode = 'NETWORK_ERROR';
 
         if (error.name === 'AbortError' || error.message?.includes('timeout')) {
-          errorMessage = 'Request timeout - SSL connection issues detected. Please try again.';
+          errorMessage = 'Request timeout - please check your connection';
           errorCode = 'TIMEOUT_ERROR';
-          console.log('🚨 SSL timeout detected, trying backup URLs...');
+          console.log('🚨 Timeout detected');
         } else if (error.message?.includes('Failed to fetch')) {
-          errorMessage = 'Unable to connect to server - SSL certificate issues possible';
+          errorMessage = 'Unable to connect to server';
           errorCode = 'CONNECTION_ERROR';
-          console.log('🚨 Connection failed, SSL issues possible');
-        } else if (error.message?.includes('SSL') || error.message?.includes('certificate')) {
-          errorMessage = 'SSL certificate error - trying alternative connection';
-          errorCode = 'SSL_ERROR';
-          console.log('🚨 SSL certificate error detected');
+          console.log('🚨 Connection failed - possible CORS or SSL issue');
+          console.log('🔍 Attempted URL:', url);
+          console.log('🔍 Request headers:', headers);
         }
 
         const apiError: ApiError = {

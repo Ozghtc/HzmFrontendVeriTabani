@@ -6,9 +6,9 @@ export const API_CONFIG = {
     'http://hzmbackandveritabani-production-c660.up.railway.app/api/v1', // HTTP fallback for SSL issues
     // Add more backup URLs if needed
   ],
-  timeout: 30000, // 30 seconds - SSL timeout için daha kısa
+  timeout: 10000, // 10 seconds - reduced for better UX
   retryDefaults: {
-    maxRetries: 0, // Retry'ı kapat
+    maxRetries: 0, // Retry disabled to prevent SSL timeout loops
     delay: 1000,
     backoff: 'exponential' as const,
   },
