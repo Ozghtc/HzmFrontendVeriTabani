@@ -41,6 +41,36 @@ export const useProjectData = () => {
             console.log('✅ Admin project loaded successfully:', adminProject?.name || 'Unknown');
             console.log('📊 Admin project details:', adminProject);
             
+            // Load tables for admin project too
+            let projectTables = [];
+            try {
+              console.log('📋 Loading tables for admin project:', adminProject.id);
+              const tablesResponse = await apiClient.tables.getTables(adminProject.id.toString());
+              
+              if (tablesResponse.success) {
+                const tablesData = (tablesResponse.data as any).data?.tables || [];
+                console.log('✅ Admin tables loaded:', tablesData.length, 'tables');
+                
+                projectTables = tablesData.map((table: any) => ({
+                  id: table.id?.toString() || '',
+                  name: table.name || table.tableName || '',
+                  fields: (table.fields || []).map((field: any) => ({
+                    id: field.id.toString(),
+                    name: field.name,
+                    type: field.type,
+                    required: field.isRequired || false,
+                    description: field.description || '',
+                    validation: field.validation || {},
+                    relationships: field.relationships || []
+                  }))
+                }));
+              } else {
+                console.log('❌ Failed to load admin tables:', tablesResponse.error);
+              }
+            } catch (tablesError) {
+              console.error('💥 Error loading admin tables:', tablesError);
+            }
+
             // Format project data for frontend
             const formattedProject = {
               id: adminProject.id,
@@ -50,12 +80,12 @@ export const useProjectData = () => {
               userId: adminProject.user_id || adminProject.userId,
               userEmail: adminProject.user_email || adminProject.userEmail,
               userName: adminProject.user_name || adminProject.userName,
-              tableCount: adminProject.tableCount || (adminProject.tables ? adminProject.tables.length : 0),
+              tableCount: projectTables.length,
               isPublic: adminProject.is_public || adminProject.isPublic || false,
               settings: adminProject.settings || {},
               createdAt: adminProject.created_at || adminProject.createdAt,
               updatedAt: adminProject.updated_at || adminProject.updatedAt,
-              tables: adminProject.tables || []
+              tables: projectTables
             };
 
             setProject(formattedProject);
