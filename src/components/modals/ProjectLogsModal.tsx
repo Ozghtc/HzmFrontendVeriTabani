@@ -13,9 +13,9 @@ interface ProjectLogsModalProps {
 }
 
 export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onClose }) => {
-  const [deployments, setDeployments] = useState<RailwayDeployment[]>([]);
-  const [selectedDeployment, setSelectedDeployment] = useState<RailwayDeployment | null>(null);
-  const [logs, setLogs] = useState<string[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
+  const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [logsLoading, setLogsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,48 +33,40 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
       // Proje adından Railway project name'ini belirle
       const railwayProjectName = project.name.toLowerCase();
       
-      console.log('🔍 Starting Railway API calls for project:', railwayProjectName);
+      console.log('🔍 Starting Railway monitoring calls for project:', railwayProjectName);
 
-      const [deploymentsResponse, healthResponse] = await Promise.all([
-        apiClient.railway.getProjectDeployments(railwayProjectName),
+      const [categoriesResponse, healthResponse] = await Promise.all([
+        apiClient.railway.getMonitoringCategories(railwayProjectName),
         apiClient.railway.getProjectHealth(railwayProjectName)
       ]);
 
-      console.log('📦 Deployments Response:', deploymentsResponse);
-      console.log('📦 Deployments Response Success:', deploymentsResponse.success);
-      console.log('📦 Deployments Response Data:', deploymentsResponse.data);
+      console.log('📦 Categories Response:', categoriesResponse);
+      console.log('📦 Categories Response Success:', categoriesResponse.success);
+      console.log('📦 Categories Response Data:', categoriesResponse.data);
 
-      if (deploymentsResponse.success) {
-        // Handle double-wrapped response structure
-        let deployments = [];
-        const responseData = (deploymentsResponse as any).data;
+      if (categoriesResponse.success) {
+        // Handle response structure
+        let categories = [];
+        const responseData = (categoriesResponse as any).data;
         
         if (Array.isArray(responseData)) {
-          deployments = responseData;
+          categories = responseData;
         } else if (responseData?.data && Array.isArray(responseData.data)) {
-          deployments = responseData.data;
-        } else if (typeof responseData === 'object' && responseData !== null) {
-          // Check if the object itself contains deployment data
-          const dataKeys = Object.keys(responseData);
-          console.log('🔍 Response data keys:', dataKeys);
-          console.log('🔍 Response data values:', responseData);
-          
-          // If response.data is the actual deployment data, wrap it in array
-          if (responseData.id && responseData.status) {
-            deployments = [responseData];
-          }
+          categories = responseData.data;
         }
         
-        console.log('✅ Setting deployments:', deployments);
-        console.log('✅ Deployments count:', deployments.length);
-        setDeployments(deployments);
-        if (deployments.length > 0) {
-          setSelectedDeployment(deployments[0]);
+        console.log('✅ Setting categories:', categories);
+        console.log('✅ Categories count:', categories.length);
+        setCategories(categories);
+        if (categories.length > 0) {
+          setSelectedCategory(categories[0]);
+          // Auto-load first category logs
+          fetchCategoryLogs(categories[0].id);
         }
       } else {
-        console.error('❌ Railway deployments API error:', deploymentsResponse.error);
-        setError(deploymentsResponse.error || 'Failed to fetch deployments');
-        setDeployments([]); // Ensure array type
+        console.error('❌ Railway categories API error:', categoriesResponse.error);
+        setError(categoriesResponse.error || 'Failed to fetch categories');
+        setCategories([]); // Ensure array type
       }
 
       console.log('🏥 Health Response:', healthResponse);
@@ -92,19 +84,19 @@ export const ProjectLogsModal: React.FC<ProjectLogsModalProps> = ({ project, onC
     }
   };
 
-  const fetchDeploymentLogs = async (deploymentId: string) => {
+  const fetchCategoryLogs = async (categoryId: string) => {
     setLogsLoading(true);
     try {
       // Pass project name to get project-specific logs
       const projectName = project.name.toLowerCase();
-      const response = await apiClient.railway.getDeploymentLogs(deploymentId, projectName);
+      const response = await apiClient.railway.getCategoryLogs(categoryId, projectName);
       if (response.success) {
-        setLogs(response.data || []);
+        setLogs(response.data?.logs || []);
       } else {
         setError(response.error || 'Failed to fetch logs');
       }
     } catch (error: any) {
-      console.error('Error fetching logs:', error);
+      console.error('Error fetching category logs:', error);
       setError(error.message || 'Failed to fetch logs');
     } finally {
       setLogsLoading(false);

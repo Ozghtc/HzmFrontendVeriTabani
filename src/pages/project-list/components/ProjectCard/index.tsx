@@ -5,7 +5,7 @@ import ProjectCardHeader from './ProjectCardHeader';
 import ApiKeySection from './ApiKeySection';
 import ProjectActions from './ProjectActions';
 import ProjectInfoModal from './ProjectInfoModal';
-import { ProjectLogsModal } from '../../../../components/modals/ProjectLogsModal';
+import { NewProjectLogsModal } from '../../../../components/modals/NewProjectLogsModal';
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
@@ -73,7 +73,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       />
 
       {isProjectLogsOpen && (
-        <ProjectLogsModal
+        <NewProjectLogsModal
           project={project}
           onClose={() => setIsProjectLogsOpen(false)}
         />

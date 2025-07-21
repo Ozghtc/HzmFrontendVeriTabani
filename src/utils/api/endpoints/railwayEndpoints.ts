@@ -21,6 +21,54 @@ export interface RailwayProject {
 export class RailwayEndpoints {
   constructor(private request: Function) {}
 
+  // Get monitoring categories
+  async getMonitoringCategories(projectName: string): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await this.request('/railway/monitoring-categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ projectName }),
+      });
+
+      console.log('📊 Railway Monitoring Categories Response:', response);
+
+      return response;
+    } catch (error: any) {
+      console.error('📊 Railway Monitoring Categories Error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to fetch monitoring categories',
+        code: 'RAILWAY_MONITORING_ERROR',
+      };
+    }
+  }
+
+  // Get category logs
+  async getCategoryLogs(categoryId: string, projectName: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.request('/railway/category-logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ categoryId, projectName }),
+      });
+
+      console.log('📋 Railway Category Logs Response:', response);
+
+      return response;
+    } catch (error: any) {
+      console.error('📋 Railway Category Logs Error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to fetch category logs',
+        code: 'RAILWAY_CATEGORY_ERROR',
+      };
+    }
+  }
+
   // Get project deployments and logs
   async getProjectDeployments(projectName: string): Promise<ApiResponse<RailwayDeployment[]>> {
     try {
