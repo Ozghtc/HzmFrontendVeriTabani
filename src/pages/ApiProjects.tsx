@@ -39,47 +39,6 @@ const ApiProjects = () => {
   console.log('🔍 ApiProjects Page - Error:', error);
   console.log('🔍 ApiProjects Page - User:', state.user);
 
-  // DEBUG: Test direct fetch on mount
-  React.useEffect(() => {
-    const testDirectFetch = async () => {
-      try {
-        const token = sessionStorage.getItem('auth_token_session');
-        if (!token) {
-          console.log('❌ No token for direct fetch test');
-          return;
-        }
-        
-        console.log('🧪 Testing direct fetch to projects API...');
-        const response = await fetch('https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          mode: 'cors',
-          credentials: 'include'
-        });
-        
-        console.log('🧪 Direct fetch response status:', response.status);
-        console.log('🧪 Direct fetch response ok:', response.ok);
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('✅ Direct fetch successful! Data:', data);
-        } else {
-          console.log('❌ Direct fetch failed:', response.status, response.statusText);
-        }
-      } catch (error) {
-        console.error('💥 Direct fetch error:', error);
-        console.error('💥 Error name:', (error as any).name);
-        console.error('💥 Error message:', (error as any).message);
-      }
-    };
-    
-    testDirectFetch();
-  }, []); // Only run once on mount
-
   return (
     <AuthGuard isAuthenticated={state.isAuthenticated}>
       <div className="min-h-screen bg-slate-50">
