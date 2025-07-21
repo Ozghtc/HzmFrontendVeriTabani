@@ -95,13 +95,13 @@ Bu endpoint'ler Authorization: Bearer <JWT_TOKEN> header'ı ile çalışır:
 
 ### 🔑 JWT TOKEN NASIL ALINIR:
 \`\`\`bash
-# 1. Giriş yapın
+# 1. Örnek kullanıcı ile giriş yapın
 curl -X POST \\
-  "${apiInfo.baseUrl}/auth/login" \\
+  "${apiInfo.baseUrl}/api/v1/auth/login" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "email": "your-email@example.com",
-    "password": "your-password"
+    "email": "test@example.com",
+    "password": "test123456"
   }'
 
 # Response'dan token'ı alın:
@@ -109,10 +109,20 @@ curl -X POST \\
   "success": true,
   "data": {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {...}
+    "user": {
+      "id": 1,
+      "email": "test@example.com", 
+      "name": "Test User",
+      "isAdmin": false
+    }
   }
 }
 \`\`\`
+
+### 🧪 ÖRNEK TEST KULLANICISI:
+- **Email:** \`test@example.com\`
+- **Password:** \`test123456\`
+- **Not:** Bu örnek kullanıcı, kendi backend'inizde oluşturmanız gereken test kullanıcısıdır
 
 ## 📋 HTTP Headers
 
@@ -499,8 +509,8 @@ const loginResponse = await fetch(
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      email: 'your-email@example.com',
-      password: 'your-password'
+      email: 'test@example.com',
+      password: 'test123456'
     })
   }
 );
@@ -602,11 +612,24 @@ if (result.success) {
 - Connection pooling otomatik (max 20 connection)
 
 ## 📞 Destek İletişim
-- **Email:** ozgurhzm@gmail.com
+- **Email:** support@example.com
 - **Proje:** ${project.name}
 - **Proje ID:** ${project.id}
 - **API Key:** ${project.apiKey.substring(0, 20)}...
 - **Base URL:** ${apiInfo.baseUrl}
+
+## 🎯 Test Kullanıcısı Oluşturma
+Bu dokümantasyonu kullanmak için önce test kullanıcısı oluşturun:
+\`\`\`bash
+curl -X POST \\
+  "${apiInfo.baseUrl}/api/v1/auth/register" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "email": "test@example.com",
+    "password": "test123456",
+    "name": "Test User"
+  }'
+\`\`\`
 
 ## 🚀 Versiyonlama
 - **Mevcut Versiyon:** v1
@@ -828,8 +851,8 @@ if (result.success) {
   ${apiInfo.baseUrl}/api/v1/auth/login \\
   -H "Content-Type: application/json" \\
   -d '{
-    "email": "your-email@example.com",
-    "password": "your-password"
+    "email": "test@example.com",
+    "password": "test123456"
   }'`}</pre>
                     </div>
                   </div>
@@ -885,8 +908,8 @@ if (result.success) {
   ${apiInfo.baseUrl}/api/v1/auth/login \\
   -H "Content-Type: application/json" \\
   -d '{
-    "email": "your-email@example.com",
-    "password": "your-password"
+    "email": "test@example.com",
+    "password": "test123456"
   }'`, 'loginExample')}
                   className="mt-3 px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors flex items-center"
                 >
