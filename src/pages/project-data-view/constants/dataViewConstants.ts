@@ -7,6 +7,7 @@ import {
   Save, 
   X, 
   AlertTriangle,
+  Search,
   Database as DatabaseIcon
 } from 'lucide-react';
 
@@ -19,6 +20,7 @@ export const icons = {
   Save,
   X,
   AlertTriangle,
+  Search,
   DatabaseIcon
 };
 

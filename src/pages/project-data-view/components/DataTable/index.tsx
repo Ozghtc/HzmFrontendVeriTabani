@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { icons } from '../../constants/dataViewConstants';
 import { DataTableProps } from '../../types/dataViewTypes';
 import DataTableHeader from './DataTableHeader';
@@ -40,7 +40,39 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
   loading,
   error
 }) => {
-  const { AlertTriangle } = icons;
+  const { AlertTriangle, Search } = icons;
+  
+  // Sütun bazlı arama state'leri
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  
+  // Sütun filtresi değiştirme fonksiyonu
+  const handleColumnFilterChange = (fieldName: string, value: string) => {
+    setColumnFilters(prev => ({
+      ...prev,
+      [fieldName]: value
+    }));
+  };
+  
+  // Filtrelenmiş veri
+  const filteredTableData = useMemo(() => {
+    if (!tableData || Object.keys(columnFilters).length === 0) {
+      return tableData;
+    }
+    
+    return tableData.filter(row => {
+      return Object.entries(columnFilters).every(([fieldName, filterValue]) => {
+        if (!filterValue.trim()) return true;
+        
+        const cellValue = row[fieldName];
+        if (cellValue === null || cellValue === undefined) return false;
+        
+        const searchValue = filterValue.toLowerCase().trim();
+        const cellString = String(cellValue).toLowerCase();
+        
+        return cellString.includes(searchValue);
+      });
+    });
+  }, [tableData, columnFilters]);
 
   if (!selectedTable) {
     return <NoTableSelectedState />;
@@ -87,6 +119,7 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
+            {/* Sütun başlıkları */}
             <tr>
               {table.fields.map((field: any) => (
                 <th
@@ -99,6 +132,29 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
               ))}
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 İşlemler
+              </th>
+            </tr>
+            {/* Sütun bazlı arama input'ları */}
+            <tr className="bg-gray-100">
+              {table.fields.map((field: any) => (
+                <th key={`filter-${field.id}`} className="px-6 py-2">
+                  <div className="relative">
+                    <Search 
+                      size={14} 
+                      className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" 
+                    />
+                    <input
+                      type="text"
+                      placeholder={`${field.name} ara...`}
+                      value={columnFilters[field.name] || ''}
+                      onChange={(e) => handleColumnFilterChange(field.name, e.target.value)}
+                      className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </th>
+              ))}
+              <th className="px-6 py-2">
+                <div className="text-xs text-gray-500 text-center">Filtreler</div>
               </th>
             </tr>
           </thead>
@@ -116,10 +172,10 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
               />
             )}
 
-            {tableData.length === 0 && !addingRow ? (
+            {filteredTableData.length === 0 && !addingRow ? (
               <NoDataState onAddRow={() => setAddingRow(true)} />
             ) : (
-              tableData.map((row) => (
+              filteredTableData.map((row) => (
                 <DataTableRow
                   key={row.id}
                   row={row}
@@ -138,7 +194,11 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
         </table>
       </div>
 
-      <TableStats recordCount={tableData.length} />
+      <TableStats 
+        recordCount={filteredTableData.length}
+        totalRecords={tableData.length}
+        hasFilters={Object.values(columnFilters).some(filter => filter.trim() !== '')}
+      />
     </div>
   );
 };
