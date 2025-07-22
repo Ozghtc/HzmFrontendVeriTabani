@@ -1,5 +1,6 @@
 import React from 'react';
 import { useProjectList } from './project-list/hooks/useProjectList';
+import { useDatabase } from '../context/DatabaseContext';
 
 // Components
 import NotificationBanner from './project-list/components/NotificationBanner';
@@ -9,13 +10,15 @@ import LoadingState from './project-list/components/States/LoadingState';
 import ErrorState from './project-list/components/States/ErrorState';
 import EmptyState from './project-list/components/States/EmptyState';
 import ProjectCard from './project-list/components/ProjectCard';
+import ProjectGroup from './project-list/components/ProjectCard/ProjectGroup';
 import DeleteProjectModal from './project-list/components/DeleteProjectModal';
 import ProjectProtectionModal from './project-list/components/ProjectProtectionModal';
 
 const ProjectList = () => {
+  const { state } = useDatabase();
+  
   const {
     // State
-    state,
     projects,
     loading,
     error,
@@ -30,6 +33,9 @@ const ProjectList = () => {
     protectionModalOpen,
     protectionProjectId,
     protectionLoading,
+    
+    // Test Environment
+    groupedProjects,
     
     // Actions
     navigate,
@@ -94,22 +100,45 @@ const ProjectList = () => {
           {!loading && projects.length === 0 ? (
             <EmptyState />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map(project => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  showApiKey={showApiKey[project.id] || false}
-                  onToggleApiKey={() => toggleApiKeyVisibility(project.id)}
-                  onCopyApiKey={() => handleCopyApiKey(project.apiKey)}
-                  onDelete={() => handleDeleteProject(project.id)}
-                  onNavigateToData={() => navigateToData(project.id)}
-                  onNavigateToEdit={() => navigateToEdit(project.id)}
-                  onToggleProtection={() => handleToggleProtection(project.id)}
-                  onCreateTestProject={() => handleCreateTestProject(project.id)}
-                  loading={loading}
-                />
-              ))}
+            <div className="space-y-6">
+              {projects.map(project => {
+                // Eğer bu proje gruplu gösterilecekse ProjectGroup kullan
+                if (groupedProjects[project.id]) {
+                  return (
+                    <ProjectGroup
+                      key={`group-${project.id}`}
+                      project={project}
+                      showApiKey={showApiKey}
+                      onToggleApiKey={toggleApiKeyVisibility}
+                      onCopyApiKey={handleCopyApiKey}
+                      onDelete={handleDeleteProject}
+                      onNavigateToData={navigateToData}
+                      onNavigateToEdit={navigateToEdit}
+                      onToggleProtection={handleToggleProtection}
+                      onCreateTestProject={handleCreateTestProject}
+                      loading={loading}
+                    />
+                  );
+                }
+                
+                // Normal proje kartı
+                return (
+                  <div key={project.id} className="w-full max-w-md mx-auto">
+                    <ProjectCard
+                      project={project}
+                      showApiKey={showApiKey[project.id] || false}
+                      onToggleApiKey={() => toggleApiKeyVisibility(project.id)}
+                      onCopyApiKey={() => handleCopyApiKey(project.apiKey)}
+                      onDelete={() => handleDeleteProject(project.id)}
+                      onNavigateToData={() => navigateToData(project.id)}
+                      onNavigateToEdit={() => navigateToEdit(project.id)}
+                      onToggleProtection={() => handleToggleProtection(project.id)}
+                      onCreateTestProject={() => handleCreateTestProject(project.id)}
+                      loading={loading}
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
         </main>
@@ -127,6 +156,7 @@ const ProjectList = () => {
         onPasswordChange={setDeleteProtectionPassword}
       />
 
+      {/* Protection Modal */}
       <ProjectProtectionModal
         isOpen={protectionModalOpen}
         onClose={handleProtectionCancel}

@@ -24,6 +24,9 @@ export const useProjectList = () => {
   const [protectionModalOpen, setProtectionModalOpen] = useState(false);
   const [protectionProjectId, setProtectionProjectId] = useState<number | null>(null);
   const [protectionLoading, setProtectionLoading] = useState(false);
+  
+  // Test Environment State
+  const [groupedProjects, setGroupedProjects] = useState<Record<number, boolean>>({});
 
   // Handle add project
   const handleAddProject = useCallback(async (formData: ProjectFormData) => {
@@ -205,13 +208,13 @@ export const useProjectList = () => {
       console.log('🔑 Token from localStorage:', token ? 'Present' : 'Missing');
       
       if (!token) {
-        // Geçici çözüm: Token yoksa bilgilendirme yap
-        alert(`🧪 Test Projesi Ortamı Özelliği\n\n` +
-              `Bu özellik aktif hale getirildi ama şu anda:\n` +
-              `• Giriş token'ı eksik\n` +
-              `• Database kolonları güncelleniyor\n\n` +
-              `Yakında tam çalışır hale gelecek!\n\n` +
-              `Proje ID: ${projectId}`);
+        // Test projesi görünümünü aktif et
+        setGroupedProjects(prev => ({
+          ...prev,
+          [projectId]: true
+        }));
+        
+        showNotification('success', `Test projesi görünümü aktif edildi! Proje ID: ${projectId}`);
         return;
       }
       
@@ -280,6 +283,11 @@ export const useProjectList = () => {
     protectionProjectId,
     protectionLoading,
     
+    // Test Environment
+    createTestEnvironment,
+    groupedProjects,
+    setGroupedProjects,
+    
     // Actions
     navigate,
     handleAddProject,
@@ -303,6 +311,5 @@ export const useProjectList = () => {
     
     // Utils
     ApiKeyGenerator,
-    createTestEnvironment
   };
 }; 
