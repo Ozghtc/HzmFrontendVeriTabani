@@ -201,13 +201,16 @@ export const useProjectList = () => {
       setCreating(true); // Use setCreating for loading state
       console.log('🧪 Creating test environment for project:', projectId);
       
-             const token = localStorage.getItem('token');
-       if (!token) {
-         throw new Error('Authentication required');
-       }
-       
-       const response = await fetch(
-         `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`,
+      const token = localStorage.getItem('token');
+      console.log('🔑 Token from localStorage:', token ? 'Present' : 'Missing');
+      
+      if (!token) {
+        throw new Error('Authentication required - Please login first');
+      }
+      
+      console.log('📡 Making request to create test environment...');
+      const response = await fetch(
+        `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`,
         {
           method: 'POST',
           headers: {
@@ -217,7 +220,9 @@ export const useProjectList = () => {
         }
       );
       
+      console.log('📊 Response status:', response.status);
       const data = await response.json();
+      console.log('📦 Response data:', data);
       
       if (data.success) {
         console.log('✅ Test environment created:', data.data);
@@ -232,12 +237,23 @@ export const useProjectList = () => {
       }
     } catch (error: any) {
       console.error('❌ Test environment creation failed:', error);
-      showNotification('error', `Test ortamı oluşturulamadı: ${error.message}`);
+      
+      // Daha detaylı hata mesajı
+      let errorMessage = 'Test ortamı oluşturulamadı';
+      if (error.message.includes('Authentication')) {
+        errorMessage = 'Giriş yapmanız gerekiyor. Lütfen sayfayı yenileyip tekrar giriş yapın.';
+      } else if (error.message.includes('not found')) {
+        errorMessage = 'Proje bulunamadı. Lütfen sayfayı yenileyin.';
+      } else {
+        errorMessage = `Hata: ${error.message}`;
+      }
+      
+      showNotification('error', errorMessage);
       throw error;
     } finally {
       setCreating(false); // Use setCreating for loading state
     }
-     }, [fetchProjects, showNotification]);
+  }, [fetchProjects, showNotification]);
 
   return {
     // State
