@@ -9,6 +9,7 @@ import NoDataState from '../EmptyStates/NoDataState';
 import NoTableSelectedState from '../EmptyStates/NoTableSelectedState';
 import NoFieldsState from '../EmptyStates/NoFieldsState';
 import { formatDisplayValue } from '../../utils/dataFormatters';
+import { turkishSearch } from '../../../../utils/turkishSearch';
 
 interface ExtendedDataTableProps extends DataTableProps {
   projectId: number;
@@ -53,7 +54,7 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
     }));
   };
   
-  // Filtrelenmiş veri
+  // Filtrelenmiş veri (Türkçe karakter desteği ile)
   const filteredTableData = useMemo(() => {
     if (!tableData || Object.keys(columnFilters).length === 0) {
       return tableData;
@@ -66,10 +67,10 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
         const cellValue = row[fieldName];
         if (cellValue === null || cellValue === undefined) return false;
         
-        const searchValue = filterValue.toLowerCase().trim();
-        const cellString = String(cellValue).toLowerCase();
+        const cellString = String(cellValue);
         
-        return cellString.includes(searchValue);
+        // Türkçe karakter desteği ile arama
+        return turkishSearch(filterValue, cellString);
       });
     });
   }, [tableData, columnFilters]);
