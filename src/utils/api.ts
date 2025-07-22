@@ -67,7 +67,7 @@ export { RequestInterceptorManager } from './api/interceptors/requestInterceptor
 export { ResponseInterceptorManager } from './api/interceptors/responseInterceptor';
 
 // Default export
-export default apiClient;
+export default apiClient; 
 
 // Test Environment API
 export const createTestEnvironment = async (projectId: number) => {

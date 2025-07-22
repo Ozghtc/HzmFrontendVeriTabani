@@ -856,7 +856,7 @@ curl -X POST \\
   }'`}</pre>
                     </div>
                   </div>
-
+                  
                   {/* Tablo Oluşturma */}
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-2">2. Tablo Oluşturma (JWT ile):</h4>
@@ -885,7 +885,7 @@ curl -X POST \\
   }'`}</pre>
                     </div>
                   </div>
-
+                  
                   {/* Veri Ekleme */}
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-2">4. Veri Ekleme (JWT ile):</h4>
@@ -916,7 +916,7 @@ curl -X POST \\
                   {copiedItems.loginExample ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
                   Giriş Kodunu Kopyala
                 </button>
-
+                
                 <button
                   onClick={() => handleCopy(`curl -X POST \\
   ${apiInfo.baseUrl}/api/v1/tables/project/${apiInfo.projectId} \\
