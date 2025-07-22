@@ -65,12 +65,31 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
         if (!filterValue.trim()) return true;
         
         const cellValue = row[fieldName];
-        if (cellValue === null || cellValue === undefined) return false;
+        
+        // Debug log'ları
+        console.log('🔍 Arama Debug:', {
+          fieldName,
+          filterValue,
+          cellValue,
+          rowKeys: Object.keys(row),
+          hasValue: cellValue !== null && cellValue !== undefined
+        });
+        
+        if (cellValue === null || cellValue === undefined) {
+          console.log('❌ Cell value null/undefined for field:', fieldName);
+          return false;
+        }
         
         const cellString = String(cellValue);
+        const searchResult = turkishSearch(filterValue, cellString);
         
-        // Türkçe karakter desteği ile arama
-        return turkishSearch(filterValue, cellString);
+        console.log('🎯 Search result:', {
+          searchTerm: filterValue,
+          targetText: cellString,
+          result: searchResult
+        });
+        
+        return searchResult;
       });
     });
   }, [tableData, columnFilters]);
