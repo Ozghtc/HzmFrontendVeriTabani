@@ -60,11 +60,16 @@ export const turkishSearch = (searchTerm: string, targetText: string): boolean =
     return true;
   }
   
-  // 3. İngilizce -> Türkçe dönüşüm kontrolü (regex ile)
-  const regexPattern = createTurkishRegexPattern(normalizedSearch);
-  const regex = new RegExp(regexPattern, 'i');
-  
-  return regex.test(normalizedTarget);
+  // 3. Regex ile kapsamlı karakter eşleştirme
+  try {
+    const regexPattern = createTurkishRegexPattern(normalizedSearch);
+    const regex = new RegExp(regexPattern, 'gi'); // global ve case-insensitive
+    return regex.test(normalizedTarget);
+  } catch (error) {
+    console.warn('Regex pattern error:', error);
+    // Regex hata verirse fallback olarak basit arama yap
+    return normalizedTarget.includes(normalizedSearch);
+  }
 };
 
 /**
@@ -77,13 +82,7 @@ const createTurkishRegexPattern = (searchTerm: string): string => {
     .toLowerCase()
     .split('')
     .map(char => {
-      // Önce küçük harfli alternatifleri kontrol et
-      const alternatives = ENGLISH_TO_TURKISH_MAP[char];
-      if (alternatives) {
-        return `[${alternatives.join('')}]`;
-      }
-      
-      // Türkçe karakterler için de alternatifler ekle
+      // Her karakter için tüm alternatiflerini al
       const turkishAlternatives = getTurkishAlternatives(char);
       if (turkishAlternatives.length > 1) {
         return `[${turkishAlternatives.join('')}]`;
@@ -185,9 +184,16 @@ export const testTurkishSearch = () => {
     { search: 'İstanbul', target: 'istanbul', expected: true },
     { search: 'ISTANBUL', target: 'İstanbul', expected: true },
     { search: 'İSTANBUL', target: 'istanbul', expected: true },
+    
+    // Kısmi eşleşme testleri (SORUN OLAN KISIM)
     { search: 'İs', target: 'İstanbul, Türkiye', expected: true },
     { search: 'is', target: 'İstanbul, Türkiye', expected: true },
     { search: 'IS', target: 'İstanbul, Türkiye', expected: true },
+    { search: 'iz', target: 'İzmir, Türkiye', expected: true },
+    { search: 'İz', target: 'İzmir, Türkiye', expected: true },
+    { search: 'IZ', target: 'İzmir, Türkiye', expected: true },
+    { search: 'zm', target: 'İzmir, Türkiye', expected: true },
+    { search: 'mir', target: 'İzmir, Türkiye', expected: true },
     
     // Türkçe karakter testleri
     { search: 'ankara', target: 'Ankara', expected: true },
@@ -203,11 +209,15 @@ export const testTurkishSearch = () => {
     { search: 'şişli', target: 'Sisli', expected: true },
     { search: 'ŞİŞLİ', target: 'sisli', expected: true },
     
-    // Kısmi eşleşme testleri
+    // Hastane isimleri testleri
     { search: 'acı', target: 'Acıbadem Hastanesi', expected: true },
     { search: 'ACI', target: 'Acıbadem Hastanesi', expected: true },
+    { search: 'acibadem', target: 'Acıbadem Hastanesi', expected: true },
+    { search: 'ACİBADEM', target: 'Acıbadem Hastanesi', expected: true },
     { search: 'mem', target: 'Memorial Hastanesi', expected: true },
     { search: 'MEM', target: 'memorial hastanesi', expected: true },
+    { search: 'memorial', target: 'Memorial Hastanesi', expected: true },
+    { search: 'MEMORİAL', target: 'Memorial Hastanesi', expected: true },
   ];
   
   testCases.forEach(({ search, target, expected }) => {
