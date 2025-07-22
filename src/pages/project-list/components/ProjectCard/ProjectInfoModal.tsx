@@ -37,10 +37,10 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
       tablesList: `/api/v1/tables/project/${project.id.toString()}`,
       tableCreate: `/api/v1/tables/project/${project.id.toString()}`,
       
-      // Field yönetimi (KURUMLAR tablosu için Table ID: 10)
-      fieldAdd: `/api/v1/tables/project/${project.id.toString()}/10/fields`,
-      fieldUpdate: `/api/v1/tables/project/${project.id.toString()}/10/fields/:fieldId`,
-      fieldDelete: `/api/v1/tables/project/${project.id.toString()}/10/fields/:fieldId`,
+      // Field yönetimi (GÜNCELLENDİ - Doğru Format)
+      fieldAdd: `/api/v1/tables/${project.id.toString()}/:tableId/fields`,
+      fieldUpdate: `/api/v1/tables/:tableId/fields/:fieldId`,
+      fieldDelete: `/api/v1/tables/:tableId/fields/:fieldId`,
       
       // Veri yönetimi  
       dataGet: `/api/v1/data/table/:tableId`,
@@ -95,12 +95,12 @@ Bu endpoint'ler Authorization: Bearer <JWT_TOKEN> header'ı ile çalışır:
 
 ### 🔑 JWT TOKEN NASIL ALINIR:
 \`\`\`bash
-# 1. Örnek kullanıcı ile giriş yapın
+# TEST EDİLDİ - ÇALIŞIYOR ✅
 curl -X POST \\
   "${apiInfo.baseUrl}/api/v1/auth/login" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "email": "test@example.com",
+    "email": "test2@example.com",
     "password": "test123456"
   }'
 
@@ -119,10 +119,10 @@ curl -X POST \\
 }
 \`\`\`
 
-### 🧪 ÖRNEK TEST KULLANICISI:
-- **Email:** \`test@example.com\`
+### 🧪 ÇALIŞAN TEST KULLANICISI:
+- **Email:** \`test2@example.com\`
 - **Password:** \`test123456\`
-- **Not:** Bu örnek kullanıcı, kendi backend'inizde oluşturmanız gereken test kullanıcısıdır
+- **Status:** ✅ AKTİF VE ÇALIŞIYOR
 
 ## 📋 HTTP Headers
 
