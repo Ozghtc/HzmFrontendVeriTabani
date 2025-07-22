@@ -16,20 +16,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onNavigateToData,
   onNavigateToEdit,
   onToggleProtection,
+  onCreateTestProject, // Yeni prop
   loading
 }) => {
   const { Table } = icons;
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false);
   const [isProjectLogsOpen, setIsProjectLogsOpen] = useState(false);
   
-  // Remove excessive logging to prevent console spam
-  // console.log('🔍 Rendering project:', { 
-  //   id: project.id, 
-  //   name: project.name, 
-  //   type: typeof project.id,
-  //   fullProject: project 
-  // });
-  // console.log('🎯 Düzenle button will navigate to:', `/projects/${project.id}`);
+  // Test projesi oluşturma handler
+  const handleCreateTestProject = () => {
+    console.log('🧪 Test projesi oluşturuluyor:', project.name);
+    if (onCreateTestProject) {
+      onCreateTestProject();
+    }
+  };
   
   return (
     <>
@@ -62,6 +62,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           onNavigateToEdit={onNavigateToEdit}
           onShowProjectInfo={() => setIsProjectInfoOpen(true)}
           onShowProjectLogs={() => setIsProjectLogsOpen(true)}
+          onCreateTestProject={handleCreateTestProject}
           loading={loading}
         />
       </div>

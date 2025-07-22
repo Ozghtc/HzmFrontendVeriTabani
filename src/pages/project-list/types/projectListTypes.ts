@@ -43,6 +43,7 @@ export interface ProjectCardProps {
   onNavigateToData: () => void;
   onNavigateToEdit: () => void;
   onToggleProtection: () => void;
+  onCreateTestProject?: () => void; // Yeni prop
   loading: boolean;
 }
 

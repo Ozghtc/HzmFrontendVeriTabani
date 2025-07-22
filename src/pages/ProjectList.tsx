@@ -41,7 +41,6 @@ const ProjectList = () => {
     toggleApiKeyVisibility,
     navigateToData,
     navigateToEdit,
-    navigateToApi,
     fetchProjects,
     retryAfterError,
     setDeleteConfirmName,
@@ -52,6 +51,13 @@ const ProjectList = () => {
     handleProtectionSubmit,
     handleProtectionCancel
   } = useProjectList();
+
+  // Test projesi oluşturma handler'ı
+  const handleCreateTestProject = (projectId: number) => {
+    console.log('🧪 Test projesi oluşturma başlatıldı - Proje ID:', projectId);
+    // TODO: Test projesi oluşturma modal'ını aç veya doğrudan API çağrısı yap
+    alert(`Test projesi oluşturma özelliği yakında aktif olacak!\nProje ID: ${projectId}`);
+  };
 
   return (
     <>
@@ -94,6 +100,7 @@ const ProjectList = () => {
                   onNavigateToData={() => navigateToData(project.id)}
                   onNavigateToEdit={() => navigateToEdit(project.id)}
                   onToggleProtection={() => handleToggleProtection(project.id)}
+                  onCreateTestProject={() => handleCreateTestProject(project.id)}
                   loading={loading}
                 />
               ))}
