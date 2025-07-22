@@ -26,7 +26,26 @@ export const useProjectList = () => {
   const [protectionLoading, setProtectionLoading] = useState(false);
   
   // Test Environment State
-  const [groupedProjects, setGroupedProjects] = useState<Record<number, boolean>>({});
+  const [groupedProjects, setGroupedProjects] = useState<Record<number, boolean>>(() => {
+    // localStorage'dan önceki gruplu projeleri yükle
+    try {
+      const saved = localStorage.getItem('hzm_grouped_projects');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // groupedProjects değiştiğinde localStorage'a kaydet
+  const updateGroupedProjects = useCallback((newGroupedProjects: Record<number, boolean>) => {
+    setGroupedProjects(newGroupedProjects);
+    try {
+      localStorage.setItem('hzm_grouped_projects', JSON.stringify(newGroupedProjects));
+      console.log('💾 Grouped projects saved to localStorage:', newGroupedProjects);
+    } catch (error) {
+      console.error('❌ Failed to save grouped projects to localStorage:', error);
+    }
+  }, []);
 
   // Handle add project
   const handleAddProject = useCallback(async (formData: ProjectFormData) => {
@@ -209,10 +228,11 @@ export const useProjectList = () => {
       
       if (!token) {
         // Test projesi görünümünü aktif et
-        setGroupedProjects(prev => ({
-          ...prev,
+        const newGroupedState = {
+          ...groupedProjects,
           [projectId]: true
-        }));
+        };
+        updateGroupedProjects(newGroupedState);
         
         showNotification('success', `Test projesi görünümü aktif edildi! Proje ID: ${projectId}`);
         return;
@@ -263,7 +283,7 @@ export const useProjectList = () => {
     } finally {
       setCreating(false);
     }
-  }, [fetchProjects, showNotification]);
+  }, [fetchProjects, showNotification, updateGroupedProjects, groupedProjects]);
 
   return {
     // State
@@ -286,7 +306,7 @@ export const useProjectList = () => {
     // Test Environment
     createTestEnvironment,
     groupedProjects,
-    setGroupedProjects,
+    updateGroupedProjects,
     
     // Actions
     navigate,

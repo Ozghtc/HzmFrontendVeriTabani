@@ -36,7 +36,9 @@ const ProjectList = () => {
     protectionLoading,
     
     // Test Environment
+    createTestEnvironment,
     groupedProjects,
+    updateGroupedProjects,
     
     // Actions
     navigate,
@@ -57,9 +59,6 @@ const ProjectList = () => {
     handleToggleProtection,
     handleProtectionSubmit,
     handleProtectionCancel,
-    
-    // Test Environment
-    createTestEnvironment
   } = useProjectList();
 
   // Test projesi oluşturma handler'ı
