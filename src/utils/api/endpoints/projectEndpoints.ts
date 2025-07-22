@@ -173,3 +173,8 @@ export class ProjectEndpoints implements IProjectEndpoints {
     return response;
   }
 } 
+
+export const createTestEnvironment = async (projectId: number) => {
+  const response = await apiInstance.post(`/projects/${projectId}/create-test-environment`);
+  return response.data;
+}; 

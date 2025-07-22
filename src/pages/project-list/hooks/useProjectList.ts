@@ -195,6 +195,50 @@ export const useProjectList = () => {
     setProtectionLoading(false);
   }, []);
 
+  // Test Environment Creation
+  const createTestEnvironment = useCallback(async (projectId: number) => {
+    try {
+      setCreating(true); // Use setCreating for loading state
+      console.log('🧪 Creating test environment for project:', projectId);
+      
+             const token = localStorage.getItem('token');
+       if (!token) {
+         throw new Error('Authentication required');
+       }
+       
+       const response = await fetch(
+         `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('✅ Test environment created:', data.data);
+        showNotification('success', data.data.message);
+        
+        // Proje listesini yenile
+        await fetchProjects();
+        
+        return data.data;
+      } else {
+        throw new Error(data.error || 'Test ortamı oluşturulamadı');
+      }
+    } catch (error: any) {
+      console.error('❌ Test environment creation failed:', error);
+      showNotification('error', `Test ortamı oluşturulamadı: ${error.message}`);
+      throw error;
+    } finally {
+      setCreating(false); // Use setCreating for loading state
+    }
+     }, [fetchProjects, showNotification]);
+
   return {
     // State
     state,
@@ -235,6 +279,7 @@ export const useProjectList = () => {
     handleProtectionCancel,
     
     // Utils
-    ApiKeyGenerator
+    ApiKeyGenerator,
+    createTestEnvironment
   };
 }; 

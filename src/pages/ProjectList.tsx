@@ -49,14 +49,20 @@ const ProjectList = () => {
     // Protection actions
     handleToggleProtection,
     handleProtectionSubmit,
-    handleProtectionCancel
+    handleProtectionCancel,
+    
+    // Test Environment
+    createTestEnvironment
   } = useProjectList();
 
   // Test projesi oluşturma handler'ı
-  const handleCreateTestProject = (projectId: number) => {
-    console.log('🧪 Test projesi oluşturma başlatıldı - Proje ID:', projectId);
-    // TODO: Test projesi oluşturma modal'ını aç veya doğrudan API çağrısı yap
-    alert(`Test projesi oluşturma özelliği yakında aktif olacak!\nProje ID: ${projectId}`);
+  const handleCreateTestProject = async (projectId: number) => {
+    try {
+      console.log('🧪 Test projesi oluşturma başlatıldı - Proje ID:', projectId);
+      await createTestEnvironment(projectId);
+    } catch (error) {
+      console.error('Test projesi oluşturma hatası:', error);
+    }
   };
 
   return (
