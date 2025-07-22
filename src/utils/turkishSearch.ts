@@ -3,25 +3,25 @@
  * İstanbul -> Istanbul veya Istanbul -> İstanbul şeklinde arama desteği
  */
 
-// Türkçe karakterlerin İngilizce karşılıkları
+// Türkçe karakterlerin İngilizce karşılıkları (case-insensitive)
 const TURKISH_TO_ENGLISH_MAP: Record<string, string> = {
-  'ç': 'c', 'Ç': 'C',
-  'ğ': 'g', 'Ğ': 'G', 
-  'ı': 'i', 'I': 'I',
-  'İ': 'I', 'i': 'i',
-  'ö': 'o', 'Ö': 'O',
-  'ş': 's', 'Ş': 'S',
-  'ü': 'u', 'Ü': 'U'
+  'ç': 'c', 'Ç': 'c',
+  'ğ': 'g', 'Ğ': 'g', 
+  'ı': 'i', 'I': 'i',
+  'İ': 'i', 'i': 'i',
+  'ö': 'o', 'Ö': 'o',
+  'ş': 's', 'Ş': 's',
+  'ü': 'u', 'Ü': 'u'
 };
 
-// İngilizce karakterlerin Türkçe karşılıkları
+// İngilizce karakterlerin Türkçe karşılıkları (case-insensitive)
 const ENGLISH_TO_TURKISH_MAP: Record<string, string[]> = {
-  'c': ['c', 'ç'], 'C': ['C', 'Ç'],
-  'g': ['g', 'ğ'], 'G': ['G', 'Ğ'],
-  'i': ['i', 'ı', 'İ'], 'I': ['I', 'İ', 'ı'],
-  'o': ['o', 'ö'], 'O': ['O', 'Ö'],
-  's': ['s', 'ş'], 'S': ['S', 'Ş'],
-  'u': ['u', 'ü'], 'U': ['U', 'Ü']
+  'c': ['c', 'ç', 'C', 'Ç'],
+  'g': ['g', 'ğ', 'G', 'Ğ'],
+  'i': ['i', 'ı', 'İ', 'I'],
+  'o': ['o', 'ö', 'O', 'Ö'],
+  's': ['s', 'ş', 'S', 'Ş'],
+  'u': ['u', 'ü', 'U', 'Ü']
 };
 
 /**
@@ -74,16 +74,54 @@ export const turkishSearch = (searchTerm: string, targetText: string): boolean =
  */
 const createTurkishRegexPattern = (searchTerm: string): string => {
   return searchTerm
+    .toLowerCase()
     .split('')
     .map(char => {
+      // Önce küçük harfli alternatifleri kontrol et
       const alternatives = ENGLISH_TO_TURKISH_MAP[char];
       if (alternatives) {
         return `[${alternatives.join('')}]`;
       }
+      
+      // Türkçe karakterler için de alternatifler ekle
+      const turkishAlternatives = getTurkishAlternatives(char);
+      if (turkishAlternatives.length > 1) {
+        return `[${turkishAlternatives.join('')}]`;
+      }
+      
       // Özel karakterleri escape et
       return char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     })
     .join('');
+};
+
+// Bir karakter için tüm Türkçe alternatiflerini getir
+const getTurkishAlternatives = (char: string): string[] => {
+  const charLower = char.toLowerCase();
+  const charUpper = char.toUpperCase();
+  
+  // Temel karakter setini oluştur
+  let alternatives = [charLower, charUpper];
+  
+  // Türkçe karakter eşleştirmeleri
+  switch (charLower) {
+    case 'c': alternatives = ['c', 'C', 'ç', 'Ç']; break;
+    case 'ç': alternatives = ['ç', 'Ç', 'c', 'C']; break;
+    case 'g': alternatives = ['g', 'G', 'ğ', 'Ğ']; break;
+    case 'ğ': alternatives = ['ğ', 'Ğ', 'g', 'G']; break;
+    case 'i': alternatives = ['i', 'I', 'ı', 'İ']; break;
+    case 'ı': alternatives = ['ı', 'I', 'i', 'İ']; break;
+    case 'İ': alternatives = ['İ', 'I', 'i', 'ı']; break;
+    case 'o': alternatives = ['o', 'O', 'ö', 'Ö']; break;
+    case 'ö': alternatives = ['ö', 'Ö', 'o', 'O']; break;
+    case 's': alternatives = ['s', 'S', 'ş', 'Ş']; break;
+    case 'ş': alternatives = ['ş', 'Ş', 's', 'S']; break;
+    case 'u': alternatives = ['u', 'U', 'ü', 'Ü']; break;
+    case 'ü': alternatives = ['ü', 'Ü', 'u', 'U']; break;
+    default: alternatives = [charLower, charUpper]; break;
+  }
+  
+  return [...new Set(alternatives)]; // Duplicate'ları kaldır
 };
 
 /**
@@ -142,14 +180,34 @@ export const testTurkishSearch = () => {
   console.log('🧪 Türkçe Arama Testleri:');
   
   const testCases = [
+    // Büyük/küçük harf testleri
     { search: 'istanbul', target: 'İstanbul', expected: true },
     { search: 'İstanbul', target: 'istanbul', expected: true },
+    { search: 'ISTANBUL', target: 'İstanbul', expected: true },
+    { search: 'İSTANBUL', target: 'istanbul', expected: true },
+    { search: 'İs', target: 'İstanbul, Türkiye', expected: true },
+    { search: 'is', target: 'İstanbul, Türkiye', expected: true },
+    { search: 'IS', target: 'İstanbul, Türkiye', expected: true },
+    
+    // Türkçe karakter testleri
     { search: 'ankara', target: 'Ankara', expected: true },
+    { search: 'ANKARA', target: 'ankara', expected: true },
     { search: 'izmir', target: 'İzmir', expected: true },
+    { search: 'İZMİR', target: 'izmir', expected: true },
     { search: 'çankaya', target: 'Cankaya', expected: true },
+    { search: 'ÇANKAYA', target: 'cankaya', expected: true },
     { search: 'cankaya', target: 'Çankaya', expected: true },
+    { search: 'CANKAYA', target: 'çankaya', expected: true },
     { search: 'göztepe', target: 'Goztepe', expected: true },
+    { search: 'GÖZTEPE', target: 'goztepe', expected: true },
     { search: 'şişli', target: 'Sisli', expected: true },
+    { search: 'ŞİŞLİ', target: 'sisli', expected: true },
+    
+    // Kısmi eşleşme testleri
+    { search: 'acı', target: 'Acıbadem Hastanesi', expected: true },
+    { search: 'ACI', target: 'Acıbadem Hastanesi', expected: true },
+    { search: 'mem', target: 'Memorial Hastanesi', expected: true },
+    { search: 'MEM', target: 'memorial hastanesi', expected: true },
   ];
   
   testCases.forEach(({ search, target, expected }) => {
