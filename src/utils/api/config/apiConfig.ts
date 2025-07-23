@@ -1,27 +1,77 @@
 // API Configuration
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1',
-  backupURLs: [
-    'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1',
-    'http://hzmbackandveritabani-production-c660.up.railway.app/api/v1', // HTTP fallback for SSL issues
-    // Add more backup URLs if needed
-  ],
-  timeout: 10000, // 10 seconds - reduced for better UX
-  retryDefaults: {
-    maxRetries: 0, // Retry disabled to prevent SSL timeout loops
-    delay: 1000,
-    backoff: 'exponential' as const,
-  },
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-  rateLimiting: {
-    enabled: false, // Rate limiting devre dışı - backend'de handle ediliyor
-    maxRequestsPerMinute: 60,
-    maxBurst: 10,
-  },
-};
+  // Base URLs
+  PRODUCTION_URL: 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1',
+  
+  // API Keys
+  LIVE_API_KEY: 'hzm_b446ef9e20064af09190e85f415a2a0c', // Canlı API Key
+  TEST_API_KEY: 'hzm_4ca2d8cac1e444bb8e0a14f6e773a760', // Test API Key
+  
+  // Default settings
+  TIMEOUT: 10000,
+  RETRY_ATTEMPTS: 3,
+} as const;
+
+// API Mode Management
+export type ApiMode = 'live' | 'test';
+
+export class ApiModeManager {
+  private static readonly STORAGE_KEY = 'hzm_api_mode';
+  
+  // Get current API mode (default: live)
+  static getCurrentMode(): ApiMode {
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      return (stored as ApiMode) || 'live';
+    } catch {
+      return 'live';
+    }
+  }
+  
+  // Set API mode
+  static setMode(mode: ApiMode): void {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, mode);
+      console.log(`🔄 API Mode changed to: ${mode.toUpperCase()}`);
+      
+      // Reload page to apply new API settings
+      window.location.reload();
+    } catch (error) {
+      console.error('❌ Failed to set API mode:', error);
+    }
+  }
+  
+  // Get current API key based on mode
+  static getCurrentApiKey(): string {
+    const mode = this.getCurrentMode();
+    return mode === 'test' ? API_CONFIG.TEST_API_KEY : API_CONFIG.LIVE_API_KEY;
+  }
+  
+  // Get current base URL
+  static getCurrentBaseUrl(): string {
+    return API_CONFIG.PRODUCTION_URL;
+  }
+  
+  // Check if in test mode
+  static isTestMode(): boolean {
+    return this.getCurrentMode() === 'test';
+  }
+  
+  // Toggle between modes
+  static toggleMode(): void {
+    const currentMode = this.getCurrentMode();
+    const newMode: ApiMode = currentMode === 'live' ? 'test' : 'live';
+    this.setMode(newMode);
+  }
+}
+
+// Export current configuration
+export const getCurrentApiConfig = () => ({
+  baseURL: ApiModeManager.getCurrentBaseUrl(),
+  apiKey: ApiModeManager.getCurrentApiKey(),
+  mode: ApiModeManager.getCurrentMode(),
+  isTestMode: ApiModeManager.isTestMode(),
+});
 
 // Endpoint paths
 export const ENDPOINTS = {
