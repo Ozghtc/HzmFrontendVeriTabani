@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDatabase } from '../../../context/DatabaseContext';
 import { useApiProjects } from '../../../hooks/useApiProjects';
@@ -46,6 +46,41 @@ export const useProjectList = () => {
       console.error('❌ Failed to save grouped projects to sessionStorage:', error);
     }
   }, []);
+
+  // Load projects on mount
+  useEffect(() => {
+    const loadProjects = async () => {
+      console.log('🚀 Component mount - loading projects...');
+      
+      try {
+        // fetchProjects artık {projects, detectedGroupedProjects} döndürüyor
+        const result = await fetchProjects();
+        
+        if (result && result.projects) {
+          console.log('📦 Projects loaded:', result.projects.length);
+          console.log('🧪 Detected grouped projects:', result.detectedGroupedProjects);
+          
+          // Backend'den gelen grouped projects'leri sessionStorage ile birleştir
+          const currentSessionGrouped = groupedProjects;
+          const combinedGrouped = { ...currentSessionGrouped, ...result.detectedGroupedProjects };
+          
+          console.log('🔄 Combining grouped states:');
+          console.log('   SessionStorage:', currentSessionGrouped);
+          console.log('   Backend detected:', result.detectedGroupedProjects);
+          console.log('   Combined result:', combinedGrouped);
+          
+          // Sadece değişiklik varsa güncelle
+          if (JSON.stringify(combinedGrouped) !== JSON.stringify(currentSessionGrouped)) {
+            updateGroupedProjects(combinedGrouped);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Initial project load failed:', error);
+      }
+    };
+    
+    loadProjects();
+  }, [fetchProjects, updateGroupedProjects]); // groupedProjects dependency'sini kaldırdık infinite loop'u önlemek için
 
   // Handle add project
   const handleAddProject = useCallback(async (formData: ProjectFormData) => {

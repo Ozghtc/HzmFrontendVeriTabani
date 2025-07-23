@@ -23,24 +23,10 @@ export const useApiProjects = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchProjects = async () => {
-    setLoading(true);
-    setError(null);
-    
-    // Check if user is authenticated
-    const token = AuthManager.getToken();
-    console.log('🔐 Auth token exists:', !!token);
-    console.log('🔐 Auth token preview:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
-    console.log('🌐 API Base URL from env:', import.meta.env.VITE_API_BASE_URL);
-    
-    if (!token) {
-      console.log('❌ No auth token found');
-      setProjects([]);
-      setError('Authentication required');
-      setLoading(false);
-      return;
-    }
-    
     try {
+      setLoading(true);
+      setError(null);
+      
       console.log('🔍 Fetching projects from backend...');
       
       const response = await apiClient.projects.getProjects();
@@ -76,37 +62,50 @@ export const useApiProjects = () => {
         }
         
         console.log('✅ Projects loaded from backend:', projects.length, 'projects');
-        console.log('🔍 Backend project IDs:', projects.map((p: any) => ({ 
-          id: p.id, 
-          name: p.name, 
-          userId: p.userId,
-          idType: typeof p.id,
-          userIdType: typeof p.userId 
+        console.log('📋 Backend project details:', projects.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          isTestEnvironment: p.isTestEnvironment,
+          parentProjectId: p.parentProjectId,
+          testEnvironmentId: p.testEnvironmentId
         })));
-        console.log('📋 Full projects data:', projects);
         
-        // Set projects - API-only architecture
-        setProjects(projects);
+        // Backend'den gelen test environment yapısını analiz et
+        const detectedGroupedProjects: Record<number, boolean> = {};
         
-        setError(null);
+        projects.forEach((project: any) => {
+          // Eğer project'in test environment'ı varsa, onu grupla
+          if (project.testEnvironmentId) {
+            detectedGroupedProjects[project.id] = true;
+            console.log(`🧪 Project ${project.id} (${project.name}) has test environment ${project.testEnvironmentId} - marking as grouped`);
+          }
+        });
+        
+        console.log('🔍 Detected grouped projects from backend:', detectedGroupedProjects);
+        
+        // API'den gelen grouped projects bilgisini döndür
+        return {
+          projects,
+          detectedGroupedProjects
+        };
       } else {
-        console.log('❌ Backend projects API failed:', response.error);
-        setProjects([]);
-        setError(response.error || 'Failed to load projects');
+        console.log('❌ Backend API failed:', response.error);
+        setError(response.error || 'Backend API connection failed');
+        return {
+          projects: [],
+          detectedGroupedProjects: {}
+        };
       }
-    } catch (err: any) {
-      console.log('💥 Network error:', err.message);
-      setProjects([]);
-      
-      // Handle rate limit specifically
-      if (err.response?.status === 429 || err.message?.includes('Too many requests')) {
-        setError('Çok fazla istek gönderildi. Lütfen birkaç dakika bekleyip tekrar deneyin.');
-        return; // Don't retry automatically
-      }
-      
-      setError('Network error - please check your connection');
+    } catch (error: any) {
+      console.error('❌ Error fetching projects:', error);
+      setError(error.message || 'Network error occurred');
+      return {
+        projects: [],
+        detectedGroupedProjects: {}
+      };
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const createProject = async (projectData: { name: string; description?: string }) => {

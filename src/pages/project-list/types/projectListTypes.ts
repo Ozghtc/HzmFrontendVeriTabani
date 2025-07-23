@@ -8,6 +8,8 @@ export interface Project {
   updatedAt: string;
   isProtected?: boolean;
   isTestEnvironment?: boolean;
+  parentProjectId?: number;
+  testEnvironmentId?: number;
 }
 
 export interface NotificationState {
