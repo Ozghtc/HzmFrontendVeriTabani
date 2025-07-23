@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { getCurrentApiConfig } from '../config/apiConfig';
 import { AuthManager } from '../utils/authUtils';
+import { ApiClient } from './ApiClient';
 
 class ApiInstance {
   private instance: AxiosInstance;
@@ -100,8 +101,11 @@ class ApiInstance {
 // Create singleton instance
 export const apiInstance = new ApiInstance();
 
-// Also export as apiClient for backward compatibility
-export const apiClient = apiInstance;
+// Create ApiClient instance for proper API structure
+const apiClientInstance = new ApiClient();
+
+// Export apiClient with proper structure
+export const apiClient = apiClientInstance;
 
 // Export for easy access
 export default apiInstance; 
