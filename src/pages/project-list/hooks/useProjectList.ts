@@ -217,7 +217,7 @@ export const useProjectList = () => {
     setProtectionLoading(false);
   }, []);
 
-  // Test Environment Creation
+  // Test Environment Creation - İki Katmanlı Sistem
   const createTestEnvironment = useCallback(async (projectId: number) => {
     try {
       setCreating(true);
@@ -226,56 +226,100 @@ export const useProjectList = () => {
       const token = localStorage.getItem('token');
       console.log('🔑 Token from localStorage:', token ? 'Present' : 'Missing');
       
-      if (!token) {
-        // Test projesi görünümünü aktif et
-        const newGroupedState = {
-          ...groupedProjects,
-          [projectId]: true
-        };
-        updateGroupedProjects(newGroupedState);
-        
-        showNotification('success', `Test projesi görünümü aktif edildi! Proje ID: ${projectId}`);
-        return;
-      }
-      
-      console.log('📡 Making request to create test environment...');
-      const response = await fetch(
-        `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+      // Önce backend API'yi dene
+      if (token) {
+        try {
+          console.log('📡 Attempting backend API call...');
+          const response = await fetch(
+            `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              }
+            }
+          );
+          
+          console.log('📊 Backend response status:', response.status);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('📦 Backend response data:', data);
+            
+            if (data.success) {
+              console.log('✅ Backend test environment created successfully!');
+              
+              // Gerçek test projesi oluşturuldu
+              const newGroupedState = {
+                ...groupedProjects,
+                [projectId]: true
+              };
+              updateGroupedProjects(newGroupedState);
+              
+              showNotification('success', `✅ Gerçek test ortamı oluşturuldu! ${data.data?.message || ''}`);
+              
+              // Proje listesini yenile
+              await fetchProjects();
+              return data.data;
+            }
           }
+          
+          // Backend başarısız, fallback'e geç
+          console.log('⚠️ Backend API failed, falling back to simulation...');
+          throw new Error('Backend API failed');
+          
+        } catch (backendError) {
+          console.log('❌ Backend error:', backendError);
+          // Fallback simülasyona geç
         }
-      );
-      
-      console.log('📊 Response status:', response.status);
-      const data = await response.json();
-      console.log('📦 Response data:', data);
-      
-      if (data.success) {
-        console.log('✅ Test environment created:', data.data);
-        showNotification('success', data.data.message);
-        
-        // Proje listesini yenile
-        await fetchProjects();
-        
-        return data.data;
-      } else {
-        throw new Error(data.error || 'Test ortamı oluşturulamadı');
       }
+      
+      // Fallback: Frontend Simülasyon
+      console.log('🎭 Using frontend simulation fallback...');
+      
+      // Proje bilgilerini al
+      const originalProject = projects.find(p => p.id === projectId);
+      if (!originalProject) {
+        throw new Error('Orijinal proje bulunamadı');
+      }
+      
+      // Test projesi görünümünü aktif et
+      const newGroupedState = {
+        ...groupedProjects,
+        [projectId]: true
+      };
+      updateGroupedProjects(newGroupedState);
+      
+      // Simülasyon başarı mesajı
+      showNotification('success', `🎭 Test projesi simülasyonu aktif edildi! "${originalProject.name}" için görsel test ortamı hazır.`);
+      
+      // Simülasyon verisi döndür
+      return {
+        type: 'simulation',
+        originalProject: originalProject,
+        testProject: {
+          id: projectId + 10000,
+          name: `${originalProject.name} - Test`,
+          apiKey: `test_hzm_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`,
+          tableCount: originalProject.tableCount,
+          isTestEnvironment: true
+        }
+      };
+      
     } catch (error: any) {
       console.error('❌ Test environment creation failed:', error);
       
-      // Daha detaylı hata mesajı
+      // Detaylı hata mesajı
       let errorMessage = 'Test ortamı oluşturulamadı';
       if (error.message.includes('Authentication')) {
-        errorMessage = 'Giriş yapmanız gerekiyor. Lütfen sayfayı yenileyip tekrar giriş yapın.';
+        errorMessage = '🔐 Giriş yapmanız gerekiyor. Lütfen sayfayı yenileyip tekrar giriş yapın.';
       } else if (error.message.includes('not found')) {
-        errorMessage = 'Proje bulunamadı. Lütfen sayfayı yenileyin.';
+        errorMessage = '📂 Proje bulunamadı. Lütfen sayfayı yenileyin.';
+      } else if (error.message.includes('Backend API failed')) {
+        errorMessage = '⚠️ Backend henüz hazır değil, simülasyon modu aktif.';
       } else {
-        errorMessage = `Hata: ${error.message}`;
+        errorMessage = `❌ Hata: ${error.message}`;
       }
       
       showNotification('error', errorMessage);
@@ -283,7 +327,7 @@ export const useProjectList = () => {
     } finally {
       setCreating(false);
     }
-  }, [fetchProjects, showNotification, updateGroupedProjects, groupedProjects]);
+  }, [fetchProjects, showNotification, updateGroupedProjects, groupedProjects, projects]);
 
   return {
     // State
