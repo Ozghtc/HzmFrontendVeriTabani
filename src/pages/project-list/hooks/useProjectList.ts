@@ -137,7 +137,28 @@ export const useProjectList = () => {
       
       if (success) {
         console.log('✅ Project deleted successfully');
-        showNotification('success', 'Proje başarıyla silindi!');
+        
+        // GROUP MANAGEMENT: Handle test project deletion logic
+        const isTestProject = (projectToDelete as any).isTestEnvironment;
+        const parentProjectId = (projectToDelete as any).parentProjectId;
+        
+        if (isTestProject && parentProjectId) {
+          // Test projesi silindi - parent projeyi gruptan çıkar
+          const newGroupedState = { ...groupedProjects };
+          delete newGroupedState[parentProjectId];
+          updateGroupedProjects(newGroupedState);
+          console.log('🧪 Test project deleted - parent project ungrouped:', parentProjectId);
+          showNotification('success', 'Test projesi silindi! Ana proje normal listeye döndü.');
+        } else if (groupedProjects[deletingProject]) {
+          // Normal proje silindi (test environment ile birlikte)
+          const newGroupedState = { ...groupedProjects };
+          delete newGroupedState[deletingProject];
+          updateGroupedProjects(newGroupedState);
+          console.log('🗑️ Normal project deleted with test environment - ungrouped:', deletingProject);
+          showNotification('success', 'Proje ve test ortamı birlikte silindi!');
+        } else {
+          showNotification('success', 'Proje başarıyla silindi!');
+        }
       } else {
         console.log('❌ Project delete failed');
         showNotification('error', 'Proje silinirken hata oluştu.');

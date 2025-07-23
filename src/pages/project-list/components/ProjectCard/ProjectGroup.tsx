@@ -207,14 +207,17 @@ const ProjectGroup: React.FC<ProjectGroupProps> = ({
               </div>
               <div className="transform hover:scale-105 transition-transform duration-200 opacity-90">
                 <ProjectCard
-                  project={testProject}
+                  project={{
+                    ...testProject,
+                    isProtected: project.isProtected // Parent projenin koruma durumunu kopyala
+                  }}
                   showApiKey={showApiKey[testProject.id] || false}
                   onToggleApiKey={() => onToggleApiKey(testProject.id)}
                   onCopyApiKey={() => onCopyApiKey(testProject.apiKey)}
-                  onDelete={() => {}} // Test projesini silemez
+                  onDelete={() => onDelete(testProject.id)} // Test projesi de silinebilir
                   onNavigateToData={() => onNavigateToData(testProject.id)}
                   onNavigateToEdit={() => onNavigateToEdit(testProject.id)}
-                  onToggleProtection={() => {}} // Test projesi koruması yok
+                  onToggleProtection={() => onToggleProtection(project.id)} // Parent projenin korumasını değiştir
                   onCreateTestProject={() => {}} // Test projesi için test projesi yok
                   loading={loading}
                 />
