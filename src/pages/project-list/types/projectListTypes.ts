@@ -7,6 +7,7 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   isProtected?: boolean;
+  isTestEnvironment?: boolean;
 }
 
 export interface NotificationState {

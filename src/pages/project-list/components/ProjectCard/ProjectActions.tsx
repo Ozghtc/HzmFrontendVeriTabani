@@ -9,6 +9,7 @@ interface ProjectActionsProps {
   onShowProjectLogs: () => void;
   onCreateTestProject?: () => void; // Yeni prop
   loading: boolean;
+  isTestProject?: boolean; // Test projesi mi kontrolü
 }
 
 const ProjectActions: React.FC<ProjectActionsProps> = ({
@@ -17,7 +18,8 @@ const ProjectActions: React.FC<ProjectActionsProps> = ({
   onShowProjectInfo,
   onShowProjectLogs,
   onCreateTestProject,
-  loading
+  loading,
+  isTestProject = false
 }) => {
   const { Eye, Settings, Code, Info } = icons;
   
@@ -63,19 +65,21 @@ const ProjectActions: React.FC<ProjectActionsProps> = ({
       
       {/* İkinci satır - Test Projesi Oluştur butonu */}
       <div className="grid grid-cols-1">
-        <button
-          onClick={onCreateTestProject}
-          disabled={loading}
-          className={`px-4 py-2 rounded-md transition-colors flex items-center justify-center text-sm font-medium ${
-            loading 
-              ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-              : 'bg-purple-600 text-white hover:bg-purple-700'
-          }`}
-          title="Bu projeye otomatik test verileri ekle"
-        >
-          <TestTube size={16} className="mr-2" />
-          Test Projesi Oluştur
-        </button>
+        {!isTestProject && onCreateTestProject && (
+          <button
+            onClick={onCreateTestProject}
+            disabled={loading}
+            className={`px-4 py-2 rounded-md transition-colors flex items-center justify-center text-sm font-medium ${
+              loading 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-purple-600 text-white hover:bg-purple-700'
+            }`}
+            title="Bu projeye otomatik test verileri ekle"
+          >
+            <TestTube size={16} className="mr-2" />
+            Test Projesi Oluştur
+          </button>
+        )}
       </div>
     </div>
   );

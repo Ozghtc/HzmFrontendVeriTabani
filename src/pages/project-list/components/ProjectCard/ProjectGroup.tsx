@@ -82,6 +82,81 @@ const ProjectGroup: React.FC<ProjectGroupProps> = ({
         </button>
       </div>
       
+      {/* Hızlı Erişim Butonları */}
+      <div className="grid md:grid-cols-2 gap-6 mb-6">
+        {/* Canlı Proje Hızlı Erişim */}
+        <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4">
+          <div className="flex items-center mb-3">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-2 rounded-lg mr-3">
+              <Play size={16} className="text-white" />
+            </div>
+            <h3 className="font-bold text-green-800">🟢 CANLI HİZLI ERİŞİM</h3>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            <button
+              onClick={() => onNavigateToData(project.id)}
+              className="bg-blue-600 text-white px-2 py-2 rounded-md hover:bg-blue-700 transition-colors text-xs font-medium"
+            >
+              Veriler
+            </button>
+            <button
+              onClick={() => onNavigateToEdit(project.id)}
+              className="bg-green-600 text-white px-2 py-2 rounded-md hover:bg-green-700 transition-colors text-xs font-medium"
+            >
+              Düzenle
+            </button>
+            <button
+              onClick={() => {/* Bilgiler modal açılacak */}}
+              className="bg-orange-600 text-white px-2 py-2 rounded-md hover:bg-orange-700 transition-colors text-xs font-medium"
+            >
+              Bilgiler
+            </button>
+            <button
+              onClick={() => {/* Logs modal açılacak */}}
+              className="bg-red-600 text-white px-2 py-2 rounded-md hover:bg-red-700 transition-colors text-xs font-medium"
+            >
+              Logs
+            </button>
+          </div>
+        </div>
+        
+        {/* Test Projesi Hızlı Erişim */}
+        <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
+          <div className="flex items-center mb-3">
+            <div className="bg-gradient-to-r from-purple-500 to-violet-500 p-2 rounded-lg mr-3">
+              <Beaker size={16} className="text-white" />
+            </div>
+            <h3 className="font-bold text-purple-800">🟣 TEST HİZLI ERİŞİM</h3>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            <button
+              onClick={() => onNavigateToData(testProject.id)}
+              className="bg-blue-600 text-white px-2 py-2 rounded-md hover:bg-blue-700 transition-colors text-xs font-medium"
+            >
+              Veriler
+            </button>
+            <button
+              onClick={() => onNavigateToEdit(testProject.id)}
+              className="bg-green-600 text-white px-2 py-2 rounded-md hover:bg-green-700 transition-colors text-xs font-medium"
+            >
+              Düzenle
+            </button>
+            <button
+              onClick={() => {/* Test bilgiler modal açılacak */}}
+              className="bg-orange-600 text-white px-2 py-2 rounded-md hover:bg-orange-700 transition-colors text-xs font-medium"
+            >
+              Bilgiler
+            </button>
+            <button
+              onClick={() => {/* Test logs modal açılacak */}}
+              className="bg-red-600 text-white px-2 py-2 rounded-md hover:bg-red-700 transition-colors text-xs font-medium"
+            >
+              Logs
+            </button>
+          </div>
+        </div>
+      </div>
+      
       {/* Connection Info */}
       <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 mb-6 border border-blue-200 shadow-sm">
         <div className="space-y-3">

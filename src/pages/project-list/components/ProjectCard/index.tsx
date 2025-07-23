@@ -62,8 +62,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           onNavigateToEdit={onNavigateToEdit}
           onShowProjectInfo={() => setIsProjectInfoOpen(true)}
           onShowProjectLogs={() => setIsProjectLogsOpen(true)}
-          onCreateTestProject={handleCreateTestProject}
+          onCreateTestProject={project.isTestEnvironment ? undefined : handleCreateTestProject}
           loading={loading}
+          isTestProject={project.isTestEnvironment || false}
         />
       </div>
 
