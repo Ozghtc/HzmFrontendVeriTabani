@@ -1,9 +1,32 @@
 [build]
-  command = "npm run build"
   publish = "dist"
+  command = "npm run build"
 
 [build.environment]
-  VITE_API_BASE_URL = "https://hzmbackandveritabani-production-c660.up.railway.app/api/v1"
+  NODE_ENV = "production"
+
+# Main branch - Production
+[context.production]
+  publish = "dist"
+  command = "npm run build"
+  [context.production.environment]
+    NODE_ENV = "production"
+    VITE_API_BASE_URL = "https://hzmbackandveritabani-production-c660.up.railway.app/api/v1"
+    VITE_APP_TITLE = "HZMSoft Database Pro"
+
+# Development branch - Test/Staging
+[context.development]
+  publish = "dist"
+  command = "npm run build"
+  [context.development.environment]
+    NODE_ENV = "development"
+    VITE_API_BASE_URL = "https://hzmbackandveritabani-production-c660.up.railway.app/api/v1"
+    VITE_APP_TITLE = "HZMSoft Database Pro - TEST ORTAMI"
+
+# Branch deployments
+[context.branch-deploy]
+  publish = "dist"
+  command = "npm run build"
 
 [[redirects]]
   from = "/*"
