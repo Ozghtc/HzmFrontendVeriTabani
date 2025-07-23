@@ -38,6 +38,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           project={project} 
           onDelete={onDelete} 
           onToggleProtection={onToggleProtection}
+          isTestProject={project.isTestEnvironment || false}
         />
         
         <ApiKeySection

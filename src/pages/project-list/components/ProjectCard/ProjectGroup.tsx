@@ -209,15 +209,16 @@ const ProjectGroup: React.FC<ProjectGroupProps> = ({
                 <ProjectCard
                   project={{
                     ...testProject,
-                    isProtected: project.isProtected // Parent projenin koruma durumunu kopyala
+                    isProtected: project.isProtected, // Parent projenin koruma durumunu kopyala
+                    isTestEnvironment: true // Test projesi olduğunu belirt
                   }}
                   showApiKey={showApiKey[testProject.id] || false}
                   onToggleApiKey={() => onToggleApiKey(testProject.id)}
                   onCopyApiKey={() => onCopyApiKey(testProject.apiKey)}
-                  onDelete={() => onDelete(testProject.id)} // Test projesi de silinebilir
+                  onDelete={() => onDelete(testProject.id)} // Test projesi silinebilir (koruma durumuna göre)
                   onNavigateToData={() => onNavigateToData(testProject.id)}
                   onNavigateToEdit={() => onNavigateToEdit(testProject.id)}
-                  onToggleProtection={() => onToggleProtection(project.id)} // Parent projenin korumasını değiştir
+                  onToggleProtection={() => {}} // Test projesi kendi koruması yok - boş function
                   onCreateTestProject={() => {}} // Test projesi için test projesi yok
                   loading={loading}
                 />
