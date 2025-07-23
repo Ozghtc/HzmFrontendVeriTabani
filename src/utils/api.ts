@@ -1,7 +1,6 @@
 // API Client and Instance
 export { ApiClient } from './api/core/ApiClient';
-export { default as apiClient } from './api/core/apiInstance';
-import apiInstance from './api/core/apiInstance';
+export { apiClient, default as apiInstance } from './api/core/apiInstance';
 
 // Types
 export type {
@@ -66,6 +65,9 @@ export { API_CONFIG, ENDPOINTS } from './api/config/apiConfig';
 export { RequestInterceptorManager } from './api/interceptors/requestInterceptor';
 export { ResponseInterceptorManager } from './api/interceptors/responseInterceptor';
 
+// Import for internal use
+import { apiClient } from './api/core/apiInstance';
+
 // Default export
 export default apiClient; 
 
@@ -74,7 +76,7 @@ export const createTestEnvironment = async (projectId: number) => {
   try {
     console.log('🧪 Creating test environment for project:', projectId);
     
-    const response = await apiInstance.post(`/projects/${projectId}/create-test-environment`);
+    const response = await apiClient.post(`/projects/${projectId}/create-test-environment`);
     
     if (response.data.success) {
       console.log('✅ Test environment created:', response.data.data);

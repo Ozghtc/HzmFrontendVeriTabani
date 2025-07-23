@@ -100,5 +100,8 @@ class ApiInstance {
 // Create singleton instance
 export const apiInstance = new ApiInstance();
 
+// Also export as apiClient for backward compatibility
+export const apiClient = apiInstance;
+
 // Export for easy access
 export default apiInstance; 
