@@ -25,25 +25,25 @@ export const useProjectList = () => {
   const [protectionProjectId, setProtectionProjectId] = useState<number | null>(null);
   const [protectionLoading, setProtectionLoading] = useState(false);
   
-  // Test Environment State
+  // Test Environment State - SessionStorage (sekme kapanınca silinir)
   const [groupedProjects, setGroupedProjects] = useState<Record<number, boolean>>(() => {
-    // localStorage'dan önceki gruplu projeleri yükle
+    // sessionStorage'dan önceki gruplu projeleri yükle (sadece bu sekme için)
     try {
-      const saved = localStorage.getItem('hzm_grouped_projects');
+      const saved = sessionStorage.getItem('hzm_grouped_projects');
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
     }
   });
 
-  // groupedProjects değiştiğinde localStorage'a kaydet
+  // groupedProjects değiştiğinde sessionStorage'a kaydet
   const updateGroupedProjects = useCallback((newGroupedProjects: Record<number, boolean>) => {
     setGroupedProjects(newGroupedProjects);
     try {
-      localStorage.setItem('hzm_grouped_projects', JSON.stringify(newGroupedProjects));
-      console.log('💾 Grouped projects saved to localStorage:', newGroupedProjects);
+      sessionStorage.setItem('hzm_grouped_projects', JSON.stringify(newGroupedProjects));
+      console.log('💾 Grouped projects saved to sessionStorage (this tab only):', newGroupedProjects);
     } catch (error) {
-      console.error('❌ Failed to save grouped projects to localStorage:', error);
+      console.error('❌ Failed to save grouped projects to sessionStorage:', error);
     }
   }, []);
 
