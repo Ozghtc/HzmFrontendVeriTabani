@@ -226,90 +226,110 @@ export const useProjectList = () => {
       const token = localStorage.getItem('token');
       console.log('🔑 Token from localStorage:', token ? 'Present' : 'Missing');
       
-      // Önce backend API'yi dene
-      if (token) {
-        try {
-          console.log('📡 Attempting backend API call...');
-          console.log('🔗 API URL:', `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`);
-          console.log('🔑 Authorization header:', `Bearer ${token.substring(0, 20)}...`);
-          
-          const response = await fetch(
-            `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              }
-            }
-          );
-          
-          console.log('📊 Backend response status:', response.status);
-          console.log('📊 Backend response ok:', response.ok);
-          console.log('📊 Backend response statusText:', response.statusText);
-          
-          if (response.ok) {
-            const data = await response.json();
-            console.log('📦 Backend response data:', data);
-            
-            if (data.success) {
-              console.log('✅ Backend test environment created successfully!');
-              
-              // Gerçek test projesi oluşturuldu
-              const newGroupedState = {
-                ...groupedProjects,
-                [projectId]: true
-              };
-              updateGroupedProjects(newGroupedState);
-              
-              showNotification('success', `✅ Gerçek test ortamı oluşturuldu! ${data.data?.message || ''}`);
-              
-              // Proje listesini yenile
-              await fetchProjects();
-              return data.data;
-            } else {
-              console.log('❌ Backend response success=false:', data.error);
-              throw new Error(`Backend error: ${data.error}`);
-            }
-          } else {
-            // Response not ok, get error details
-            let errorText = '';
-            try {
-              const errorData = await response.json();
-              errorText = errorData.error || errorData.message || 'Unknown error';
-              console.log('❌ Backend error response:', errorData);
-            } catch (parseError) {
-              errorText = await response.text();
-              console.log('❌ Backend error text:', errorText);
-            }
-            
-            throw new Error(`Backend API failed: ${response.status} ${response.statusText} - ${errorText}`);
-          }
-          
-        } catch (backendError: any) {
-          console.log('❌ Backend error details:', {
-            message: backendError.message,
-            name: backendError.name,
-            stack: backendError.stack?.substring(0, 200)
-          });
-          
-          // Eğer gerçek bir network hatası varsa, kullanıcıyı bilgilendir
-          if (backendError.name === 'TypeError' && backendError.message.includes('fetch')) {
-            showNotification('error', '🌐 Network hatası: Backend sunucusuna ulaşılamıyor');
-          } else if (backendError.message.includes('401') || backendError.message.includes('Unauthorized')) {
-            showNotification('error', '🔐 Yetki hatası: Token geçersiz olabilir');
-          } else if (backendError.message.includes('404')) {
-            showNotification('error', '📂 Endpoint bulunamadı: Backend henüz hazır değil');
-          } else {
-            showNotification('error', `❌ Backend hatası: ${backendError.message}`);
-          }
-          
-          // Fallback simülasyona geç
-          console.log('⚠️ Falling back to simulation due to backend error...');
+      // Token yoksa farklı yerlerden dene
+      let authToken = token;
+      if (!authToken) {
+        // sessionStorage'da dene
+        authToken = sessionStorage.getItem('token');
+        console.log('🔑 Token from sessionStorage:', authToken ? 'Present' : 'Missing');
+      }
+      
+      if (!authToken) {
+        // Diğer token anahtarlarını dene
+        authToken = localStorage.getItem('authToken') || 
+                   localStorage.getItem('access_token') ||
+                   localStorage.getItem('jwt_token');
+        console.log('🔑 Token from alternative keys:', authToken ? 'Present' : 'Missing');
+      }
+      
+      console.log('🔑 Final token status:', authToken ? `Found: ${authToken.substring(0, 20)}...` : 'Not found anywhere');
+      
+      // Backend API'yi her durumda dene (token varsa auth ile, yoksa anonymous)
+      try {
+        console.log('📡 Attempting backend API call...');
+        console.log('🔗 API URL:', `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`);
+        
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json'
+        };
+        
+        if (authToken) {
+          headers['Authorization'] = `Bearer ${authToken}`;
+          console.log('🔑 Using Authorization header with token');
+        } else {
+          console.log('⚠️ No token found, attempting anonymous request');
         }
-      } else {
-        console.log('⚠️ No token found, using simulation...');
-        showNotification('info', '🔐 Giriş token\'ı bulunamadı, simülasyon modu aktif');
+        
+        const response = await fetch(
+          `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`,
+          {
+            method: 'POST',
+            headers
+          }
+        );
+        
+        console.log('📊 Backend response status:', response.status);
+        console.log('📊 Backend response ok:', response.ok);
+        console.log('📊 Backend response statusText:', response.statusText);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('📦 Backend response data:', data);
+          
+          if (data.success) {
+            console.log('✅ Backend test environment created successfully!');
+            
+            // Gerçek test projesi oluşturuldu
+            const newGroupedState = {
+              ...groupedProjects,
+              [projectId]: true
+            };
+            updateGroupedProjects(newGroupedState);
+            
+            showNotification('success', `✅ Gerçek test ortamı oluşturuldu! ${data.data?.message || ''}`);
+            
+            // Proje listesini yenile
+            await fetchProjects();
+            return data.data;
+          } else {
+            console.log('❌ Backend response success=false:', data.error);
+            throw new Error(`Backend error: ${data.error}`);
+          }
+        } else {
+          // Response not ok, get error details
+          let errorText = '';
+          try {
+            const errorData = await response.json();
+            errorText = errorData.error || errorData.message || 'Unknown error';
+            console.log('❌ Backend error response:', errorData);
+          } catch (parseError) {
+            errorText = await response.text();
+            console.log('❌ Backend error text:', errorText);
+          }
+          
+          throw new Error(`Backend API failed: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+        
+      } catch (backendError: any) {
+        console.log('❌ Backend error details:', {
+          message: backendError.message,
+          name: backendError.name,
+          stack: backendError.stack?.substring(0, 200)
+        });
+        
+        // Eğer gerçek bir network hatası varsa, kullanıcıyı bilgilendir
+        if (backendError.name === 'TypeError' && backendError.message.includes('fetch')) {
+          showNotification('error', '🌐 Network hatası: Backend sunucusuna ulaşılamıyor');
+        } else if (backendError.message.includes('401') || backendError.message.includes('Unauthorized')) {
+          showNotification('error', '🔐 Yetki hatası: Giriş yapmanız gerekiyor');
+        } else if (backendError.message.includes('404')) {
+          showNotification('error', '📂 Endpoint bulunamadı: Backend henüz hazır değil');
+        } else {
+          showNotification('error', `❌ Backend hatası: ${backendError.message}`);
+        }
+        
+        // Fallback simülasyona geç
+        console.log('⚠️ Falling back to simulation due to backend error...');
       }
       
       // Fallback: Frontend Simülasyon
