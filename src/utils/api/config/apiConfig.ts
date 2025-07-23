@@ -10,6 +10,27 @@ export const API_CONFIG = {
   // Default settings
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
+  
+  // Rate limiting configuration
+  rateLimiting: {
+    maxRequestsPerMinute: 60,
+    maxBurst: 10
+  },
+  
+  // Headers
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  
+  // Retry defaults
+  retryDefaults: {
+    maxRetries: 3,
+    delay: 1000
+  },
+  
+  // Base URL (default)
+  baseURL: 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'
 } as const;
 
 // API Mode Management
