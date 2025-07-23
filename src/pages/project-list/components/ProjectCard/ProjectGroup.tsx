@@ -55,106 +55,93 @@ const ProjectGroup: React.FC<ProjectGroupProps> = ({
   
   return (
     <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-xl shadow-xl border-2 border-blue-300 p-6 mb-6">
-      {/* Group Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-xl mr-4 shadow-lg">
-            <TestTube className="text-white" size={24} />
+      {/* Group Header - Tek Satırda Hepsi */}
+      <div className="flex items-center justify-between mb-6 bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
+        <div className="flex items-center gap-3">
+          {/* Proje Adı */}
+          <h2 className="text-xl font-bold text-gray-800">
+            📊 {project.name}
+          </h2>
+          
+          {/* Yeşil Top */}
+          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          
+          {/* Canlı Hızlı Erişim */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-green-700">CANLI</span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => onNavigateToData(project.id)}
+                className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-blue-600 transition-colors"
+              >
+                Veri
+              </button>
+              <button
+                onClick={() => onNavigateToEdit(project.id)}
+                className="bg-green-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-green-600 transition-colors"
+              >
+                Düzen
+              </button>
+              <button
+                onClick={() => {/* Bilgiler modal açılacak */}}
+                className="bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-orange-600 transition-colors"
+              >
+                Bilgi
+              </button>
+              <button
+                onClick={() => {/* Logs modal açılacak */}}
+                className="bg-red-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-red-600 transition-colors"
+              >
+                Logs
+              </button>
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-1">
-              📊 {project.name}
-            </h2>
-            <p className="text-sm text-blue-600 font-medium">
-              Canlı Proje + Test Ortamı Görünümü
-            </p>
+          
+          {/* Mor Top */}
+          <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+          
+          {/* Test Hızlı Erişim */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-purple-700">TEST</span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => onNavigateToData(testProject.id)}
+                className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-blue-600 transition-colors"
+              >
+                Veri
+              </button>
+              <button
+                onClick={() => onNavigateToEdit(testProject.id)}
+                className="bg-green-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-green-600 transition-colors"
+              >
+                Düzen
+              </button>
+              <button
+                onClick={() => {/* Test bilgiler modal açılacak */}}
+                className="bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-orange-600 transition-colors"
+              >
+                Bilgi
+              </button>
+              <button
+                onClick={() => {/* Test logs modal açılacak */}}
+                className="bg-red-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-red-600 transition-colors"
+              >
+                Logs
+              </button>
+            </div>
           </div>
         </div>
         
+        {/* Ok Tuşu */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="p-3 text-blue-600 hover:bg-blue-100 rounded-xl transition-all duration-200 shadow-sm"
+          className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all duration-200"
         >
           <ArrowRight 
-            size={20} 
+            size={18} 
             className={`transform transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
           />
         </button>
-      </div>
-      
-      {/* Hızlı Erişim Butonları */}
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        {/* Canlı Proje Hızlı Erişim */}
-        <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4">
-          <div className="flex items-center mb-3">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-2 rounded-lg mr-3">
-              <Play size={16} className="text-white" />
-            </div>
-            <h3 className="font-bold text-green-800">🟢 CANLI HİZLI ERİŞİM</h3>
-          </div>
-          <div className="grid grid-cols-4 gap-2">
-            <button
-              onClick={() => onNavigateToData(project.id)}
-              className="bg-blue-600 text-white px-2 py-2 rounded-md hover:bg-blue-700 transition-colors text-xs font-medium"
-            >
-              Veriler
-            </button>
-            <button
-              onClick={() => onNavigateToEdit(project.id)}
-              className="bg-green-600 text-white px-2 py-2 rounded-md hover:bg-green-700 transition-colors text-xs font-medium"
-            >
-              Düzenle
-            </button>
-            <button
-              onClick={() => {/* Bilgiler modal açılacak */}}
-              className="bg-orange-600 text-white px-2 py-2 rounded-md hover:bg-orange-700 transition-colors text-xs font-medium"
-            >
-              Bilgiler
-            </button>
-            <button
-              onClick={() => {/* Logs modal açılacak */}}
-              className="bg-red-600 text-white px-2 py-2 rounded-md hover:bg-red-700 transition-colors text-xs font-medium"
-            >
-              Logs
-            </button>
-          </div>
-        </div>
-        
-        {/* Test Projesi Hızlı Erişim */}
-        <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
-          <div className="flex items-center mb-3">
-            <div className="bg-gradient-to-r from-purple-500 to-violet-500 p-2 rounded-lg mr-3">
-              <Beaker size={16} className="text-white" />
-            </div>
-            <h3 className="font-bold text-purple-800">🟣 TEST HİZLI ERİŞİM</h3>
-          </div>
-          <div className="grid grid-cols-4 gap-2">
-            <button
-              onClick={() => onNavigateToData(testProject.id)}
-              className="bg-blue-600 text-white px-2 py-2 rounded-md hover:bg-blue-700 transition-colors text-xs font-medium"
-            >
-              Veriler
-            </button>
-            <button
-              onClick={() => onNavigateToEdit(testProject.id)}
-              className="bg-green-600 text-white px-2 py-2 rounded-md hover:bg-green-700 transition-colors text-xs font-medium"
-            >
-              Düzenle
-            </button>
-            <button
-              onClick={() => {/* Test bilgiler modal açılacak */}}
-              className="bg-orange-600 text-white px-2 py-2 rounded-md hover:bg-orange-700 transition-colors text-xs font-medium"
-            >
-              Bilgiler
-            </button>
-            <button
-              onClick={() => {/* Test logs modal açılacak */}}
-              className="bg-red-600 text-white px-2 py-2 rounded-md hover:bg-red-700 transition-colors text-xs font-medium"
-            >
-              Logs
-            </button>
-          </div>
-        </div>
       </div>
       
       {/* Connection Info */}
