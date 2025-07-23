@@ -83,6 +83,10 @@ export const useApiProjects = () => {
         
         console.log('🔍 Detected grouped projects from backend:', detectedGroupedProjects);
         
+        // ✅ DÜZELTME: Projeler state'e set et
+        setProjects(projects);
+        setError(null);
+        
         // API'den gelen grouped projects bilgisini döndür
         return {
           projects,
@@ -91,6 +95,7 @@ export const useApiProjects = () => {
       } else {
         console.log('❌ Backend API failed:', response.error);
         setError(response.error || 'Backend API connection failed');
+        setProjects([]);
         return {
           projects: [],
           detectedGroupedProjects: {}
@@ -99,6 +104,7 @@ export const useApiProjects = () => {
     } catch (error: any) {
       console.error('❌ Error fetching projects:', error);
       setError(error.message || 'Network error occurred');
+      setProjects([]);
       return {
         projects: [],
         detectedGroupedProjects: {}
