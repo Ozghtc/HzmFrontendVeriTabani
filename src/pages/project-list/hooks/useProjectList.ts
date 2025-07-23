@@ -35,6 +35,9 @@ export const useProjectList = () => {
       return {};
     }
   });
+  
+  // Test projelerini sakla
+  const [testProjects, setTestProjects] = useState<Record<number, any>>({});
 
   // groupedProjects değiştiğinde sessionStorage'a kaydet
   const updateGroupedProjects = useCallback((newGroupedProjects: Record<number, boolean>) => {
@@ -59,6 +62,12 @@ export const useProjectList = () => {
         if (result && result.projects) {
           console.log('📦 Projects loaded:', result.projects.length);
           console.log('🧪 Detected grouped projects:', result.detectedGroupedProjects);
+          console.log('🧪 Test projects:', result.testProjects);
+          
+          // Backend'den gelen test projelerini sakla
+          if (result.testProjects) {
+            setTestProjects(result.testProjects);
+          }
           
           // Backend'den gelen grouped projects'leri sessionStorage ile birleştir
           const currentSessionGrouped = groupedProjects;
@@ -334,7 +343,7 @@ export const useProjectList = () => {
           if (data.success) {
             console.log('✅ Backend test environment created successfully!');
             
-            // Gerçek test projesi oluşturuldu
+            // Gerçek test projesi oluşturuldu - projeleri yeniden yükle
             const newGroupedState = {
               ...groupedProjects,
               [projectId]: true
@@ -343,8 +352,8 @@ export const useProjectList = () => {
             
             showNotification('success', `✅ Gerçek test ortamı oluşturuldu! ${data.data?.message || ''}`);
             
-            // Test projesi oluşturuldu - artık yeniden yüklemeye gerek yok
-            // await fetchProjects(); // KALDIRILDI - sonsuz loop engellemek için
+            // Test projesi oluşturuldu - projeleri yeniden yükle
+            await fetchProjects();
             return data.data;
           } else {
             console.log('❌ Backend response success=false:', data.error);
@@ -439,7 +448,7 @@ export const useProjectList = () => {
     } finally {
       setCreating(false);
     }
-  }, [showNotification, updateGroupedProjects, groupedProjects, projects]);
+  }, [showNotification, updateGroupedProjects, groupedProjects, projects, fetchProjects]);
 
   return {
     // State
@@ -462,6 +471,7 @@ export const useProjectList = () => {
     // Test Environment
     createTestEnvironment,
     groupedProjects,
+    testProjects,
     updateGroupedProjects,
     
     // Actions

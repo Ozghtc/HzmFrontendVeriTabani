@@ -13,7 +13,7 @@ import ProjectCard from './project-list/components/ProjectCard';
 import ProjectGroup from './project-list/components/ProjectCard/ProjectGroup';
 import DeleteProjectModal from './project-list/components/DeleteProjectModal';
 import ProjectProtectionModal from './project-list/components/ProjectProtectionModal';
-import { TestTube, Database } from 'lucide-react'; // Added lucide-react for icons
+import { TestTube, Database } from 'lucide-react';
 
 const ProjectList = () => {
   const { state } = useDatabase();
@@ -38,6 +38,7 @@ const ProjectList = () => {
     // Test Environment
     createTestEnvironment,
     groupedProjects,
+    testProjects,
     updateGroupedProjects,
     
     // Actions
@@ -71,6 +72,63 @@ const ProjectList = () => {
     }
   };
 
+  // Proje filtreleme mantığı - Test projelerini ayrı kategorize et
+  const categorizeProjects = () => {
+    const normalProjects: any[] = [];
+    const testEnvironmentProjects: any[] = [];
+    const standaloneTestProjects: any[] = [];
+
+    // Önce hangi parent projelerin test environment'ı olduğunu belirle
+    const parentProjectsWithTestEnv = new Set<number>();
+    
+    projects.forEach(project => {
+      if ((project as any).isTestEnvironment && (project as any).parentProjectId) {
+        parentProjectsWithTestEnv.add((project as any).parentProjectId);
+      }
+    });
+
+    projects.forEach(project => {
+      // Test projesi mi kontrol et
+      const isTestProject = (project as any).isTestEnvironment || false;
+      
+      if (isTestProject) {
+        // Bu bir test projesi
+        const parentProjectId = (project as any).parentProjectId;
+        
+        // Eğer parent projesi de listede varsa, bu test projesini standalone olarak gösterme
+        // Çünkü parent proje zaten test environment bölümünde görünecek
+        const hasParentInList = parentProjectId && projects.some(p => p.id === parentProjectId);
+        
+        if (!hasParentInList) {
+          // Parent projesi listede yok, standalone test projesi olarak göster
+          standaloneTestProjects.push(project);
+        }
+        // Eğer parent projesi varsa, bu test projesini ayrıca gösterme
+        // Çünkü ProjectGroup içinde zaten görünecek
+      } else if (groupedProjects[project.id] || parentProjectsWithTestEnv.has(project.id)) {
+        // Bu normal bir proje ama test ortamı var - test environment bölümüne ekle
+        testEnvironmentProjects.push(project);
+      } else {
+        // Normal tek proje - standart projeler bölümüne ekle
+        normalProjects.push(project);
+      }
+    });
+
+    console.log('🔍 Project categorization:');
+    console.log('  Normal projects:', normalProjects.map(p => `${p.id}:${p.name}`));
+    console.log('  Test environment projects:', testEnvironmentProjects.map(p => `${p.id}:${p.name}`));
+    console.log('  Standalone test projects:', standaloneTestProjects.map(p => `${p.id}:${p.name}`));
+    console.log('  Parent projects with test env:', Array.from(parentProjectsWithTestEnv));
+
+    return {
+      normalProjects,
+      testEnvironmentProjects,
+      standaloneTestProjects
+    };
+  };
+
+  const { normalProjects, testEnvironmentProjects, standaloneTestProjects } = categorizeProjects();
+
   return (
     <>
       <div className="min-h-screen bg-slate-50">
@@ -101,8 +159,8 @@ const ProjectList = () => {
             <EmptyState />
           ) : (
             <div className="space-y-8">
-              {/* Gruplu Projeler Bölümü */}
-              {projects.some(project => groupedProjects[project.id]) && (
+              {/* Test Ortamı Projeleri Bölümü - Parent projeleri için */}
+              {testEnvironmentProjects.length > 0 && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -114,35 +172,70 @@ const ProjectList = () => {
                       </h2>
                     </div>
                     <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full">
-                      {projects.filter(p => groupedProjects[p.id]).length} Gruplu Proje
+                      {testEnvironmentProjects.length} Gruplu Proje
                     </div>
                   </div>
                   
                   <div className="space-y-6">
-                    {projects
-                      .filter(project => groupedProjects[project.id])
-                      .map(project => (
-                        <ProjectGroup
-                          key={`group-${project.id}`}
-                          project={project}
-                          showApiKey={showApiKey}
-                          onToggleApiKey={toggleApiKeyVisibility}
-                          onCopyApiKey={handleCopyApiKey}
-                          onDelete={handleDeleteProject}
-                          onNavigateToData={navigateToData}
-                          onNavigateToEdit={navigateToEdit}
-                          onToggleProtection={handleToggleProtection}
-                          onCreateTestProject={handleCreateTestProject}
-                          loading={loading}
-                        />
-                      ))
-                    }
+                    {testEnvironmentProjects.map(project => (
+                      <ProjectGroup
+                        key={`group-${project.id}`}
+                        project={project}
+                        testProject={testProjects[project.id]} // Gerçek test projesi verisi
+                        showApiKey={showApiKey}
+                        onToggleApiKey={toggleApiKeyVisibility}
+                        onCopyApiKey={handleCopyApiKey}
+                        onDelete={handleDeleteProject}
+                        onNavigateToData={navigateToData}
+                        onNavigateToEdit={navigateToEdit}
+                        onToggleProtection={handleToggleProtection}
+                        onCreateTestProject={handleCreateTestProject}
+                        loading={loading}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Standalone Test Projeleri Bölümü - Sadece test projeleri için */}
+              {standaloneTestProjects.length > 0 && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="bg-gradient-to-r from-purple-500 to-violet-500 p-2 rounded-lg mr-3">
+                        <TestTube className="text-white" size={20} />
+                      </div>
+                      <h2 className="text-2xl font-bold text-gray-800">
+                        🧪 Test Projeleri
+                      </h2>
+                    </div>
+                    <div className="text-sm text-gray-600 bg-purple-50 px-3 py-1 rounded-full">
+                      {standaloneTestProjects.length} Test Projesi
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {standaloneTestProjects.map(project => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        showApiKey={showApiKey[project.id] || false}
+                        onToggleApiKey={() => toggleApiKeyVisibility(project.id)}
+                        onCopyApiKey={() => handleCopyApiKey(project.apiKey)}
+                        onDelete={() => handleDeleteProject(project.id)}
+                        onNavigateToData={() => navigateToData(project.id)}
+                        onNavigateToEdit={() => navigateToEdit(project.id)}
+                        onToggleProtection={() => handleToggleProtection(project.id)}
+                        onCreateTestProject={() => {}} // Test projesi için test projesi oluşturulamaz
+                        loading={loading}
+                      />
+                    ))}
                   </div>
                 </div>
               )}
 
               {/* Normal Projeler Bölümü */}
-              {projects.some(project => !groupedProjects[project.id]) && (
+              {normalProjects.length > 0 && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -154,29 +247,26 @@ const ProjectList = () => {
                       </h2>
                     </div>
                     <div className="text-sm text-gray-600 bg-green-50 px-3 py-1 rounded-full">
-                      {projects.filter(p => !groupedProjects[p.id]).length} Tek Proje
+                      {normalProjects.length} Tek Proje
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {projects
-                      .filter(project => !groupedProjects[project.id])
-                      .map(project => (
-                        <ProjectCard
-                          key={project.id}
-                          project={project}
-                          showApiKey={showApiKey[project.id] || false}
-                          onToggleApiKey={() => toggleApiKeyVisibility(project.id)}
-                          onCopyApiKey={() => handleCopyApiKey(project.apiKey)}
-                          onDelete={() => handleDeleteProject(project.id)}
-                          onNavigateToData={() => navigateToData(project.id)}
-                          onNavigateToEdit={() => navigateToEdit(project.id)}
-                          onToggleProtection={() => handleToggleProtection(project.id)}
-                          onCreateTestProject={() => handleCreateTestProject(project.id)}
-                          loading={loading}
-                        />
-                      ))
-                    }
+                    {normalProjects.map(project => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        showApiKey={showApiKey[project.id] || false}
+                        onToggleApiKey={() => toggleApiKeyVisibility(project.id)}
+                        onCopyApiKey={() => handleCopyApiKey(project.apiKey)}
+                        onDelete={() => handleDeleteProject(project.id)}
+                        onNavigateToData={() => navigateToData(project.id)}
+                        onNavigateToEdit={() => navigateToEdit(project.id)}
+                        onToggleProtection={() => handleToggleProtection(project.id)}
+                        onCreateTestProject={() => handleCreateTestProject(project.id)}
+                        loading={loading}
+                      />
+                    ))}
                   </div>
                 </div>
               )}

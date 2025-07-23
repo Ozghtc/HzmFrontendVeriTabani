@@ -8,6 +8,7 @@ import { NewProjectLogsModal } from '../../../../components/modals/NewProjectLog
 
 interface ProjectGroupProps {
   project: any;
+  testProject?: any; // Gerçek test projesi verisi
   showApiKey: Record<number, boolean>;
   onToggleApiKey: (projectId: number) => void;
   onCopyApiKey: (apiKey: string) => void;
@@ -21,6 +22,7 @@ interface ProjectGroupProps {
 
 const ProjectGroup: React.FC<ProjectGroupProps> = ({
   project,
+  testProject: realTestProject,
   showApiKey,
   onToggleApiKey,
   onCopyApiKey,
@@ -50,16 +52,25 @@ const ProjectGroup: React.FC<ProjectGroupProps> = ({
     return `${testPrefix}${timestamp}_${randomPart}_${projectHash}`;
   }, [project.id]);
   
-  // Test projesi klonu oluştur
-  const testProject = useMemo(() => ({
-    ...project,
-    id: project.id + 10000, // Test projesi için benzersiz ID
-    name: `${project.name} - Test`,
-    description: `Test ortamı: ${project.description || project.name}`,
-    apiKey: generateTestApiKey(), // Benzersiz test API key
-    isTestEnvironment: true,
-    tableCount: project.tableCount // Aynı tablo sayısı
-  }), [project, generateTestApiKey]);
+  // Gerçek test projesi varsa onu kullan, yoksa mock oluştur
+  const testProject = useMemo(() => {
+    if (realTestProject) {
+      console.log('✅ Using real test project data:', realTestProject);
+      return realTestProject; // Gerçek test projesi verisi
+    }
+    
+    console.log('⚠️ No real test project data, creating mock for display purposes');
+    // Fallback: Mock test projesi (sadece görsel amaçlı - gerçek test projesi yoksa)
+    return {
+      ...project,
+      id: project.id + 10000, // Test projesi için benzersiz ID
+      name: `${project.name} - Test`,
+      description: `Test ortamı: ${project.description || project.name}`,
+      apiKey: generateTestApiKey(), // Benzersiz test API key
+      isTestEnvironment: true,
+      tableCount: project.tableCount // Aynı tablo sayısı
+    };
+  }, [project, realTestProject, generateTestApiKey]);
   
   return (
     <>

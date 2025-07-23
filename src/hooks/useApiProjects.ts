@@ -72,6 +72,7 @@ export const useApiProjects = () => {
         
         // Backend'den gelen test environment yapısını analiz et
         const detectedGroupedProjects: Record<number, boolean> = {};
+        const testProjects: Record<number, any> = {}; // Test projelerini sakla
         
         projects.forEach((project: any) => {
           // Eğer project'in test environment'ı varsa, onu grupla
@@ -79,18 +80,26 @@ export const useApiProjects = () => {
             detectedGroupedProjects[project.id] = true;
             console.log(`🧪 Project ${project.id} (${project.name}) has test environment ${project.testEnvironmentId} - marking as grouped`);
           }
+          
+          // Test projelerini ayrı bir map'te sakla
+          if (project.isTestEnvironment && project.parentProjectId) {
+            testProjects[project.parentProjectId] = project;
+            console.log(`🧪 Test project ${project.id} (${project.name}) found for parent ${project.parentProjectId}`);
+          }
         });
         
         console.log('🔍 Detected grouped projects from backend:', detectedGroupedProjects);
+        console.log('🧪 Test projects map:', testProjects);
         
         // ✅ DÜZELTME: Projeler state'e set et
         setProjects(projects);
         setError(null);
         
-        // API'den gelen grouped projects bilgisini döndür
+        // API'den gelen grouped projects ve test projects bilgisini döndür
         return {
           projects,
-          detectedGroupedProjects
+          detectedGroupedProjects,
+          testProjects
         };
       } else {
         console.log('❌ Backend API failed:', response.error);
