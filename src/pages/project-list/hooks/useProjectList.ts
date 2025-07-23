@@ -230,6 +230,9 @@ export const useProjectList = () => {
       if (token) {
         try {
           console.log('📡 Attempting backend API call...');
+          console.log('🔗 API URL:', `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`);
+          console.log('🔑 Authorization header:', `Bearer ${token.substring(0, 20)}...`);
+          
           const response = await fetch(
             `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`,
             {
@@ -242,6 +245,8 @@ export const useProjectList = () => {
           );
           
           console.log('📊 Backend response status:', response.status);
+          console.log('📊 Backend response ok:', response.ok);
+          console.log('📊 Backend response statusText:', response.statusText);
           
           if (response.ok) {
             const data = await response.json();
@@ -262,17 +267,49 @@ export const useProjectList = () => {
               // Proje listesini yenile
               await fetchProjects();
               return data.data;
+            } else {
+              console.log('❌ Backend response success=false:', data.error);
+              throw new Error(`Backend error: ${data.error}`);
             }
+          } else {
+            // Response not ok, get error details
+            let errorText = '';
+            try {
+              const errorData = await response.json();
+              errorText = errorData.error || errorData.message || 'Unknown error';
+              console.log('❌ Backend error response:', errorData);
+            } catch (parseError) {
+              errorText = await response.text();
+              console.log('❌ Backend error text:', errorText);
+            }
+            
+            throw new Error(`Backend API failed: ${response.status} ${response.statusText} - ${errorText}`);
           }
           
-          // Backend başarısız, fallback'e geç
-          console.log('⚠️ Backend API failed, falling back to simulation...');
-          throw new Error('Backend API failed');
+        } catch (backendError: any) {
+          console.log('❌ Backend error details:', {
+            message: backendError.message,
+            name: backendError.name,
+            stack: backendError.stack?.substring(0, 200)
+          });
           
-        } catch (backendError) {
-          console.log('❌ Backend error:', backendError);
+          // Eğer gerçek bir network hatası varsa, kullanıcıyı bilgilendir
+          if (backendError.name === 'TypeError' && backendError.message.includes('fetch')) {
+            showNotification('error', '🌐 Network hatası: Backend sunucusuna ulaşılamıyor');
+          } else if (backendError.message.includes('401') || backendError.message.includes('Unauthorized')) {
+            showNotification('error', '🔐 Yetki hatası: Token geçersiz olabilir');
+          } else if (backendError.message.includes('404')) {
+            showNotification('error', '📂 Endpoint bulunamadı: Backend henüz hazır değil');
+          } else {
+            showNotification('error', `❌ Backend hatası: ${backendError.message}`);
+          }
+          
           // Fallback simülasyona geç
+          console.log('⚠️ Falling back to simulation due to backend error...');
         }
+      } else {
+        console.log('⚠️ No token found, using simulation...');
+        showNotification('info', '🔐 Giriş token\'ı bulunamadı, simülasyon modu aktif');
       }
       
       // Fallback: Frontend Simülasyon
