@@ -80,7 +80,7 @@ export const useProjectList = () => {
     };
     
     loadProjects();
-  }, [fetchProjects, updateGroupedProjects]); // groupedProjects dependency'sini kaldırdık infinite loop'u önlemek için
+  }, []); // ✅ DÜZELTME: Dependency array'i boş - sadece mount'ta çalış
 
   // Handle add project
   const handleAddProject = useCallback(async (formData: ProjectFormData) => {
@@ -138,7 +138,6 @@ export const useProjectList = () => {
       if (success) {
         console.log('✅ Project deleted successfully');
         showNotification('success', 'Proje başarıyla silindi!');
-        await fetchProjects();
       } else {
         console.log('❌ Project delete failed');
         showNotification('error', 'Proje silinirken hata oluştu.');
@@ -149,7 +148,7 @@ export const useProjectList = () => {
       setDeleteConfirmName('');
       showNotification('error', 'Network hatası - proje silinemedi.');
     }
-  }, [deletingProject, deleteConfirmName, projects, deleteProject, fetchProjects, showNotification]);
+  }, [deletingProject, deleteConfirmName, projects, deleteProject, showNotification]);
 
   // Cancel delete project
   const cancelDeleteProject = useCallback(() => {
@@ -323,8 +322,8 @@ export const useProjectList = () => {
             
             showNotification('success', `✅ Gerçek test ortamı oluşturuldu! ${data.data?.message || ''}`);
             
-            // Proje listesini yenile
-            await fetchProjects();
+            // Test projesi oluşturuldu - artık yeniden yüklemeye gerek yok
+            // await fetchProjects(); // KALDIRILDI - sonsuz loop engellemek için
             return data.data;
           } else {
             console.log('❌ Backend response success=false:', data.error);
@@ -419,7 +418,7 @@ export const useProjectList = () => {
     } finally {
       setCreating(false);
     }
-  }, [fetchProjects, showNotification, updateGroupedProjects, groupedProjects, projects]);
+  }, [showNotification, updateGroupedProjects, groupedProjects, projects]);
 
   return {
     // State
