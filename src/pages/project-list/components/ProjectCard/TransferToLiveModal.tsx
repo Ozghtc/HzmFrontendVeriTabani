@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ArrowRight, Database, Table, Users, Filter } from 'lucide-react';
 import { apiClient } from '../../../../utils/api';
+import { AuthManager } from '../../../../utils/api/utils/authUtils';
+import { useNavigate } from 'react-router-dom';
 
 interface TableInfo {
   id: number;
@@ -20,17 +22,18 @@ interface TransferToLiveModalProps {
   liveProject: any;
 }
 
-const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
+export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
   testProject,
   liveProject
 }) => {
-  const [testTables, setTestTables] = useState<TableInfo[]>([]);
-  const [liveTables, setLiveTables] = useState<TableInfo[]>([]);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [testTables, setTestTables] = useState<TableInfo[]>([]);
+  const [liveTables, setLiveTables] = useState<TableInfo[]>([]);
   const [filterType, setFilterType] = useState<FilterType>('all');
 
   // Gerçek API'den tablo verilerini çek
@@ -107,11 +110,20 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
       
       const tableIds = filteredTestTables.map(table => table.id);
       
+      // Token kontrolü
+      const token = AuthManager.getToken();
+      if (!token) {
+        console.log('❌ No token found, redirecting to login...');
+        AuthManager.removeToken();
+        navigate('/login');
+        return;
+      }
+      
       const response = await fetch('https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/tables/transfer-to-live', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           testProjectId: testProject.id,
@@ -119,6 +131,14 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
           tableIds: tableIds
         })
       });
+      
+      // Token expired kontrolü
+      if (response.status === 401) {
+        console.log('❌ Token expired, redirecting to login...');
+        AuthManager.removeToken();
+        navigate('/login');
+        return;
+      }
       
       const result = await response.json();
       
