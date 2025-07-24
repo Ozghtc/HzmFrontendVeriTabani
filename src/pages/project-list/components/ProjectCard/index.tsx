@@ -5,6 +5,7 @@ import ProjectCardHeader from './ProjectCardHeader';
 import ApiKeySection from './ApiKeySection';
 import ProjectActions from './ProjectActions';
 import ProjectInfoModal from './ProjectInfoModal';
+import TransferToLiveModal from './TransferToLiveModal';
 import { NewProjectLogsModal } from '../../../../components/modals/NewProjectLogsModal';
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -18,11 +19,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onToggleProtection,
   onCreateTestProject, // Yeni prop
   onTransferToLive, // Test projesinden canlıya aktar prop
-  loading
+  loading,
+  liveProject // Parent proje bilgisi (test projesi için)
 }) => {
   const { Table } = icons;
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false);
   const [isProjectLogsOpen, setIsProjectLogsOpen] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   
   // Test projesi oluşturma handler
   const handleCreateTestProject = () => {
@@ -32,9 +35,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     }
   };
   
-  // Canlıya aktar handler
+  // Canlıya aktar modal açma handler
   const handleTransferToLive = () => {
-    console.log('📤 Test projesinden canlıya aktar:', project.name);
+    console.log('📤 Transfer modal açılıyor - Test Proje:', project.name);
+    setIsTransferModalOpen(true);
+  };
+  
+  // Transfer onaylama handler
+  const handleConfirmTransfer = () => {
+    console.log('✅ Transfer onaylandı - Test Proje ID:', project.id);
+    setIsTransferModalOpen(false);
     if (onTransferToLive) {
       onTransferToLive();
     }
@@ -89,6 +99,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <NewProjectLogsModal
           project={project}
           onClose={() => setIsProjectLogsOpen(false)}
+        />
+      )}
+
+      {/* Transfer Modal - Sadece test projeleri için */}
+      {project.isTestEnvironment && (
+        <TransferToLiveModal
+          isOpen={isTransferModalOpen}
+          onClose={() => setIsTransferModalOpen(false)}
+          onConfirm={handleConfirmTransfer}
+          testProject={project}
+          liveProject={liveProject}
         />
       )}
     </>

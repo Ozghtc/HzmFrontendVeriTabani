@@ -49,6 +49,7 @@ export interface ProjectCardProps {
   onCreateTestProject?: () => void; // Yeni prop
   onTransferToLive?: () => void; // Test projesinden canlıya aktar prop
   loading: boolean;
+  liveProject?: any; // Parent proje bilgisi (test projesi için)
 }
 
 export interface AddProjectFormProps {

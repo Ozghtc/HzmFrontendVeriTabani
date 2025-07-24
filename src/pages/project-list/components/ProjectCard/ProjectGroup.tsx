@@ -235,6 +235,7 @@ const ProjectGroup: React.FC<ProjectGroupProps> = ({
                   onCreateTestProject={() => {}} // Test projesi için test projesi yok
                   onTransferToLive={onTransferToLive ? () => onTransferToLive(testProject.id) : undefined} // Test projesinden canlıya aktar
                   loading={loading}
+                  liveProject={project} // Parent (canlı) proje bilgisi
                 />
               </div>
             </div>
