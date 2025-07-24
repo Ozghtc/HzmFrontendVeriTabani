@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ArrowLeft, Database, Table, Users } from 'lucide-react';
 
 interface TableInfo {
@@ -59,7 +60,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
   const totalTestRows = testTables.reduce((sum, table) => sum + table.rowCount, 0);
   const totalLiveRows = liveTables.reduce((sum, table) => sum + table.rowCount, 0);
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
       <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
         {/* Header */}
@@ -227,6 +228,9 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
       </div>
     </div>
   );
+
+  // Portal kullanarak modal'ı document.body'ye render et
+  return createPortal(modalContent, document.body);
 };
 
 export default TransferToLiveModal; 
