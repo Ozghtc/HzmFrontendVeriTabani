@@ -8,7 +8,7 @@ import TablePanel from './panels/TablePanel';
 import FieldPanel from './panels/field/FieldPanel';
 
 const Layout: React.FC = () => {
-  const { projects, loading: projectsLoading } = useApiProjects();
+  const { projects, loading: projectsLoading, fetchProjects } = useApiProjects();
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [selectedTable, setSelectedTable] = useState<any | null>(null);
   const [fields, setFields] = useState<Field[]>([]);
@@ -63,15 +63,15 @@ const Layout: React.FC = () => {
   };
 
   const handleUpdateField = (fieldId: string, updates: Partial<Field>) => {
-    setFields(prev => prev.map(field => 
+    setFields((prev: Field[]) => prev.map((field: Field) => 
       field.id === fieldId ? { ...field, ...updates } : field
     ));
     
     // Update selected table's fields
     if (selectedTable) {
-      setSelectedTable(prev => ({
+      setSelectedTable((prev: any) => ({
         ...prev,
-        fields: prev.fields?.map(field => 
+        fields: prev.fields?.map((field: Field) => 
           field.id === fieldId ? { ...field, ...updates } : field
         ) || []
       }));
@@ -79,19 +79,19 @@ const Layout: React.FC = () => {
   };
 
   const handleDeleteField = (fieldId: string) => {
-    setFields(prev => prev.filter(field => field.id !== fieldId));
+    setFields((prev: Field[]) => prev.filter((field: Field) => field.id !== fieldId));
     
     // Update selected table's fields
     if (selectedTable) {
-      setSelectedTable(prev => ({
+      setSelectedTable((prev: any) => ({
         ...prev,
-        fields: prev.fields?.filter(field => field.id !== fieldId) || []
+        fields: prev.fields?.filter((field: Field) => field.id !== fieldId) || []
       }));
     }
   };
 
   const handleReorderFields = (oldIndex: number, newIndex: number) => {
-    setFields(prev => {
+    setFields((prev: Field[]) => {
       const newFields = [...prev];
       const [movedField] = newFields.splice(oldIndex, 1);
       newFields.splice(newIndex, 0, movedField);
@@ -100,7 +100,7 @@ const Layout: React.FC = () => {
     
     // Update selected table's fields
     if (selectedTable) {
-      setSelectedTable(prev => {
+      setSelectedTable((prev: any) => {
         const newFields = [...(prev.fields || [])];
         const [movedField] = newFields.splice(oldIndex, 1);
         newFields.splice(newIndex, 0, movedField);
@@ -110,7 +110,7 @@ const Layout: React.FC = () => {
   };
 
   const handleAddRelationship = (fieldId: string, relationship: FieldRelationship) => {
-    setFields(prev => prev.map(field => 
+    setFields((prev: Field[]) => prev.map((field: Field) => 
       field.id === fieldId 
         ? { ...field, relationships: [...(field.relationships || []), relationship] }
         : field
@@ -118,9 +118,9 @@ const Layout: React.FC = () => {
     
     // Update selected table's fields
     if (selectedTable) {
-      setSelectedTable(prev => ({
+      setSelectedTable((prev: any) => ({
         ...prev,
-        fields: prev.fields?.map(field => 
+        fields: prev.fields?.map((field: Field) => 
           field.id === fieldId 
             ? { ...field, relationships: [...(field.relationships || []), relationship] }
             : field
@@ -130,23 +130,59 @@ const Layout: React.FC = () => {
   };
 
   const handleRemoveRelationship = (fieldId: string, relationshipId: string) => {
-    setFields(prev => prev.map(field => 
+    setFields((prev: Field[]) => prev.map((field: Field) => 
       field.id === fieldId 
-        ? { ...field, relationships: field.relationships?.filter(rel => rel.id !== relationshipId) || [] }
+        ? { 
+            ...field, 
+            relationships: (field.relationships || []).filter((rel: FieldRelationship) => rel.id !== relationshipId)
+          }
         : field
     ));
     
     // Update selected table's fields
     if (selectedTable) {
-      setSelectedTable(prev => ({
+      setSelectedTable((prev: any) => ({
         ...prev,
-        fields: prev.fields?.map(field => 
+        fields: prev.fields?.map((field: Field) => 
           field.id === fieldId 
-            ? { ...field, relationships: field.relationships?.filter(rel => rel.id !== relationshipId) || [] }
+            ? { 
+                ...field, 
+                relationships: (field.relationships || []).filter((rel: FieldRelationship) => rel.id !== relationshipId)
+              }
             : field
         ) || []
       }));
     }
+  };
+
+  const handleProjectRefresh = async () => {
+    console.log('🔄 Refreshing projects...');
+    await fetchProjects();
+    
+    // Re-select the current project to get updated data
+    if (selectedProject) {
+      const updatedProject = projects.find((p: any) => p.id === selectedProject.id);
+      if (updatedProject) {
+        setSelectedProject(updatedProject);
+        
+        // Re-select the current table if exists
+        if (selectedTable) {
+          const updatedTable = (updatedProject as any).tables?.find((t: any) => t.id === selectedTable.id);
+          if (updatedTable) {
+            setSelectedTable(updatedTable);
+            setFields(updatedTable.fields || []);
+          }
+        }
+      }
+    }
+  };
+
+  const handleTableCreated = async () => {
+    await handleProjectRefresh();
+  };
+
+  const handleFieldsChanged = async () => {
+    await handleProjectRefresh();
   };
 
   if (projectsLoading) {
@@ -154,25 +190,21 @@ const Layout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Project Panel */}
+    <div className="h-screen flex flex-col bg-gray-50">
+      <div className="flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 h-full">
           <ProjectPanel 
             projects={projects}
             selectedProject={selectedProject}
             onSelectProject={handleSelectProject}
           />
-          
-          {/* Table Panel */}
           <TablePanel 
             selectedProject={selectedProject}
             selectedTable={selectedTable}
             onTableSelect={handleSelectTable}
+            onTableCreated={handleTableCreated}
           />
-          
-          {/* Field Panel */}
-          <FieldPanel
+          <FieldPanel 
             selectedProject={selectedProject}
             selectedTable={selectedTable}
             fields={fields}
@@ -182,6 +214,7 @@ const Layout: React.FC = () => {
             onReorderFields={handleReorderFields}
             onAddRelationship={handleAddRelationship}
             onRemoveRelationship={handleRemoveRelationship}
+            onFieldsChanged={handleFieldsChanged}
           />
         </div>
       </div>

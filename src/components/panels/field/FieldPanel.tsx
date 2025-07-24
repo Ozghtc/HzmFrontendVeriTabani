@@ -31,6 +31,7 @@ interface FieldPanelProps {
   onReorderFields: (oldIndex: number, newIndex: number) => void;
   onAddRelationship: (fieldId: string, relationship: any) => void;
   onRemoveRelationship: (fieldId: string, relationshipId: string) => void;
+  onFieldsChanged?: () => void; // New callback for refreshing parent
 }
 
 const FieldPanel: React.FC<FieldPanelProps> = ({
@@ -43,6 +44,7 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
   onReorderFields,
   onAddRelationship,
   onRemoveRelationship,
+  onFieldsChanged, // Add this
 }) => {
   const navigate = useNavigate();
   const [showRelationshipModal, setShowRelationshipModal] = useState(false);
@@ -94,6 +96,12 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
         
         onAddField(newField);
         
+        // Refresh parent component to get updated data
+        if (onFieldsChanged) {
+          console.log('🔄 Triggering parent refresh after field add');
+          onFieldsChanged();
+        }
+        
       } else {
         console.error('❌ Failed to add field:', response.error);
         setError(response.error || 'Failed to add field');
@@ -118,8 +126,41 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
     }
   };
 
-  const handleDeleteField = (fieldId: string) => {
-    onDeleteField(fieldId);
+  const handleDeleteField = async (fieldId: string) => {
+    if (!selectedProject || !selectedTable) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('🗑️ Deleting field from backend:', fieldId);
+      
+      const response = await apiClient.fields.deleteField(
+        selectedProject.id.toString(), 
+        selectedTable.id.toString(), 
+        fieldId
+      );
+      
+      if (response.success) {
+        console.log('✅ Field deleted from backend successfully');
+        onDeleteField(fieldId);
+        
+        // Refresh parent component to get updated data
+        if (onFieldsChanged) {
+          console.log('🔄 Triggering parent refresh after field delete');
+          onFieldsChanged();
+        }
+      } else {
+        console.error('❌ Failed to delete field:', response.error);
+        setError(response.error || 'Failed to delete field');
+      }
+      
+    } catch (error) {
+      console.error('💥 Error deleting field:', error);
+      setError('Network error while deleting field');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleViewData = () => {

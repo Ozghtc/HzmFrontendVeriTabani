@@ -163,6 +163,7 @@ const TablesTabContent: React.FC<TablesTabContentProps> = ({ project, onRefresh 
         onReorderFields={handleReorderFields}
         onAddRelationship={handleAddRelationship}
         onRemoveRelationship={handleRemoveRelationship}
+        onFieldsChanged={onRefresh}
       />
     </div>
   );
