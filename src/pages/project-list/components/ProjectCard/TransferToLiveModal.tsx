@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ArrowLeft, Database, Table, Users } from 'lucide-react';
+import { X, ArrowRight, Database, Table, Users } from 'lucide-react';
 
 interface TableInfo {
   id: number;
@@ -67,7 +67,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-r from-emerald-500 to-green-500 p-2 rounded-lg">
-              <ArrowLeft className="text-white" size={20} />
+              <ArrowRight className="text-white" size={20} />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-800">
@@ -103,7 +103,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                   <div className="text-xs text-purple-600">{totalTestRows} toplam kayıt</div>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg text-center">
-                  <ArrowLeft className="mx-auto text-blue-600 mb-2" size={24} />
+                  <ArrowRight className="mx-auto text-blue-600 mb-2" size={24} />
                   <div className="text-sm text-blue-700 font-medium">Aktarım Yönü</div>
                   <div className="text-xs text-blue-600">Test → Canlı</div>
                 </div>
@@ -116,14 +116,14 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
 
               {/* Tables Comparison */}
               <div className="grid grid-cols-2 gap-6">
-                {/* Test Project Tables */}
+                {/* Sol Taraf - Test Projesi */}
                 <div>
                   <div className="flex items-center mb-4">
                     <div className="bg-purple-100 p-2 rounded-lg mr-3">
                       <Database className="text-purple-600" size={20} />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-800">Test Projesi Tabloları</h3>
+                      <h3 className="font-semibold text-gray-800">Test Proje Tabloları</h3>
                       <p className="text-sm text-gray-600">{testProject?.name}</p>
                     </div>
                   </div>
@@ -150,7 +150,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                   </div>
                 </div>
 
-                {/* Live Project Tables */}
+                {/* Sağ Taraf - Canlı Projesi */}
                 <div>
                   <div className="flex items-center mb-4">
                     <div className="bg-green-100 p-2 rounded-lg mr-3">
@@ -221,7 +221,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                 : 'bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700'
             }`}
           >
-            <ArrowLeft size={16} />
+            <ArrowRight size={16} />
             Canlıya Aktar
           </button>
         </div>

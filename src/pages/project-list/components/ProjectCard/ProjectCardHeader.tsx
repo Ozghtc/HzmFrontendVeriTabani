@@ -43,6 +43,18 @@ const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Canlıya Aktar butonu - Sadece test projeleri için, en solda */}
+          {isTestProject && onTransferToLive && (
+            <button
+              onClick={onTransferToLive}
+              className="px-3 py-2 rounded-md transition-colors flex-shrink-0 bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 flex items-center gap-1"
+              title="Projedeki tablo ve sütunlar canlıya taşınacaktır"
+            >
+              <ArrowRight size={14} />
+              <span className="text-xs font-medium">Canlıya Taşı</span>
+            </button>
+          )}
+          
           {/* Kilit butonu sadece normal projelerde görünür */}
           {!isTestProject && (
             <button
@@ -55,18 +67,6 @@ const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({
               title={project.isProtected ? 'Proje Korumalı' : 'Proje Korumasız'}
             >
               {project.isProtected ? <Lock size={18} /> : <Unlock size={18} />}
-            </button>
-          )}
-          
-          {/* Canlıya Aktar butonu - Sadece test projeleri için, sil butonunun yanında */}
-          {isTestProject && onTransferToLive && (
-            <button
-              onClick={onTransferToLive}
-              className="px-3 py-2 rounded-md transition-colors flex-shrink-0 bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 flex items-center gap-1"
-              title="Projedeki tablo ve sütunlar canlıya taşınacaktır"
-            >
-              <span className="text-xs font-medium">Canlıya Taşı</span>
-              <ArrowRight size={14} />
             </button>
           )}
           
