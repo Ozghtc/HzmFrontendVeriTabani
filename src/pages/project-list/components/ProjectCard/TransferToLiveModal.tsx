@@ -97,6 +97,47 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
     }
   };
 
+  const handleTransferToLive = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('🚀 Starting transfer to live...');
+      console.log('Filtered tables to transfer:', filteredTestTables);
+      
+      const tableIds = filteredTestTables.map(table => table.id);
+      
+      const response = await fetch('/api/tables/transfer-to-live', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          testProjectId: testProject.id,
+          liveProjectId: liveProject.id,
+          tableIds: tableIds
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ Transfer completed:', result.data);
+        alert(`🎉 ${result.data.summary.successful} tablo başarıyla canlıya aktarıldı!`);
+        onConfirm(); // Close modal and refresh
+      } else {
+        throw new Error(result.error || 'Transfer failed');
+      }
+      
+    } catch (err: any) {
+      console.error('❌ Transfer failed:', err);
+      setError('Transfer işlemi başarısız: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Tablo karşılaştırma fonksiyonu
   const isTableSame = (testTable: TableInfo): boolean => {
     const liveTable = liveTables.find(live => live.name === testTable.name);
@@ -362,7 +403,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
             İptal
           </button>
           <button
-            onClick={onConfirm}
+            onClick={handleTransferToLive}
             disabled={loading || error !== null || filteredTestTables.length === 0}
             className={`px-6 py-2 rounded-md transition-colors flex items-center gap-2 ${
               loading || error !== null || filteredTestTables.length === 0
