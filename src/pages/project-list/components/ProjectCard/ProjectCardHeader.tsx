@@ -1,7 +1,7 @@
 import React from 'react';
 import { icons } from '../../constants/projectListConstants';
 import { Project } from '../../types/projectListTypes';
-import { ArrowRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 interface ProjectCardHeaderProps {
   project: Project;
@@ -62,10 +62,10 @@ const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({
           {isTestProject && onTransferToLive && (
             <button
               onClick={onTransferToLive}
-              className="p-1.5 rounded-md transition-colors flex-shrink-0 bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600"
-              title="Test projesindeki verileri canlı projeye aktar"
+              className="p-2 rounded-md transition-colors flex-shrink-0 bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600"
+              title="Canlıya Taşı - Test projesindeki verileri canlı projeye aktar"
             >
-              <ArrowRight size={14} />
+              <ArrowLeft size={16} />
             </button>
           )}
           
