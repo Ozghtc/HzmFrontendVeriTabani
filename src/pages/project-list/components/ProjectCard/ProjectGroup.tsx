@@ -236,6 +236,7 @@ const ProjectGroup: React.FC<ProjectGroupProps> = ({
                   onToggleProtection={() => onToggleProtection(project.id)}
                   onCreateTestProject={() => {}} // Canlı projede test projesi butonu yok
                   loading={loading}
+                  hasTestProject={true} // Bu proje test projesine sahip
                 />
               </div>
             </div>

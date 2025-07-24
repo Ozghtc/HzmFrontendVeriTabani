@@ -1,6 +1,6 @@
 import React from 'react';
 import { icons } from '../../constants/projectListConstants';
-import { Activity, TestTube } from 'lucide-react';
+import { Activity, TestTube, Info } from 'lucide-react';
 
 interface ProjectActionsProps {
   onNavigateToData: () => void;
@@ -8,6 +8,7 @@ interface ProjectActionsProps {
   onShowProjectInfo: () => void;
   onShowProjectLogs: () => void;
   onCreateTestProject?: () => void; // Yeni prop
+  hasTestProject?: boolean; // Test projesi var mı kontrolü
   loading: boolean;
   isTestProject?: boolean; // Test projesi mi kontrolü
 }
@@ -18,10 +19,11 @@ const ProjectActions: React.FC<ProjectActionsProps> = ({
   onShowProjectInfo,
   onShowProjectLogs,
   onCreateTestProject,
+  hasTestProject = false,
   loading,
   isTestProject = false
 }) => {
-  const { Eye, Settings, Code, Info } = icons;
+  const { Eye, Settings, Code } = icons;
   
   return (
     <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-lg">
@@ -63,22 +65,36 @@ const ProjectActions: React.FC<ProjectActionsProps> = ({
         </button>
       </div>
       
-      {/* İkinci satır - Test Projesi Oluştur butonu (sadece normal projeler için) */}
-      {!isTestProject && onCreateTestProject && (
+      {/* İkinci satır - Duruma göre buton */}
+      {!isTestProject && (
         <div className="grid grid-cols-1">
-          <button
-            onClick={onCreateTestProject}
-            disabled={loading}
-            className={`px-4 py-2 rounded-md transition-colors flex items-center justify-center text-sm font-medium ${
-              loading 
-                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                : 'bg-purple-600 text-white hover:bg-purple-700'
-            }`}
-            title="Bu projeye otomatik test verileri ekle"
-          >
-            <TestTube size={16} className="mr-2" />
-            Test Projesi Oluştur
-          </button>
+          {hasTestProject ? (
+            // Test projesi varsa bilgi butonu
+            <button
+              className="px-4 py-2 rounded-md transition-colors flex items-center justify-center text-sm font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+              title="Bu projenin test ortamı mevcut"
+            >
+              <Info size={16} className="mr-2" />
+              Test Ortamı Mevcut
+            </button>
+          ) : (
+            // Test projesi yoksa oluştur butonu
+            onCreateTestProject && (
+              <button
+                onClick={onCreateTestProject}
+                disabled={loading}
+                className={`px-4 py-2 rounded-md transition-colors flex items-center justify-center text-sm font-medium ${
+                  loading 
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                }`}
+                title="Bu projeye otomatik test verileri ekle"
+              >
+                <TestTube size={16} className="mr-2" />
+                Test Projesi Oluştur
+              </button>
+            )
+          )}
         </div>
       )}
     </div>

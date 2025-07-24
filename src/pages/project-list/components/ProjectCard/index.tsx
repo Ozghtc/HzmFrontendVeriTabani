@@ -20,7 +20,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onCreateTestProject, // Yeni prop
   onTransferToLive, // Test projesinden canlıya aktar prop
   loading,
-  liveProject // Parent proje bilgisi (test projesi için)
+  liveProject, // Parent proje bilgisi (test projesi için)
+  hasTestProject = false // Test projesi var mı bilgisi
 }) => {
   const { Table } = icons;
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false);
@@ -86,6 +87,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           onCreateTestProject={project.isTestEnvironment ? undefined : handleCreateTestProject}
           loading={loading}
           isTestProject={project.isTestEnvironment || false}
+          hasTestProject={hasTestProject}
         />
       </div>
 

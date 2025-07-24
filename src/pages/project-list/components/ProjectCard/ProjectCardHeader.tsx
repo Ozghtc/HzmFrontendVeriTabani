@@ -1,7 +1,7 @@
 import React from 'react';
 import { icons } from '../../constants/projectListConstants';
 import { Project } from '../../types/projectListTypes';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface ProjectCardHeaderProps {
   project: Project;
@@ -65,8 +65,8 @@ const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({
               className="px-3 py-2 rounded-md transition-colors flex-shrink-0 bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 flex items-center gap-1"
               title="Projedeki tablo ve sütunlar canlıya taşınacaktır"
             >
-              <ArrowLeft size={14} />
               <span className="text-xs font-medium">Canlıya Taşı</span>
+              <ArrowRight size={14} />
             </button>
           )}
           
