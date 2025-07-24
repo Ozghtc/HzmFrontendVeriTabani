@@ -62,10 +62,11 @@ const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({
           {isTestProject && onTransferToLive && (
             <button
               onClick={onTransferToLive}
-              className="p-2 rounded-md transition-colors flex-shrink-0 bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600"
-              title="Canlıya Taşı - Test projesindeki verileri canlı projeye aktar"
+              className="px-3 py-2 rounded-md transition-colors flex-shrink-0 bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 flex items-center gap-1"
+              title="Projedeki tablo ve sütunlar canlıya taşınacaktır"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={14} />
+              <span className="text-xs font-medium">Canlıya Taşı</span>
             </button>
           )}
           
