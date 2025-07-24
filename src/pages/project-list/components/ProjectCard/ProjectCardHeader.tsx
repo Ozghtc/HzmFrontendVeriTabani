@@ -1,15 +1,23 @@
 import React from 'react';
 import { icons } from '../../constants/projectListConstants';
 import { Project } from '../../types/projectListTypes';
+import { ArrowRight } from 'lucide-react';
 
 interface ProjectCardHeaderProps {
   project: Project;
   onDelete: () => void;
   onToggleProtection: () => void;
+  onTransferToLive?: () => void; // Test projesinden canlıya aktar
   isTestProject?: boolean; // Test projesi kontrolü
 }
 
-const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({ project, onDelete, onToggleProtection, isTestProject = false }) => {
+const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({ 
+  project, 
+  onDelete, 
+  onToggleProtection, 
+  onTransferToLive,
+  isTestProject = false 
+}) => {
   const { Database, Calendar, Table, Trash2, Lock, Unlock } = icons;
   
   return (
@@ -49,6 +57,18 @@ const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({ project, onDelete
               {project.isProtected ? <Lock size={18} /> : <Unlock size={18} />}
             </button>
           )}
+          
+          {/* Canlıya Aktar butonu - Sadece test projeleri için, sil butonunun yanında */}
+          {isTestProject && onTransferToLive && (
+            <button
+              onClick={onTransferToLive}
+              className="p-1.5 rounded-md transition-colors flex-shrink-0 bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600"
+              title="Test projesindeki verileri canlı projeye aktar"
+            >
+              <ArrowRight size={14} />
+            </button>
+          )}
+          
           <button
             onClick={onDelete}
             disabled={isTestProject && project.isProtected} // Test projesi korumalıysa silinemez

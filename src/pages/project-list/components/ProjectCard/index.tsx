@@ -47,6 +47,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           project={project} 
           onDelete={onDelete} 
           onToggleProtection={onToggleProtection}
+          onTransferToLive={project.isTestEnvironment ? handleTransferToLive : undefined}
           isTestProject={project.isTestEnvironment || false}
         />
         
@@ -73,7 +74,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           onShowProjectInfo={() => setIsProjectInfoOpen(true)}
           onShowProjectLogs={() => setIsProjectLogsOpen(true)}
           onCreateTestProject={project.isTestEnvironment ? undefined : handleCreateTestProject}
-          onTransferToLive={project.isTestEnvironment ? handleTransferToLive : undefined}
           loading={loading}
           isTestProject={project.isTestEnvironment || false}
         />
