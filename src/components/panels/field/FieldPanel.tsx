@@ -175,6 +175,9 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
   // Filter out hidden fields for display
   const visibleFields = fields.filter((field: any) => !field.isHidden);
   const hasVisibleFields = visibleFields.length > 0;
+  
+  // Debug log to force deployment
+  console.log('🔍 FieldPanel - Filtering hidden fields, visible count:', visibleFields.length);
 
   // Load fields when table changes
   useEffect(() => {
