@@ -107,7 +107,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
       
       const tableIds = filteredTestTables.map(table => table.id);
       
-      const response = await fetch('/api/tables/transfer-to-live', {
+      const response = await fetch('https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/tables/transfer-to-live', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
