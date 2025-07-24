@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ArrowRight, Database, Table, Users } from 'lucide-react';
+import { apiClient } from '../../../../utils/api';
 
 interface TableInfo {
   id: number;
   name: string;
   columnCount: number;
-  rowCount: number;
+  fieldNames: string[];
 }
 
 interface TransferToLiveModalProps {
@@ -27,38 +28,76 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
   const [testTables, setTestTables] = useState<TableInfo[]>([]);
   const [liveTables, setLiveTables] = useState<TableInfo[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data for demonstration - Bu gerçek API'den gelecek
+  // Gerçek API'den tablo verilerini çek
   useEffect(() => {
-    if (isOpen) {
-      setLoading(true);
-      // Simulated API call
-      setTimeout(() => {
-        setTestTables([
-          { id: 1, name: 'kullanicilar', columnCount: 5, rowCount: 12 },
-          { id: 2, name: 'urunler', columnCount: 8, rowCount: 25 },
-          { id: 3, name: 'siparisler', columnCount: 6, rowCount: 8 },
-          { id: 4, name: 'kategoriler', columnCount: 3, rowCount: 5 },
-          { id: 5, name: 'yorumlar', columnCount: 4, rowCount: 18 }
-        ]);
-        
-        setLiveTables([
-          { id: 1, name: 'kullanicilar', columnCount: 5, rowCount: 150 },
-          { id: 2, name: 'urunler', columnCount: 8, rowCount: 300 },
-          { id: 3, name: 'siparisler', columnCount: 6, rowCount: 450 },
-          { id: 4, name: 'kategoriler', columnCount: 3, rowCount: 12 },
-          { id: 5, name: 'yorumlar', columnCount: 4, rowCount: 280 }
-        ]);
-        
-        setLoading(false);
-      }, 1000);
+    if (isOpen && testProject && liveProject) {
+      loadTablesData();
     }
-  }, [isOpen]);
+  }, [isOpen, testProject, liveProject]);
+
+  const loadTablesData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('📊 Loading tables data for transfer modal...');
+      console.log('Test Project:', testProject);
+      console.log('Live Project:', liveProject);
+
+      // Test projesi tablolarını çek
+      const testTablesResponse = await apiClient.tables.getTables(testProject.id.toString());
+      console.log('Test tables response:', testTablesResponse);
+      
+      // Canlı proje tablolarını çek  
+      const liveTablesResponse = await apiClient.tables.getTables(liveProject.id.toString());
+      console.log('Live tables response:', liveTablesResponse);
+
+      if (testTablesResponse.success && testTablesResponse.data) {
+        const testTablesData = (testTablesResponse.data as any).data?.tables || [];
+        const formattedTestTables: TableInfo[] = testTablesData.map((table: any) => ({
+          id: table.id,
+          name: table.name || table.tableName,
+          columnCount: (table.fields || []).length,
+          fieldNames: (table.fields || []).map((field: any) => field.name)
+        }));
+        setTestTables(formattedTestTables);
+        console.log('✅ Test tables loaded:', formattedTestTables);
+      } else {
+        console.error('❌ Failed to load test tables:', testTablesResponse.error);
+        setTestTables([]);
+      }
+
+      if (liveTablesResponse.success && liveTablesResponse.data) {
+        const liveTablesData = (liveTablesResponse.data as any).data?.tables || [];
+        const formattedLiveTables: TableInfo[] = liveTablesData.map((table: any) => ({
+          id: table.id,
+          name: table.name || table.tableName,
+          columnCount: (table.fields || []).length,
+          fieldNames: (table.fields || []).map((field: any) => field.name)
+        }));
+        setLiveTables(formattedLiveTables);
+        console.log('✅ Live tables loaded:', formattedLiveTables);
+      } else {
+        console.error('❌ Failed to load live tables:', liveTablesResponse.error);
+        setLiveTables([]);
+      }
+
+    } catch (err: any) {
+      console.error('💥 Error loading tables data:', err);
+      setError('Tablo bilgileri yüklenirken hata oluştu: ' + err.message);
+      setTestTables([]);
+      setLiveTables([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
-  const totalTestRows = testTables.reduce((sum, table) => sum + table.rowCount, 0);
-  const totalLiveRows = liveTables.reduce((sum, table) => sum + table.rowCount, 0);
+  const totalTestColumns = testTables.reduce((sum, table) => sum + table.columnCount, 0);
+  const totalLiveColumns = liveTables.reduce((sum, table) => sum + table.columnCount, 0);
 
   const modalContent = (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
@@ -93,6 +132,19 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               <span className="ml-3 text-gray-600">Tablo bilgileri yükleniyor...</span>
             </div>
+          ) : error ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="text-red-500 mb-2">❌</div>
+                <p className="text-red-600">{error}</p>
+                <button
+                  onClick={loadTablesData}
+                  className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Tekrar Dene
+                </button>
+              </div>
+            </div>
           ) : (
             <>
               {/* Summary */}
@@ -100,7 +152,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                 <div className="bg-purple-50 p-4 rounded-lg text-center">
                   <div className="text-2xl font-bold text-purple-600">{testTables.length}</div>
                   <div className="text-sm text-purple-700 font-medium">Test Tablosu</div>
-                  <div className="text-xs text-purple-600">{totalTestRows} toplam kayıt</div>
+                  <div className="text-xs text-purple-600">{totalTestColumns} toplam sütun</div>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg text-center">
                   <ArrowRight className="mx-auto text-blue-600 mb-2" size={24} />
@@ -110,7 +162,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                 <div className="bg-green-50 p-4 rounded-lg text-center">
                   <div className="text-2xl font-bold text-green-600">{liveTables.length}</div>
                   <div className="text-sm text-green-700 font-medium">Canlı Tablosu</div>
-                  <div className="text-xs text-green-600">{totalLiveRows} mevcut kayıt</div>
+                  <div className="text-xs text-green-600">{totalLiveColumns} mevcut sütun</div>
                 </div>
               </div>
 
@@ -129,24 +181,32 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                   </div>
                   
                   <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {testTables.map((table) => (
-                      <div key={table.id} className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <Table className="text-purple-600 mr-2" size={16} />
-                            <span className="font-medium text-gray-800">{table.name}</span>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-purple-600">
-                              {table.columnCount} sütun
+                    {testTables.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Database className="mx-auto mb-2" size={32} />
+                        <p>Test projesinde tablo bulunamadı</p>
+                      </div>
+                    ) : (
+                      testTables.map((table) => (
+                        <div key={table.id} className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <Table className="text-purple-600 mr-2" size={16} />
+                              <span className="font-medium text-gray-800">{table.name}</span>
                             </div>
-                            <div className="text-xs text-purple-500">
-                              {table.rowCount} kayıt
+                            <div className="text-right">
+                              <div className="text-sm font-medium text-purple-600">
+                                {table.columnCount} sütun
+                              </div>
+                              <div className="text-xs text-purple-500">
+                                {table.fieldNames.slice(0, 2).join(', ')}
+                                {table.fieldNames.length > 2 && '...'}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
 
@@ -163,24 +223,32 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                   </div>
                   
                   <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {liveTables.map((table) => (
-                      <div key={table.id} className="bg-green-50 border border-green-200 rounded-lg p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <Table className="text-green-600 mr-2" size={16} />
-                            <span className="font-medium text-gray-800">{table.name}</span>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-green-600">
-                              {table.columnCount} sütun
+                    {liveTables.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Database className="mx-auto mb-2" size={32} />
+                        <p>Canlı projede tablo bulunamadı</p>
+                      </div>
+                    ) : (
+                      liveTables.map((table) => (
+                        <div key={table.id} className="bg-green-50 border border-green-200 rounded-lg p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <Table className="text-green-600 mr-2" size={16} />
+                              <span className="font-medium text-gray-800">{table.name}</span>
                             </div>
-                            <div className="text-xs text-green-500">
-                              {table.rowCount} kayıt
+                            <div className="text-right">
+                              <div className="text-sm font-medium text-green-600">
+                                {table.columnCount} sütun
+                              </div>
+                              <div className="text-xs text-green-500">
+                                {table.fieldNames.slice(0, 2).join(', ')}
+                                {table.fieldNames.length > 2 && '...'}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -194,8 +262,8 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                   <div>
                     <h4 className="font-medium text-yellow-800 mb-1">Dikkat!</h4>
                     <p className="text-sm text-yellow-700">
-                      Test projesindeki <strong>{totalTestRows} kayıt</strong> canlı projeye aktarılacak. 
-                      Canlı projede aynı isimli tablolar varsa veriler <strong>üzerine yazılacak</strong>.
+                      Test projesindeki <strong>{testTables.length} tablo</strong> ve <strong>{totalTestColumns} sütun</strong> canlı projeye aktarılacak. 
+                      Canlı projede aynı isimli tablolar varsa yapılar <strong>üzerine yazılacak</strong>.
                     </p>
                   </div>
                 </div>
@@ -214,9 +282,9 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
           </button>
           <button
             onClick={onConfirm}
-            disabled={loading}
+            disabled={loading || error !== null || testTables.length === 0}
             className={`px-6 py-2 rounded-md transition-colors flex items-center gap-2 ${
-              loading
+              loading || error !== null || testTables.length === 0
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                 : 'bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700'
             }`}
