@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ArrowRight, Database, Table, Users } from 'lucide-react';
+import { X, ArrowRight, Database, Table, Users, Filter } from 'lucide-react';
 import { apiClient } from '../../../../utils/api';
 
 interface TableInfo {
@@ -9,6 +9,8 @@ interface TableInfo {
   columnCount: number;
   fieldNames: string[];
 }
+
+type FilterType = 'all' | 'same' | 'different';
 
 interface TransferToLiveModalProps {
   isOpen: boolean;
@@ -29,6 +31,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
   const [liveTables, setLiveTables] = useState<TableInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<FilterType>('all');
 
   // Gerçek API'den tablo verilerini çek
   useEffect(() => {
@@ -93,6 +96,31 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
       setLoading(false);
     }
   };
+
+  // Tablo karşılaştırma fonksiyonu
+  const isTableSame = (testTable: TableInfo): boolean => {
+    const liveTable = liveTables.find(live => live.name === testTable.name);
+    if (!liveTable) return false;
+    
+    // Tablo adı ve sütun sayısı aynı mı kontrol et
+    return liveTable.columnCount === testTable.columnCount;
+  };
+
+  // Filtrelenmiş test tabloları
+  const getFilteredTestTables = (): TableInfo[] => {
+    switch (filterType) {
+      case 'same':
+        return testTables.filter(table => isTableSame(table));
+      case 'different':
+        return testTables.filter(table => !isTableSame(table));
+      default:
+        return testTables;
+    }
+  };
+
+  const filteredTestTables = getFilteredTestTables();
+  const sameTablesCount = testTables.filter(table => isTableSame(table)).length;
+  const differentTablesCount = testTables.length - sameTablesCount;
 
   if (!isOpen) return null;
 
@@ -170,42 +198,95 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
               <div className="grid grid-cols-2 gap-6">
                 {/* Sol Taraf - Test Projesi */}
                 <div>
-                  <div className="flex items-center mb-4">
-                    <div className="bg-purple-100 p-2 rounded-lg mr-3">
-                      <Database className="text-purple-600" size={20} />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <div className="bg-purple-100 p-2 rounded-lg mr-3">
+                        <Database className="text-purple-600" size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800">Test Proje Tabloları</h3>
+                        <p className="text-sm text-gray-600">{testProject?.name}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800">Test Proje Tabloları</h3>
-                      <p className="text-sm text-gray-600">{testProject?.name}</p>
+                    
+                    {/* Filter Buttons */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setFilterType('all')}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                          filterType === 'all'
+                            ? 'bg-gray-600 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        <Filter size={12} className="inline mr-1" />
+                        Tümü ({testTables.length})
+                      </button>
+                      <button
+                        onClick={() => setFilterType('same')}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                          filterType === 'same'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                        }`}
+                      >
+                        Aynı ({sameTablesCount})
+                      </button>
+                      <button
+                        onClick={() => setFilterType('different')}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                          filterType === 'different'
+                            ? 'bg-red-600 text-white'
+                            : 'bg-red-100 text-red-600 hover:bg-red-200'
+                        }`}
+                      >
+                        Farklı ({differentTablesCount})
+                      </button>
                     </div>
                   </div>
                   
                   <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {testTables.length === 0 ? (
+                    {filteredTestTables.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
                         <Database className="mx-auto mb-2" size={32} />
-                        <p>Test projesinde tablo bulunamadı</p>
+                        <p>
+                          {filterType === 'same' && 'Aynı tablo bulunamadı'}
+                          {filterType === 'different' && 'Farklı tablo bulunamadı'}
+                          {filterType === 'all' && 'Test projesinde tablo bulunamadı'}
+                        </p>
                       </div>
                     ) : (
-                      testTables.map((table) => (
-                        <div key={table.id} className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              <Table className="text-purple-600 mr-2" size={16} />
-                              <span className="font-medium text-gray-800">{table.name}</span>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-sm font-medium text-purple-600">
-                                {table.columnCount} sütun
+                      filteredTestTables.map((table) => {
+                        const isSame = isTableSame(table);
+                        return (
+                          <div 
+                            key={table.id} 
+                            className={`border rounded-lg p-3 ${
+                              isSame 
+                                ? 'bg-purple-50 border-purple-200' 
+                                : 'bg-red-50 border-red-200'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                <Table className={`mr-2 ${isSame ? 'text-purple-600' : 'text-red-600'}`} size={16} />
+                                <span className="font-medium text-gray-800">{table.name}</span>
+                                {isSame && <span className="ml-2 text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded">✓ Aynı</span>}
+                                {!isSame && <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-1 rounded">⚠ Farklı</span>}
                               </div>
-                              <div className="text-xs text-purple-500">
-                                {table.fieldNames.slice(0, 2).join(', ')}
-                                {table.fieldNames.length > 2 && '...'}
+                              <div className="text-right">
+                                <div className={`text-sm font-medium ${isSame ? 'text-purple-600' : 'text-red-600'}`}>
+                                  {table.columnCount} sütun
+                                </div>
+                                <div className={`text-xs ${isSame ? 'text-purple-500' : 'text-red-500'}`}>
+                                  {table.fieldNames.slice(0, 2).join(', ')}
+                                  {table.fieldNames.length > 2 && '...'}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 </div>
@@ -262,7 +343,7 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                   <div>
                     <h4 className="font-medium text-yellow-800 mb-1">Dikkat!</h4>
                     <p className="text-sm text-yellow-700">
-                      Test projesindeki <strong>{testTables.length} tablo</strong> ve <strong>{totalTestColumns} sütun</strong> canlı projeye aktarılacak. 
+                      Test projesindeki <strong>{filteredTestTables.length} tablo</strong> ve <strong>{filteredTestTables.reduce((sum, table) => sum + table.columnCount, 0)} sütun</strong> canlı projeye aktarılacak. 
                       Canlı projede aynı isimli tablolar varsa yapılar <strong>üzerine yazılacak</strong>.
                     </p>
                   </div>
@@ -282,15 +363,15 @@ const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
           </button>
           <button
             onClick={onConfirm}
-            disabled={loading || error !== null || testTables.length === 0}
+            disabled={loading || error !== null || filteredTestTables.length === 0}
             className={`px-6 py-2 rounded-md transition-colors flex items-center gap-2 ${
-              loading || error !== null || testTables.length === 0
+              loading || error !== null || filteredTestTables.length === 0
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                 : 'bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700'
             }`}
           >
             <ArrowRight size={16} />
-            Canlıya Aktar
+            Canlıya Aktar ({filteredTestTables.length})
           </button>
         </div>
       </div>
