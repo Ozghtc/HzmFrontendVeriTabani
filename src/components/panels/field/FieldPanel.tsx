@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Link } from 'lucide-react';
 import {
@@ -172,6 +172,21 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
   const isPanelDisabled = !selectedProject || !selectedTable;
   const hasFields = fields.length > 0;
   
+  // Filter out hidden fields for display
+  const visibleFields = fields.filter((field: any) => !field.isHidden);
+  const hasVisibleFields = visibleFields.length > 0;
+
+  // Load fields when table changes
+  useEffect(() => {
+    if (selectedTable) {
+      // Filter out hidden fields
+      const visibleFields = (selectedTable.fields || []).filter((field: any) => !field.isHidden);
+      // setFields(visibleFields); // This line was removed as per the edit hint
+    } else {
+      // setFields([]); // This line was removed as per the edit hint
+    }
+  }, [selectedTable]);
+  
   return (
     <>
       <div className={`bg-white rounded-lg shadow-md p-4 ${isPanelDisabled ? 'opacity-70' : ''}`}>
@@ -235,10 +250,10 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
                     onDragEnd={handleDragEnd}
                   >
                     <SortableContext
-                      items={fields.map(field => field.id)}
+                      items={visibleFields.map(field => field.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      {fields.map((field) => (
+                      {visibleFields.map((field) => (
                         <SortableFieldRow
                           key={field.id}
                           id={field.id}
@@ -261,7 +276,7 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
         </div>
         
         {/* Add Relationship Button */}
-        {hasFields && (
+        {hasVisibleFields && (
           <div className="mt-4 border-t pt-4">
             <button
               onClick={() => setShowRelationshipModal(true)}
@@ -277,11 +292,11 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
           <button
             onClick={handleViewData}
             className={`w-full px-4 py-2 rounded-md transition-colors text-sm font-medium ${
-              hasFields && selectedProject && selectedTable
+              hasVisibleFields && selectedProject && selectedTable
                 ? 'bg-green-600 text-white hover:bg-green-700'
                 : 'bg-gray-200 text-gray-700 opacity-60 cursor-not-allowed'
             }`}
-            disabled={!hasFields || !selectedProject || !selectedTable}
+            disabled={!hasVisibleFields || !selectedProject || !selectedTable}
           >
             Verileri Görüntüle
           </button>

@@ -43,6 +43,9 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
 }) => {
   const { AlertTriangle, Search } = icons;
   
+  // Filter out hidden fields
+  const visibleFields = table?.fields?.filter((field: any) => !field.isHidden) || [];
+  
   // Sütun bazlı arama state'leri
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   
@@ -97,6 +100,17 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
       />
     );
   }
+  
+  // Check if there are visible fields
+  if (visibleFields.length === 0) {
+    return (
+      <div className="text-center text-gray-500 py-12">
+        <AlertTriangle className="mx-auto mb-4" size={64} />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Görünür Alan Yok</h3>
+        <p>Bu tabloda henüz görünür alan bulunmuyor.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -122,7 +136,7 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
           <thead className="bg-gray-50">
             {/* Sütun başlıkları */}
             <tr>
-              {table.fields.map((field: any) => (
+              {visibleFields.map((field: any) => (
                 <th
                   key={field.id}
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -137,7 +151,7 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
             </tr>
             {/* Sütun bazlı arama input'ları */}
             <tr className="bg-gray-100">
-              {table.fields.map((field: any) => (
+              {visibleFields.map((field: any) => (
                 <th key={`filter-${field.id}`} className="px-6 py-2">
                   <div className="relative">
                     <Search 
@@ -162,7 +176,7 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {addingRow && (
               <AddRowForm
-                fields={table.fields}
+                fields={visibleFields}
                 newRowData={newRowData}
                 onInputChange={onNewRowInputChange}
                 onSave={onAddRow}
@@ -180,7 +194,7 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
                 <DataTableRow
                   key={row.id}
                   row={row}
-                  fields={table.fields}
+                  fields={visibleFields}
                   isEditing={editingRow === row.id}
                   editData={editData}
                   onEdit={() => onEditRow(row)}

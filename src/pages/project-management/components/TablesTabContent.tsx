@@ -24,8 +24,10 @@ const TablesTabContent: React.FC<TablesTabContentProps> = ({ project, onRefresh 
   useEffect(() => {
     console.log('🔄 TablesTabContent: selectedTable changed:', selectedTable);
     if (selectedTable) {
-      setFields(selectedTable.fields || []);
-      console.log('📋 Fields loaded:', selectedTable.fields || []);
+      // Filter out hidden fields
+      const visibleFields = (selectedTable.fields || []).filter((field: any) => !field.isHidden);
+      setFields(visibleFields);
+      console.log('📋 Visible fields loaded:', visibleFields);
     } else {
       setFields([]);
       console.log('📋 No table selected, clearing fields');
