@@ -72,6 +72,17 @@ const ProjectList = () => {
     }
   };
 
+  // Test projesinden canlıya aktar handler'ı
+  const handleTransferToLive = async (testProjectId: number) => {
+    try {
+      console.log('📤 Test projesinden canlıya aktar başlatıldı - Test Proje ID:', testProjectId);
+      // TODO: Backend API çağrısı yapılacak
+      console.log('🚧 Transfer to live functionality will be implemented here');
+    } catch (error) {
+      console.error('Canlıya aktar hatası:', error);
+    }
+  };
+
   // Proje filtreleme mantığı - Test projelerini ayrı kategorize et
   const categorizeProjects = () => {
     const normalProjects: any[] = [];
@@ -190,6 +201,7 @@ const ProjectList = () => {
                         onNavigateToEdit={navigateToEdit}
                         onToggleProtection={handleToggleProtection}
                         onCreateTestProject={handleCreateTestProject}
+                        onTransferToLive={handleTransferToLive}
                         loading={loading}
                       />
                     ))}
@@ -227,6 +239,7 @@ const ProjectList = () => {
                         onNavigateToEdit={() => navigateToEdit(project.id)}
                         onToggleProtection={() => handleToggleProtection(project.id)}
                         onCreateTestProject={() => {}} // Test projesi için test projesi oluşturulamaz
+                        onTransferToLive={() => handleTransferToLive(project.id)}
                         loading={loading}
                       />
                     ))}

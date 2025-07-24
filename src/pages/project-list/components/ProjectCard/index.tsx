@@ -17,6 +17,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onNavigateToEdit,
   onToggleProtection,
   onCreateTestProject, // Yeni prop
+  onTransferToLive, // Test projesinden canlıya aktar prop
   loading
 }) => {
   const { Table } = icons;
@@ -28,6 +29,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     console.log('🧪 Test projesi oluşturuluyor:', project.name);
     if (onCreateTestProject) {
       onCreateTestProject();
+    }
+  };
+  
+  // Canlıya aktar handler
+  const handleTransferToLive = () => {
+    console.log('📤 Test projesinden canlıya aktar:', project.name);
+    if (onTransferToLive) {
+      onTransferToLive();
     }
   };
   
@@ -64,6 +73,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           onShowProjectInfo={() => setIsProjectInfoOpen(true)}
           onShowProjectLogs={() => setIsProjectLogsOpen(true)}
           onCreateTestProject={project.isTestEnvironment ? undefined : handleCreateTestProject}
+          onTransferToLive={project.isTestEnvironment ? handleTransferToLive : undefined}
           loading={loading}
           isTestProject={project.isTestEnvironment || false}
         />

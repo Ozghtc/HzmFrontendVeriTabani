@@ -1,6 +1,6 @@
 import React from 'react';
 import { icons } from '../../constants/projectListConstants';
-import { Activity, TestTube } from 'lucide-react';
+import { Activity, TestTube, ArrowUp } from 'lucide-react';
 
 interface ProjectActionsProps {
   onNavigateToData: () => void;
@@ -8,6 +8,7 @@ interface ProjectActionsProps {
   onShowProjectInfo: () => void;
   onShowProjectLogs: () => void;
   onCreateTestProject?: () => void; // Yeni prop
+  onTransferToLive?: () => void; // Test projesinden canlıya aktar
   loading: boolean;
   isTestProject?: boolean; // Test projesi mi kontrolü
 }
@@ -18,6 +19,7 @@ const ProjectActions: React.FC<ProjectActionsProps> = ({
   onShowProjectInfo,
   onShowProjectLogs,
   onCreateTestProject,
+  onTransferToLive,
   loading,
   isTestProject = false
 }) => {
@@ -63,8 +65,9 @@ const ProjectActions: React.FC<ProjectActionsProps> = ({
         </button>
       </div>
       
-      {/* İkinci satır - Test Projesi Oluştur butonu */}
+      {/* İkinci satır - Özel butonlar */}
       <div className="grid grid-cols-1">
+        {/* Test Projesi Oluştur butonu - Sadece normal projeler için */}
         {!isTestProject && onCreateTestProject && (
           <button
             onClick={onCreateTestProject}
@@ -78,6 +81,23 @@ const ProjectActions: React.FC<ProjectActionsProps> = ({
           >
             <TestTube size={16} className="mr-2" />
             Test Projesi Oluştur
+          </button>
+        )}
+        
+        {/* Canlıya Aktar butonu - Sadece test projeleri için */}
+        {isTestProject && onTransferToLive && (
+          <button
+            onClick={onTransferToLive}
+            disabled={loading}
+            className={`px-4 py-2 rounded-md transition-colors flex items-center justify-center text-sm font-medium ${
+              loading 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700'
+            }`}
+            title="Test projesindeki verileri canlı projeye aktar"
+          >
+            <ArrowUp size={16} className="mr-2" />
+            Canlıya Aktar
           </button>
         )}
       </div>

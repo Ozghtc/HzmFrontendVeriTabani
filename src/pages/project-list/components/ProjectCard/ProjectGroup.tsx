@@ -17,6 +17,7 @@ interface ProjectGroupProps {
   onNavigateToEdit: (projectId: number) => void;
   onToggleProtection: (projectId: number) => void;
   onCreateTestProject: (projectId: number) => void;
+  onTransferToLive?: (testProjectId: number) => void; // Test projesinden canlıya aktar
   loading: boolean;
 }
 
@@ -31,6 +32,7 @@ const ProjectGroup: React.FC<ProjectGroupProps> = ({
   onNavigateToEdit,
   onToggleProtection,
   onCreateTestProject,
+  onTransferToLive,
   loading
 }) => {
   const [isExpanded, setIsExpanded] = useState(false); // Varsayılan kapalı
@@ -231,6 +233,7 @@ const ProjectGroup: React.FC<ProjectGroupProps> = ({
                   onNavigateToEdit={() => onNavigateToEdit(testProject.id)}
                   onToggleProtection={() => {}} // Test projesi kendi koruması yok - boş function
                   onCreateTestProject={() => {}} // Test projesi için test projesi yok
+                  onTransferToLive={onTransferToLive ? () => onTransferToLive(testProject.id) : undefined} // Test projesinden canlıya aktar
                   loading={loading}
                 />
               </div>

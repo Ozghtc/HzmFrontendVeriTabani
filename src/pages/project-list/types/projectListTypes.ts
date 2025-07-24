@@ -47,6 +47,7 @@ export interface ProjectCardProps {
   onNavigateToEdit: () => void;
   onToggleProtection: () => void;
   onCreateTestProject?: () => void; // Yeni prop
+  onTransferToLive?: () => void; // Test projesinden canlıya aktar prop
   loading: boolean;
 }
 
