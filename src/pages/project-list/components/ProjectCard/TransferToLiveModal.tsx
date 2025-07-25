@@ -65,8 +65,8 @@ export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
         const formattedTestTables: TableInfo[] = testTablesData.map((table: any) => ({
           id: table.id,
           name: table.name || table.tableName,
-          columnCount: (table.fields || []).length,
-          fieldNames: (table.fields || []).map((field: any) => field.name)
+          columnCount: (table.fields || []).filter((field: any) => !field.isHidden).length, // Only count visible fields
+          fieldNames: (table.fields || []).filter((field: any) => !field.isHidden).map((field: any) => field.name) // Only show visible field names
         }));
         setTestTables(formattedTestTables);
         console.log('✅ Test tables loaded:', formattedTestTables);
@@ -80,8 +80,8 @@ export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
         const formattedLiveTables: TableInfo[] = liveTablesData.map((table: any) => ({
           id: table.id,
           name: table.name || table.tableName,
-          columnCount: (table.fields || []).length,
-          fieldNames: (table.fields || []).map((field: any) => field.name)
+          columnCount: (table.fields || []).filter((field: any) => !field.isHidden).length, // Only count visible fields
+          fieldNames: (table.fields || []).filter((field: any) => !field.isHidden).map((field: any) => field.name) // Only show visible field names
         }));
         setLiveTables(formattedLiveTables);
         console.log('✅ Live tables loaded:', formattedLiveTables);
