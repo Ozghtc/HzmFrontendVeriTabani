@@ -33,7 +33,8 @@ export const useTableApi = (): TableApiHookReturn => {
             required: field.isRequired || false,
             description: field.description || '',
             validation: field.validation || {},
-            relationships: field.relationships || []
+            relationships: field.relationships || [],
+            isHidden: field.isHidden || false // 🔥 CRITICAL FIX: Add isHidden property
           }))
         }));
         
