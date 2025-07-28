@@ -172,6 +172,23 @@ export class ProjectEndpoints implements IProjectEndpoints {
     
     return response;
   }
+
+  async updateApiKeyPassword(projectId: string, newPassword: string): Promise<ApiResponse<void>> {
+    console.log('🔑 Updating API Key password for project:', projectId);
+    
+    const response = await this.request(`/projects/${projectId}/api-key-password`, {
+      method: 'PUT',
+      body: JSON.stringify({ newPassword }),
+    });
+    
+    if (response.success) {
+      console.log('✅ API Key password updated successfully');
+    } else {
+      console.log('❌ API Key password update failed:', response.error);
+    }
+    
+    return response;
+  }
 } 
 
 export const createTestEnvironment = async (projectId: number) => {

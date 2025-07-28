@@ -17,7 +17,8 @@ import {
   XCircle,
   Info,
   Lock,
-  Unlock
+  Unlock,
+  Edit3
 } from 'lucide-react';
 
 export const icons = {
@@ -39,7 +40,8 @@ export const icons = {
   XCircle,
   Info,
   Lock,
-  Unlock
+  Unlock,
+  Edit3
 };
 
 export const NOTIFICATION_DURATION = 3000; // 3 seconds

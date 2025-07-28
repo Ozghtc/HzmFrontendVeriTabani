@@ -3,6 +3,7 @@ export interface Project {
   name: string;
   description?: string;
   apiKey: string;
+  apiKeyPassword?: string;
   tableCount: number;
   createdAt: string;
   updatedAt: string;

@@ -7,6 +7,8 @@ import ProjectActions from './ProjectActions';
 import ProjectInfoModal from './ProjectInfoModal';
 import TransferToLiveModal from './TransferToLiveModal';
 import { NewProjectLogsModal } from '../../../../components/modals/NewProjectLogsModal';
+import { ApiKeyInfoModal } from '../../../../components/modals/ApiKeyInfoModal';
+import { apiClient } from '../../../../utils/api';
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
@@ -17,37 +19,46 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onNavigateToData,
   onNavigateToEdit,
   onToggleProtection,
-  onCreateTestProject, // Yeni prop
-  onTransferToLive, // Test projesinden canlıya aktar prop
+  onCreateTestProject,
   loading,
-  liveProject, // Parent proje bilgisi (test projesi için)
-  hasTestProject = false // Test projesi var mı bilgisi
+  hasTestProject
 }) => {
   const { Table } = icons;
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false);
   const [isProjectLogsOpen, setIsProjectLogsOpen] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
-  
-  // Test projesi oluşturma handler
-  const handleCreateTestProject = () => {
-    console.log('🧪 Test projesi oluşturuluyor:', project.name);
-    if (onCreateTestProject) {
-      onCreateTestProject();
-    }
-  };
-  
-  // Canlıya aktar modal açma handler
+  const [isApiKeyInfoOpen, setIsApiKeyInfoOpen] = useState(false);
+
   const handleTransferToLive = () => {
-    console.log('📤 Transfer modal açılıyor - Test Proje:', project.name);
     setIsTransferModalOpen(true);
   };
-  
-  // Transfer onaylama handler
-  const handleConfirmTransfer = () => {
-    console.log('✅ Transfer onaylandı - Test Proje ID:', project.id);
-    setIsTransferModalOpen(false);
-    if (onTransferToLive) {
-      onTransferToLive();
+
+  const handleCreateTestProject = () => {
+    if (onCreateTestProject) {
+      onCreateTestProject(project.id);
+    }
+  };
+
+  const handleUpdateApiKeyPassword = async (projectId: number, newPassword: string) => {
+    try {
+      console.log('🔑 Updating API Key password for project:', projectId);
+      
+      const response = await apiClient.projects.updateApiKeyPassword(
+        projectId.toString(), 
+        newPassword
+      );
+      
+      if (response.success) {
+        console.log('✅ API Key password updated successfully');
+        // You could add a success notification here
+        // The modal will close automatically on success
+      } else {
+        console.error('❌ API Key password update failed:', response.error);
+        throw new Error(response.error || 'Failed to update API Key password');
+      }
+    } catch (error) {
+      console.error('💥 Error updating API Key password:', error);
+      throw error; // Re-throw to let the modal handle the error
     }
   };
   
@@ -64,10 +75,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         
         <ApiKeySection
           apiKey={project.apiKey}
+          apiKeyPassword={project.apiKeyPassword}
           showApiKey={showApiKey}
           createdAt={project.createdAt}
           onToggleVisibility={onToggleApiKey}
           onCopyApiKey={onCopyApiKey}
+          onViewApiKeyInfo={() => setIsApiKeyInfoOpen(true)}
         />
         
         {/* Tables Summary */}
@@ -104,14 +117,24 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         />
       )}
 
+      <ApiKeyInfoModal
+        isOpen={isApiKeyInfoOpen}
+        onClose={() => setIsApiKeyInfoOpen(false)}
+        project={{
+          id: project.id,
+          name: project.name,
+          apiKey: project.apiKey,
+          apiKeyPassword: project.apiKeyPassword
+        }}
+        onUpdatePassword={handleUpdateApiKeyPassword}
+      />
+
       {/* Transfer Modal - Sadece test projeleri için */}
       {project.isTestEnvironment && (
         <TransferToLiveModal
           isOpen={isTransferModalOpen}
           onClose={() => setIsTransferModalOpen(false)}
-          onConfirm={handleConfirmTransfer}
           testProject={project}
-          liveProject={liveProject}
         />
       )}
     </>

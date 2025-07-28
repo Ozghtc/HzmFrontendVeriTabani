@@ -35,6 +35,7 @@ export interface IProjectEndpoints {
   deleteProject(projectId: string, protectionPassword?: string): Promise<ApiResponse<void>>;
   enableProjectProtection(projectId: string, password: string): Promise<ApiResponse<void>>;
   removeProjectProtection(projectId: string, password: string): Promise<ApiResponse<void>>;
+  updateApiKeyPassword(projectId: string, newPassword: string): Promise<ApiResponse<void>>;
 }
 
 // Table Endpoints Interface
