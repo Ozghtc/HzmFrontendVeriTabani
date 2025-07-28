@@ -27,7 +27,7 @@ export const useProjectData = () => {
         
         try {
           const authHeaders = AuthManager.getAuthHeaders();
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/projects/${projectId}`, {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/admin/projects/${projectId}`, {
             headers: {
               ...authHeaders,
               'Content-Type': 'application/json'

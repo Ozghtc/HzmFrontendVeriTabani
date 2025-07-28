@@ -312,7 +312,7 @@ export const useProjectList = () => {
       // Backend API'yi her durumda dene (token varsa auth ile, yoksa anonymous)
       try {
         console.log('📡 Attempting backend API call...');
-        console.log('🔗 API URL:', `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`);
+        console.log('🔗 API URL:', `https://hzmbackendveritabani-production.up.railway.app/api/v1/projects/${projectId}/create-test-environment`);
         
         const headers: Record<string, string> = {
           'Content-Type': 'application/json'
@@ -326,7 +326,7 @@ export const useProjectList = () => {
         }
         
         const response = await fetch(
-          `https://hzmbackandveritabani-production-c660.up.railway.app/api/v1/projects/${projectId}/create-test-environment`,
+          `https://hzmbackendveritabani-production.up.railway.app/api/v1/projects/${projectId}/create-test-environment`,
           {
             method: 'POST',
             headers

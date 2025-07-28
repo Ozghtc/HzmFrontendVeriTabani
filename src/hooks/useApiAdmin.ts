@@ -21,7 +21,7 @@ export const useApiUsers = () => {
         throw new Error('No valid authentication token found');
       }
       
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/users`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/admin/users`, {
         headers: {
           ...authHeaders,
           'Content-Type': 'application/json'
@@ -65,7 +65,7 @@ export const useApiUsers = () => {
         throw new Error('No valid authentication token found');
       }
       
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/users/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
           ...authHeaders,
@@ -97,7 +97,7 @@ export const useApiUsers = () => {
         throw new Error('No valid authentication token found');
       }
       
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/users/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           ...authHeaders,
@@ -147,7 +147,7 @@ export const useApiAdminProjects = () => {
         throw new Error('No valid authentication token found');
       }
       
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/admin/projects`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/admin/projects`, {
         headers: {
           ...authHeaders,
           'Content-Type': 'application/json'
@@ -191,7 +191,7 @@ export const useApiAdminProjects = () => {
         throw new Error('No valid authentication token found');
       }
       
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'}/projects/${projectId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/projects/${projectId}`, {
         method: 'DELETE',
         headers: {
           ...authHeaders,

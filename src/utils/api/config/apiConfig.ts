@@ -1,7 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
   // Base URLs
-  PRODUCTION_URL: 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1',
+  PRODUCTION_URL: 'https://hzmbackendveritabani-production.up.railway.app/api/v1',
   
   // API Keys
   LIVE_API_KEY: 'hzm_b446ef9e20064af09190e85f415a2a0c', // Canlı API Key
@@ -30,7 +30,7 @@ export const API_CONFIG = {
   },
   
   // Base URL (default)
-  baseURL: 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1'
+  baseURL: 'https://hzmbackendveritabani-production.up.railway.app/api/v1'
 } as const;
 
 // API Mode Management

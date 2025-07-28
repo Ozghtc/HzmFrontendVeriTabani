@@ -145,7 +145,7 @@ export class ApiKeyGenerator {
    * Diğer TÜM işlemler JWT TOKEN gerektirir!
    */
   static generateApiExamples(projectId: string, apiKey: string, tableName?: string) {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1';
     const headers = {
       'X-API-Key': apiKey,
       'Content-Type': 'application/json'

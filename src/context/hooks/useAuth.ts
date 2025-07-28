@@ -6,7 +6,7 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
     try {
       console.log('🔑 Attempting backend login for:', email);
       
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -48,7 +48,7 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
     try {
       console.log('📝 Attempting backend registration for:', email);
       
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
@@ -99,7 +99,7 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
       const token = AuthManager.getToken();
       if (!token) return [];
       
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/admin/users`, {
         headers: {
           'Authorization': `Bearer ${token}`,

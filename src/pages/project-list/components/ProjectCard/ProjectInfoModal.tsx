@@ -29,7 +29,7 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
   };
 
   const apiInfo = {
-    baseUrl: 'https://hzmbackandveritabani-production-c660.up.railway.app',
+    baseUrl: 'https://hzmbackendveritabani-production.up.railway.app',
     projectId: project.id.toString(),
     apiKey: project.apiKey,
     endpoints: {

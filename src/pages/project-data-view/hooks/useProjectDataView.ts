@@ -6,7 +6,7 @@ import { loadTableData, saveTableData, createNewRow } from '../utils/dataHandler
 import { AuthManager } from '../../../utils/api/utils/authUtils';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://hzmbackandveritabani-production-c660.up.railway.app/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1';
 
 export const useProjectDataView = () => {
   const { projectId } = useParams();
