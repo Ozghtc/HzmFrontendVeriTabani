@@ -163,8 +163,8 @@ const DatabasePricing = () => {
         {/* Tab Content */}
         {activeTab === 'plans' && (
           <PlansTab
-            pricingPlans={state.pricingPlans}
-            campaigns={state.campaigns}
+            pricingPlans={state.pricingPlans || []}
+            campaigns={state.campaigns || []}
             onAddNew={() => setShowPlanForm(true)}
             onEdit={(plan) => {
               setEditingPlan(plan);
@@ -177,7 +177,7 @@ const DatabasePricing = () => {
 
         {activeTab === 'campaigns' && (
           <CampaignsTab
-            campaigns={state.campaigns}
+            campaigns={state.campaigns || []}
             onAddNew={() => setShowCampaignForm(true)}
             onEdit={(campaign) => {
               setEditingCampaign(campaign);

@@ -165,13 +165,21 @@ export interface PricingPlan {
 export interface DatabaseState {
   user: User | null;
   isAuthenticated: boolean;
-  // projects, selectedProject, selectedTable, pricingPlans, campaigns kaldırıldı
+  pricingPlans: PricingPlan[];
+  campaigns: Campaign[];
+  // projects, selectedProject, selectedTable kaldırıldı
   // Bunlar artık sadece API'den gelecek
 }
 
 export type DatabaseAction =
   | { type: 'LOGIN'; payload: { user: User } }
   | { type: 'LOGOUT' }
-  | { type: 'REGISTER'; payload: { user: User } };
-  // Tüm proje, tablo, field, API key, user management ve pricing action'ları kaldırıldı
+  | { type: 'REGISTER'; payload: { user: User } }
+  | { type: 'ADD_PRICING_PLAN'; payload: { plan: PricingPlan } }
+  | { type: 'UPDATE_PRICING_PLAN'; payload: { plan: PricingPlan } }
+  | { type: 'DELETE_PRICING_PLAN'; payload: { planId: string } }
+  | { type: 'ADD_CAMPAIGN'; payload: { campaign: Campaign } }
+  | { type: 'UPDATE_CAMPAIGN'; payload: { campaign: Campaign } }
+  | { type: 'DELETE_CAMPAIGN'; payload: { campaignId: string } };
+  // Tüm proje, tablo, field, API key, user management action'ları kaldırıldı
   // Bunlar artık sadece API üzerinden yapılacak

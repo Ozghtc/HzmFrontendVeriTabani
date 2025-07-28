@@ -7,6 +7,8 @@ import { createAuthFunctions } from './hooks/useAuth';
 const initialState = {
   user: null,
   isAuthenticated: false,
+  pricingPlans: [],
+  campaigns: [],
 };
 
 // Context
