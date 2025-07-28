@@ -106,7 +106,8 @@ export const useProjectList = () => {
     
     const result = await createProject({
       name: formData.name.trim(),
-      description: formData.description?.trim() || undefined
+      description: formData.description?.trim() || undefined,
+      apiKeyPassword: formData.apiKeyPassword
     });
     
     if (result) {

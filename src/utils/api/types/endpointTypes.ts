@@ -41,6 +41,7 @@ export interface Project {
 export interface CreateProjectRequest {
   name: string;
   description?: string;
+  apiKeyPassword: string;
 }
 
 export interface UpdateProjectRequest {

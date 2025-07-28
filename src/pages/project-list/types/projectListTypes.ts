@@ -20,6 +20,7 @@ export interface NotificationState {
 export interface ProjectFormData {
   name: string;
   description?: string;
+  apiKeyPassword: string;
 }
 
 export interface ApiKeyVisibility {

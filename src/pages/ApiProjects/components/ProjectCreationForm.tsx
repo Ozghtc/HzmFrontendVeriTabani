@@ -1,21 +1,19 @@
 import React from 'react';
-import { PlusCircle, RefreshCw } from 'lucide-react';
-
-interface ProjectCreationFormProps {
-  newProjectName: string;
-  newProjectDescription: string;
-  creating: boolean;
-  onNameChange: (value: string) => void;
-  onDescriptionChange: (value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}
+import { PlusCircle } from 'lucide-react';
+import { ProjectCreationFormProps } from '../types';
+import { PasswordInput } from '../../../components/PasswordInput';
 
 const ProjectCreationForm: React.FC<ProjectCreationFormProps> = ({
   newProjectName,
   newProjectDescription,
+  apiKeyPassword,
+  apiKeyPasswordConfirm,
+  passwordError,
   creating,
   onNameChange,
   onDescriptionChange,
+  onApiKeyPasswordChange,
+  onApiKeyPasswordConfirmChange,
   onSubmit
 }) => {
   return (
@@ -56,22 +54,52 @@ const ProjectCreationForm: React.FC<ProjectCreationFormProps> = ({
           </div>
         </div>
         
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              API Key Şifresi *
+            </label>
+            <PasswordInput
+              value={apiKeyPassword}
+              onChange={onApiKeyPasswordChange}
+              placeholder="API Key şifresini girin..."
+              disabled={creating}
+              required
+              className="px-3 py-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              API Key Şifresi Tekrar *
+            </label>
+            <PasswordInput
+              value={apiKeyPasswordConfirm}
+              onChange={onApiKeyPasswordConfirmChange}
+              placeholder="API Key şifresini tekrar girin..."
+              disabled={creating}
+              required
+              className="px-3 py-2"
+            />
+          </div>
+        </div>
+        
+        {passwordError && (
+          <div className="text-red-600 text-sm bg-red-50 p-2 rounded-md">
+            {passwordError}
+          </div>
+        )}
+
         <button
           type="submit"
-          disabled={!newProjectName.trim() || creating}
-          className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+          disabled={creating}
+          className={`w-full py-3 px-4 rounded-md transition-colors flex items-center justify-center font-medium ${
+            creating
+              ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
         >
-          {creating ? (
-            <>
-              <RefreshCw size={16} className="animate-spin mr-2" />
-              Oluşturuluyor...
-            </>
-          ) : (
-            <>
-              <PlusCircle size={16} className="mr-2" />
-              Proje Oluştur
-            </>
-          )}
+          <PlusCircle size={20} className="mr-2" />
+          {creating ? 'Oluşturuluyor...' : 'Proje Oluştur'}
         </button>
       </form>
     </div>

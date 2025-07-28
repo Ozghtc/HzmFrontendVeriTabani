@@ -15,3 +15,17 @@ export interface ApiProjectsState {
   showApiKey: { [key: string]: boolean };
   creating: boolean;
 }
+
+export interface ProjectCreationFormProps {
+  newProjectName: string;
+  newProjectDescription: string;
+  apiKeyPassword: string;
+  apiKeyPasswordConfirm: string;
+  passwordError: string;
+  creating: boolean;
+  onNameChange: (value: string) => void;
+  onDescriptionChange: (value: string) => void;
+  onApiKeyPasswordChange: (value: string) => void;
+  onApiKeyPasswordConfirmChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+}

@@ -123,7 +123,7 @@ export const useApiProjects = () => {
     }
   };
 
-  const createProject = async (projectData: { name: string; description?: string }) => {
+  const createProject = async (projectData: { name: string; description?: string; apiKeyPassword: string }) => {
     setLoading(true);
     setError(null);
     

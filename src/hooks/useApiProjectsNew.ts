@@ -127,7 +127,7 @@ export function useApiProjectsNew() {
   };
 
   // Create new project
-  const createProject = async (projectData: { name: string; description?: string }) => {
+  const createProject = async (projectData: { name: string; description?: string; apiKeyPassword: string }) => {
     try {
       setError(null);
       console.log(`🔧 Creating project: ${projectData.name}`);

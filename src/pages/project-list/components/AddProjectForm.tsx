@@ -1,23 +1,44 @@
 import React, { useState } from 'react';
 import { icons } from '../constants/projectListConstants';
 import { AddProjectFormProps } from '../types/projectListTypes';
+import { PasswordInput } from '../../../components/PasswordInput';
 
 const AddProjectForm: React.FC<AddProjectFormProps> = ({ onSubmit, creating }) => {
   const { PlusCircle } = icons;
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
+  const [apiKeyPassword, setApiKeyPassword] = useState('');
+  const [apiKeyPasswordConfirm, setApiKeyPasswordConfirm] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  
+  const validatePasswords = () => {
+    if (!apiKeyPassword || apiKeyPassword.length < 8) {
+      setPasswordError('API Key şifresi en az 8 karakter olmalıdır');
+      return false;
+    }
+    if (apiKeyPassword !== apiKeyPasswordConfirm) {
+      setPasswordError('Şifreler eşleşmiyor');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newProjectName.trim() && !creating) {
+    if (newProjectName.trim() && !creating && validatePasswords()) {
       await onSubmit({
         name: newProjectName,
-        description: newProjectDescription
+        description: newProjectDescription,
+        apiKeyPassword: apiKeyPassword
       });
       
       // Clear form on success
       setNewProjectName('');
       setNewProjectDescription('');
+      setApiKeyPassword('');
+      setApiKeyPasswordConfirm('');
+      setPasswordError('');
     }
   };
   
@@ -57,6 +78,42 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onSubmit, creating }) =
             />
           </div>
         </div>
+        
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              API Key Şifresi *
+            </label>
+            <PasswordInput
+              value={apiKeyPassword}
+              onChange={setApiKeyPassword}
+              placeholder="API Key şifresini girin..."
+              disabled={creating}
+              required
+              className="px-4 py-3"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              API Key Şifresi Tekrar *
+            </label>
+            <PasswordInput
+              value={apiKeyPasswordConfirm}
+              onChange={setApiKeyPasswordConfirm}
+              placeholder="API Key şifresini tekrar girin..."
+              disabled={creating}
+              required
+              className="px-4 py-3"
+            />
+          </div>
+        </div>
+        
+        {passwordError && (
+          <div className="text-red-600 text-sm bg-red-50 p-2 rounded-md">
+            {passwordError}
+          </div>
+        )}
+        
         <div className="flex justify-end">
           <button
             type="submit"
