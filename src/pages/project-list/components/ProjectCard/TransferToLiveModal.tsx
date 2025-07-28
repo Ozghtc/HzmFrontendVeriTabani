@@ -154,7 +154,7 @@ export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
       console.error('❌ Transfer failed:', err);
       setError('Transfer işlemi başarısız: ' + err.message);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -261,12 +261,12 @@ export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
-                      <div className="bg-purple-100 p-2 rounded-lg mr-3">
-                        <Database className="text-purple-600" size={20} />
-                      </div>
-                      <div>
+                    <div className="bg-purple-100 p-2 rounded-lg mr-3">
+                      <Database className="text-purple-600" size={20} />
+                    </div>
+                    <div>
                         <h3 className="font-semibold text-gray-800">Test Proje Tabloları</h3>
-                        <p className="text-sm text-gray-600">{testProject?.name}</p>
+                      <p className="text-sm text-gray-600">{testProject?.name}</p>
                       </div>
                     </div>
                     
@@ -328,17 +328,17 @@ export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                                 : 'bg-red-50 border-red-200'
                             }`}
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
                                 <Table className={`mr-2 ${isSame ? 'text-purple-600' : 'text-red-600'}`} size={16} />
-                                <span className="font-medium text-gray-800">{table.name}</span>
+                            <span className="font-medium text-gray-800">{table.name}</span>
                                 {isSame && <span className="ml-2 text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded">✓ Aynı</span>}
                                 {!isSame && <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-1 rounded">⚠ Farklı</span>}
-                              </div>
-                              <div className="text-right">
+                          </div>
+                          <div className="text-right">
                                 <div className={`text-sm font-medium ${isSame ? 'text-purple-600' : 'text-red-600'}`}>
-                                  {table.columnCount} sütun
-                                </div>
+                              {table.columnCount} sütun
+                            </div>
                                 <div className={`text-xs ${isSame ? 'text-purple-500' : 'text-red-500'}`}>
                                   {table.fieldNames.slice(0, 2).join(', ')}
                                   {table.fieldNames.length > 2 && '...'}
@@ -372,17 +372,17 @@ export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
                       </div>
                     ) : (
                       liveTables.map((table) => (
-                        <div key={table.id} className="bg-green-50 border border-green-200 rounded-lg p-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              <Table className="text-green-600 mr-2" size={16} />
-                              <span className="font-medium text-gray-800">{table.name}</span>
+                      <div key={table.id} className="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <Table className="text-green-600 mr-2" size={16} />
+                            <span className="font-medium text-gray-800">{table.name}</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-green-600">
+                              {table.columnCount} sütun
                             </div>
-                            <div className="text-right">
-                              <div className="text-sm font-medium text-green-600">
-                                {table.columnCount} sütun
-                              </div>
-                              <div className="text-xs text-green-500">
+                            <div className="text-xs text-green-500">
                                 {table.fieldNames.slice(0, 2).join(', ')}
                                 {table.fieldNames.length > 2 && '...'}
                               </div>

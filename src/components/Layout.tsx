@@ -204,7 +204,7 @@ const Layout: React.FC = () => {
             onTableSelect={handleSelectTable}
             onTableCreated={handleTableCreated}
           />
-          <FieldPanel 
+          <FieldPanel
             selectedProject={selectedProject}
             selectedTable={selectedTable}
             fields={fields}

@@ -143,7 +143,7 @@ const FieldPanel: React.FC<FieldPanelProps> = ({
       
       if (response.success) {
         console.log('✅ Field deleted from backend successfully');
-        onDeleteField(fieldId);
+    onDeleteField(fieldId);
         
         // Refresh parent component to get updated data
         if (onFieldsChanged) {
