@@ -7,6 +7,9 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
       console.log('🔑 Attempting backend login for:', email);
       
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1';
+      console.log('🌍 DEBUG - API_BASE_URL:', API_BASE_URL);
+      console.log('🌍 DEBUG - VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+      console.log('🌍 DEBUG - Full login URL:', `${API_BASE_URL}/auth/login`);
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
