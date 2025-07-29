@@ -1,7 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
   // Base URLs
-  PRODUCTION_URL: 'https://hzmbackendveritabani-production.up.railway.app/api/v1',
+  PRODUCTION_URL: import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1',
   
   // API Keys - Environment variables'dan alınır
   LIVE_API_KEY: import.meta.env.VITE_LIVE_API_KEY || '', // Canlı API Key
@@ -30,7 +30,7 @@ export const API_CONFIG = {
   },
   
   // Base URL (default)
-  baseURL: 'https://hzmbackendveritabani-production.up.railway.app/api/v1'
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'
 } as const;
 
 // API Mode Management
