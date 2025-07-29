@@ -66,6 +66,7 @@ const ProjectActions: React.FC<ProjectActionsProps> = ({
       </div>
       
       {/* İkinci satır - Duruma göre buton */}
+      {/* Test projesi butonu geçici olarak gizlendi 
       {!isTestProject && (
         <div className="grid grid-cols-1">
           {hasTestProject ? (
@@ -97,6 +98,7 @@ const ProjectActions: React.FC<ProjectActionsProps> = ({
           )}
         </div>
       )}
+      */}
     </div>
   );
 };
