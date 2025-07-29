@@ -1,5 +1,6 @@
 import React from 'react';
 import { dataTypes } from '../../constants/fieldConstants';
+import { SearchableFieldTypeSelector } from '../SearchableFieldTypeSelector';
 
 interface BasicTabProps {
   editData: {
@@ -31,17 +32,12 @@ export const BasicTab: React.FC<BasicTabProps> = ({ editData, onChange }) => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Alan Tipi
         </label>
-        <select
-          value={editData.type}
-          onChange={(e) => onChange({ ...editData, type: e.target.value })}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-        >
-          {dataTypes.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.icon} {type.label}
-            </option>
-          ))}
-        </select>
+        <SearchableFieldTypeSelector
+          selectedType={editData.type}
+          onTypeSelect={(type) => onChange({ ...editData, type })}
+          placeholder="🔍 Field type ara ve seç..."
+          className="w-full"
+        />
       </div>
 
       <div>

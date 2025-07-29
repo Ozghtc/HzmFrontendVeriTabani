@@ -3,6 +3,7 @@ import { PlusCircle, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { FieldValidation } from '../../../../types';
 import { dataTypes } from '../constants/fieldConstants';
 import { renderValidationFields } from '../utils/validationRenderer';
+import { SearchableFieldTypeSelector } from './SearchableFieldTypeSelector';
 
 interface FieldFormProps {
   onSubmit: (fieldData: {
@@ -60,21 +61,15 @@ export const FieldForm: React.FC<FieldFormProps> = ({ onSubmit, disabled = false
       </div>
       
       <div>
-        <select
-          value={newField.type}
-          onChange={(e) => {
-            setNewField({ ...newField, type: e.target.value });
+        <SearchableFieldTypeSelector
+          selectedType={newField.type}
+          onTypeSelect={(type) => {
+            setNewField({ ...newField, type });
             setValidation({});
           }}
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-          disabled={disabled}
-        >
-          {dataTypes.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.icon} {type.label}
-            </option>
-          ))}
-        </select>
+          placeholder="🔍 Field type seçin..."
+          className="w-full"
+        />
       </div>
 
       <div>
