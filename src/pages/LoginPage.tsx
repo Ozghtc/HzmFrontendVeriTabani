@@ -55,6 +55,9 @@ const LoginPage = () => {
           <p className="text-gray-600">Hesabınıza giriş yapın</p>
         </div>
 
+        {/* API Debug Info */}
+        <div id="api-debug" className="mb-4"></div>
+
         {/* Login Form */}
         <div className="bg-white rounded-xl shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">

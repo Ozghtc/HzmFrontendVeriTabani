@@ -10,6 +10,19 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
       console.log('🌍 DEBUG - API_BASE_URL:', API_BASE_URL);
       console.log('🌍 DEBUG - VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
       console.log('🌍 DEBUG - Full login URL:', `${API_BASE_URL}/auth/login`);
+      
+      // Sayfa üzerinde göster
+      const debugElement = document.getElementById('api-debug');
+      if (debugElement) {
+        debugElement.innerHTML = `
+          <div style="background: #f0f9ff; border: 1px solid #0284c7; padding: 8px; border-radius: 4px; font-size: 11px; margin: 10px 0;">
+            <strong>🔍 API DEBUG:</strong><br/>
+            <strong>Environment:</strong> ${import.meta.env.VITE_API_BASE_URL || 'undefined'}<br/>
+            <strong>Using:</strong> ${API_BASE_URL}<br/>
+            <strong>Login URL:</strong> ${API_BASE_URL}/auth/login
+          </div>
+        `;
+      }
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
