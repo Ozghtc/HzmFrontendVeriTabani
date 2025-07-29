@@ -3,9 +3,9 @@ export const API_CONFIG = {
   // Base URLs
   PRODUCTION_URL: 'https://hzmbackendveritabani-production.up.railway.app/api/v1',
   
-  // API Keys
-  LIVE_API_KEY: 'hzm_b446ef9e20064af09190e85f415a2a0c', // Canlı API Key
-  TEST_API_KEY: 'hzm_4ca2d8cac1e444bb8e0a14f6e773a760', // Test API Key
+  // API Keys - Environment variables'dan alınır
+  LIVE_API_KEY: import.meta.env.VITE_LIVE_API_KEY || '', // Canlı API Key
+  TEST_API_KEY: import.meta.env.VITE_TEST_API_KEY || '', // Test API Key
   
   // Default settings
   TIMEOUT: 10000,
