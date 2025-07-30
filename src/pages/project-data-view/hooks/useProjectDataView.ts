@@ -6,7 +6,8 @@ import { loadTableData, saveTableData, createNewRow } from '../utils/dataHandler
 import { AuthManager } from '../../../utils/api/utils/authUtils';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1';
+// Get API URL from environment or use production URL
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1';
 
 export const useProjectDataView = () => {
   const { projectId } = useParams();
@@ -38,8 +39,20 @@ export const useProjectDataView = () => {
     try {
       setProjectLoading(true);
       const { email, apiKey, projectPassword } = getAuthCredentials();
+      
+      console.log('🔐 Checking credentials before loading project:');
+      console.log('📧 Email:', email || 'NOT FOUND');
+      console.log('🔑 API Key:', apiKey ? apiKey.substring(0, 15) + '...' : 'NOT FOUND');
+      console.log('🔒 Project Password:', projectPassword ? 'EXISTS' : 'NOT FOUND');
+      
       if (!email || !apiKey || !projectPassword) {
-        throw new Error('Authentication required');
+        console.error('❌ Missing credentials - redirecting to login');
+        setError('Oturum bilgileri bulunamadı. Lütfen tekrar giriş yapın.');
+        // Navigate to login page after a short delay
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+        return;
       }
       
       console.log(`📋 Loading project ${parsedProjectId} from API...`);
@@ -74,8 +87,8 @@ export const useProjectDataView = () => {
       
       // ✅ ADMIN BYPASS: Response yapısı farklı olabilir
       const projectData = state.user?.isAdmin 
-        ? projectResponse.data.data.project 
-        : projectResponse.data.data.project;
+        ? projectResponse.data.data?.project 
+        : projectResponse.data.data?.project;
       
       console.log('📊 Project data loaded:', projectData);
       
@@ -89,21 +102,21 @@ export const useProjectDataView = () => {
         }
       });
       
-      const tables = tablesResponse.data.success ? tablesResponse.data.data.tables : [];
+      const tables = tablesResponse.data.success ? tablesResponse.data.data?.tables || [] : [];
       
       // 3. Combine project and tables with proper field mapping
       const foundProject = {
         id: parsedProjectId,
-        name: projectData.name || '',
-        userId: projectData.user_id || projectData.userId || null,
-        userName: projectData.user_name || projectData.userName || '',
-        userEmail: projectData.user_email || projectData.userEmail || '',
-        createdAt: projectData.created_at || projectData.createdAt || '',
-        apiKey: projectData.api_key || projectData.apiKey || '',
-        apiKeys: projectData.api_keys || projectData.apiKeys || [],
-        isPublic: projectData.is_public || projectData.isPublic || false,
-        settings: projectData.settings || {},
-        description: projectData.description || '',
+        name: projectData?.name || '',
+        userId: projectData?.user_id || projectData?.userId || null,
+        userName: projectData?.user_name || projectData?.userName || '',
+        userEmail: projectData?.user_email || projectData?.userEmail || '',
+        createdAt: projectData?.created_at || projectData?.createdAt || '',
+        apiKey: projectData?.api_key || projectData?.apiKey || '',
+        apiKeys: projectData?.api_keys || projectData?.apiKeys || [],
+        isPublic: projectData?.is_public || projectData?.isPublic || false,
+        settings: projectData?.settings || {},
+        description: projectData?.description || '',
         tables: tables.map((table: any) => ({
           id: table.id?.toString() || '',
           name: table.name || table.tableName || '',
@@ -150,7 +163,10 @@ export const useProjectDataView = () => {
         const records = response.data.data.rows || [];
         setTableData(records);
         
-        // No localStorage backup - API-only
+        console.log(`✅ Table data loaded: ${records.length} records`);
+        console.log('📊 First record sample:', records[0]);
+      } else {
+        throw new Error(response.data.error || 'Failed to load table data');
       }
     } catch (err: any) {
       console.error('Error loading data from API:', err);
@@ -187,19 +203,15 @@ export const useProjectDataView = () => {
         throw new Error('Authentication required');
       }
 
-      // Create record via API
-      const response = await axios.post(
-        `${API_URL}/data/table/${selectedTable}/rows`,
-        newRowData,
-        {
-          headers: {
-            'X-API-Key': apiKey,
-            'X-User-Email': email,
-            'X-Project-Password': projectPassword,
-            'Content-Type': 'application/json'
-          }
+      // Create record via API - Fixed URL
+      const response = await axios.post(`${API_URL}/data/table/${selectedTable}/rows`, newRowData, {
+        headers: {
+          'X-API-Key': apiKey,
+          'X-User-Email': email,
+          'X-Project-Password': projectPassword,
+          'Content-Type': 'application/json'
         }
-      );
+      });
       
       if (response.data.success) {
         // Reload data from API to get the new record with server-generated ID
@@ -248,19 +260,15 @@ export const useProjectDataView = () => {
       // Remove system fields before sending
       const { id, created_at, updated_at, ...updateData } = editData;
 
-      // Update record via API
-      const response = await axios.put(
-        `${API_URL}/data/table/${selectedTable}/rows/${editingRow}`,
-        updateData,
-        {
-          headers: {
-            'X-API-Key': apiKey,
-            'X-User-Email': email,
-            'X-Project-Password': projectPassword,
-            'Content-Type': 'application/json'
-          }
+      // Update record via API - Fixed URL
+      const response = await axios.put(`${API_URL}/data/table/${selectedTable}/rows/${editingRow}`, updateData, {
+        headers: {
+          'X-API-Key': apiKey,
+          'X-User-Email': email,
+          'X-Project-Password': projectPassword,
+          'Content-Type': 'application/json'
         }
-      );
+      });
       
       if (response.data.success) {
         // Reload data from API
@@ -311,18 +319,15 @@ export const useProjectDataView = () => {
         throw new Error('Authentication required');
       }
 
-      // Delete record via API
-      const response = await axios.delete(
-        `${API_URL}/data/table/${selectedTable}/rows/${deletingRow.id}`,
-        {
-          headers: {
-            'X-API-Key': apiKey,
-            'X-User-Email': email,
-            'X-Project-Password': projectPassword,
-            'Content-Type': 'application/json'
-          }
+      // Delete record via API - Fixed URL
+      const response = await axios.delete(`${API_URL}/data/table/${selectedTable}/rows/${deletingRow.id}`, {
+        headers: {
+          'X-API-Key': apiKey,
+          'X-User-Email': email,
+          'X-Project-Password': projectPassword,
+          'Content-Type': 'application/json'
         }
-      );
+      });
       
       if (response.data.success) {
         // Reload data from API
