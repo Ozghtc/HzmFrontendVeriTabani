@@ -10,7 +10,7 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1';
 
 export const useProjectDataView = () => {
-  const { projectId } = useParams();
+  const { id } = useParams(); // Route'da :id olarak tanımlandığı için
   const navigate = useNavigate();
   const { state } = useDatabase(); // API-only, no dispatch needed
   
@@ -27,7 +27,8 @@ export const useProjectDataView = () => {
   const [projectLoading, setProjectLoading] = useState(true);
 
   // Safe ID comparison - handle both string and number types
-  const parsedProjectId = Number(projectId);
+  const parsedProjectId = Number(id);
+  const projectId = id; // Backward compatibility için
 
   // Get auth credentials from AuthManager
   const getAuthCredentials = () => {
