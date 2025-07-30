@@ -7,6 +7,7 @@ export const fieldTypeGroups = {
     icon: '📄',
     types: [
       { value: 'string', label: 'Metin (String)', icon: '📝', mathCapable: false },
+      { value: 'text', label: 'Uzun Metin (Text)', icon: '📜', mathCapable: false },
       { value: 'boolean', label: 'Boolean', icon: '☑️', mathCapable: false },
       { value: 'date', label: 'Tarih (Date)', icon: '📅', mathCapable: true }, // Date math
       { value: 'object', label: 'Nesne (Object)', icon: '🗂️', mathCapable: false },
@@ -21,9 +22,23 @@ export const fieldTypeGroups = {
     types: [
       { value: 'number', label: 'Sayı (Number)', icon: '🔢', mathCapable: true },
       { value: 'integer', label: 'Tam Sayı (Integer)', icon: '🔢', mathCapable: true },
-      { value: 'decimal', label: 'Ondalık (Decimal)', icon: '🔢', mathCapable: true },
+      { value: 'float', label: 'Ondalık Sayı (Float)', icon: '🔢', mathCapable: true },
+      { value: 'decimal', label: 'Hassas Ondalık (Decimal)', icon: '🔢', mathCapable: true },
       { value: 'percentage', label: 'Yüzde (Percentage)', icon: '📊', mathCapable: true },
       { value: 'ratio', label: 'Oran (Ratio)', icon: '⚖️', mathCapable: true },
+    ]
+  },
+
+  // 🎲 MATRİX VE ÇOK BOYUTLU VERİ TİPLERİ
+  matrix: {
+    title: 'Matrix ve Çok Boyutlu Veri Tipleri',
+    icon: '🎲',
+    types: [
+      { value: 'matrix', label: 'Matrix', icon: '🔳', mathCapable: true },
+      { value: 'vector', label: 'Vektör', icon: '➡️', mathCapable: true },
+      { value: 'tensor', label: 'Tensör', icon: '🎯', mathCapable: true },
+      { value: 'coordinates', label: 'Koordinat', icon: '📍', mathCapable: true },
+      { value: 'dataset', label: 'Veri Seti', icon: '📊', mathCapable: true },
     ]
   },
 
@@ -85,9 +100,9 @@ export const fieldTypeGroups = {
     title: 'İlişkisel Veri Tipleri',
     icon: '🔗',
     types: [
-      { value: 'relation', label: 'İlişki (Relation)', icon: '🔗', mathCapable: false },
-      { value: 'reference', label: 'Referans (Reference)', icon: '🔗', mathCapable: false },
-      { value: 'foreign_key', label: 'Yabancı Anahtar (Foreign Key)', icon: '🗝️', mathCapable: false },
+      { value: 'foreign_key', label: 'Yabancı Anahtar (Foreign Key)', icon: '🔑', mathCapable: false },
+      { value: 'relationship', label: 'İlişki (Relationship)', icon: '🔗', mathCapable: false },
+      { value: 'reference', label: 'Referans (Reference)', icon: '🗝️', mathCapable: false },
     ]
   }
 };
