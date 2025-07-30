@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Calendar, Download, Eye, Trash2, Filter, Search, RefreshCw, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { AuthManager } from '../../../utils/api/utils/authUtils';
 
 interface Report {
   id: number;
@@ -67,12 +68,19 @@ export const ReportsList: React.FC<ReportsListProps> = ({
         params.append('status', statusFilter);
       }
 
-      const token = localStorage.getItem('token');
+      const credentials = AuthManager.getCredentials();
+      if (!credentials.email || !credentials.apiKey || !credentials.projectPassword) {
+        console.log('❌ No API key credentials found');
+        return;
+      }
+      
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/reports/project/${projectId}?${params}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'X-API-Key': credentials.apiKey,
+            'X-User-Email': credentials.email,
+            'X-Project-Password': credentials.projectPassword,
             'Content-Type': 'application/json'
           }
         }
@@ -101,13 +109,20 @@ export const ReportsList: React.FC<ReportsListProps> = ({
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const credentials = AuthManager.getCredentials();
+      if (!credentials.email || !credentials.apiKey || !credentials.projectPassword) {
+        console.log('❌ No API key credentials found');
+        return;
+      }
+      
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/reports/${reportId}`,
         {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'X-API-Key': credentials.apiKey,
+            'X-User-Email': credentials.email,
+            'X-Project-Password': credentials.projectPassword,
             'Content-Type': 'application/json'
           }
         }
@@ -131,12 +146,19 @@ export const ReportsList: React.FC<ReportsListProps> = ({
   // Export report
   const exportReport = async (reportId: number, format: 'json' | 'csv' = 'json') => {
     try {
-      const token = localStorage.getItem('token');
+      const credentials = AuthManager.getCredentials();
+      if (!credentials.email || !credentials.apiKey || !credentials.projectPassword) {
+        console.log('❌ No API key credentials found');
+        return;
+      }
+      
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/reports/${reportId}/export?format=${format}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'X-API-Key': credentials.apiKey,
+            'X-User-Email': credentials.email,
+            'X-Project-Password': credentials.projectPassword
           }
         }
       );

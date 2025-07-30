@@ -22,17 +22,30 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
         console.log('📦 Backend response:', result);
         
         if (result.success && result.data) {
-          const { token, user } = result.data;
+          const { user, credentials, projects } = result.data;
           
-          // Save auth token for API calls using AuthManager
-          AuthManager.setToken(token);
-          console.log('✅ Backend login successful');
-          console.log('👤 Backend user data:', user);
-          console.log('🔒 JWT token saved to sessionStorage:', token.substring(0, 20) + '...');
-          
-          // Dispatch login with backend user data
-          dispatch({ type: 'LOGIN', payload: { user } });
-          return true;
+          // Save API key credentials for API calls using AuthManager
+          if (credentials) {
+            AuthManager.setCredentials(
+              credentials.email,
+              credentials.apiKey,
+              credentials.projectPassword
+            );
+            console.log('✅ Backend login successful');
+            console.log('👤 Backend user data:', user);
+            console.log('🔒 API Key credentials saved to sessionStorage');
+            console.log('📧 Email:', credentials.email);
+            console.log('🔑 API Key:', credentials.apiKey?.substring(0, 15) + '...');
+            console.log('🔐 Project Password:', credentials.projectPassword ? 'EXISTS' : 'MISSING');
+            console.log('📋 Available projects:', projects?.length || 0);
+            
+            // Dispatch login with backend user data
+            dispatch({ type: 'LOGIN', payload: { user } });
+            return true;
+          } else {
+            console.log('❌ No credentials received from backend');
+            return false;
+          }
         }
       } else {
         const errorData = await response.json();
@@ -64,17 +77,30 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
         console.log('📦 Backend response:', result);
         
         if (result.success && result.data) {
-          const { token, user } = result.data;
+          const { user, credentials, project } = result.data;
           
-          // Save auth token for API calls using AuthManager
-          AuthManager.setToken(token);
-          console.log('✅ Backend registration successful');
-          console.log('👤 Backend user data:', user);
-          console.log('🔒 JWT token saved to sessionStorage:', token.substring(0, 20) + '...');
-          
-          // Dispatch register with backend user data
-          dispatch({ type: 'REGISTER', payload: { user } });
-          return true;
+          // Save API key credentials for API calls using AuthManager
+          if (credentials) {
+            AuthManager.setCredentials(
+              credentials.email,
+              credentials.apiKey,
+              credentials.projectPassword
+            );
+            console.log('✅ Backend registration successful');
+            console.log('👤 Backend user data:', user);
+            console.log('📋 Default project created:', project);
+            console.log('🔒 API Key credentials saved to sessionStorage');
+            console.log('📧 Email:', credentials.email);
+            console.log('🔑 API Key:', credentials.apiKey?.substring(0, 15) + '...');
+            console.log('🔐 Project Password:', credentials.projectPassword ? 'EXISTS' : 'MISSING');
+            
+            // Dispatch register with backend user data
+            dispatch({ type: 'REGISTER', payload: { user } });
+            return true;
+          } else {
+            console.log('❌ No credentials received from backend');
+            return false;
+          }
         }
       } else {
         const errorData = await response.json();
@@ -89,22 +115,27 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
   };
   
   const logout = () => {
-    // Clear auth token using AuthManager
-    AuthManager.removeToken();
-    console.log('🧹 Logout: Cleared auth token');
+    // Clear API key credentials using AuthManager
+    AuthManager.removeCredentials();
+    console.log('🧹 Logout: Cleared API key credentials');
     dispatch({ type: 'LOGOUT' });
   };
   
-  // getAllUsers her zaman backend'den çeker
+  // getAllUsers her zaman backend'den çeker - now using API key authentication
   const getAllUsers = async () => {
     try {
-      const token = AuthManager.getToken();
-      if (!token) return [];
+      const credentials = AuthManager.getCredentials();
+      if (!credentials.email || !credentials.apiKey || !credentials.projectPassword) {
+        console.log('❌ No valid API key credentials found');
+        return [];
+      }
       
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/admin/users`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'X-API-Key': credentials.apiKey,
+          'X-User-Email': credentials.email,
+          'X-Project-Password': credentials.projectPassword,
           'Content-Type': 'application/json'
         }
       });
@@ -120,11 +151,17 @@ export const createAuthFunctions = (dispatch: React.Dispatch<DatabaseAction>) =>
     }
   };
   
-  // Save auth token for API calls
+  // Save API key credentials for API calls
+  const saveApiKeyCredentials = (email: string, apiKey: string, projectPassword: string) => {
+    AuthManager.setCredentials(email, apiKey, projectPassword);
+    console.log('🔑 API key credentials saved to sessionStorage for API calls');
+  };
+
+  // Legacy method for backward compatibility (deprecated)
   const saveAuthToken = (token: string) => {
-    AuthManager.setToken(token);
-    console.log('🔑 Auth token saved to sessionStorage for API calls');
+    console.warn('⚠️ saveAuthToken() is deprecated. Use saveApiKeyCredentials() instead.');
+    // For now, do nothing as we don't use JWT tokens anymore
   };
   
-  return { login, register, logout, getAllUsers, saveAuthToken };
+  return { login, register, logout, getAllUsers, saveAuthToken, saveApiKeyCredentials };
 }; 

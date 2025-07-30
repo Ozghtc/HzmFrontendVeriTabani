@@ -1,82 +1,99 @@
-// SessionStorage token storage (secure + persistent during session)
-class SessionTokenStorage {
-  private readonly TOKEN_KEY = 'auth_token_session';
-  private readonly TOKEN_EXPIRY_KEY = 'auth_token_expiry_session';
+// SessionStorage API Key storage (secure + persistent during session)
+class SessionApiKeyStorage {
+  private readonly EMAIL_KEY = 'auth_email_session';
+  private readonly API_KEY = 'auth_apikey_session';
+  private readonly PROJECT_PASSWORD_KEY = 'auth_project_password_session';
 
-  setToken(token: string, expiresIn?: number): void {
-    sessionStorage.setItem(this.TOKEN_KEY, token);
-    if (expiresIn) {
-      const expiryTime = Date.now() + (expiresIn * 1000);
-      sessionStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
-    }
+  setCredentials(email: string, apiKey: string, projectPassword: string): void {
+    sessionStorage.setItem(this.EMAIL_KEY, email);
+    sessionStorage.setItem(this.API_KEY, apiKey);
+    sessionStorage.setItem(this.PROJECT_PASSWORD_KEY, projectPassword);
   }
 
-  getToken(): string | null {
-    if (this.isExpired()) {
-      this.clearToken();
-      return null;
-    }
-    return sessionStorage.getItem(this.TOKEN_KEY);
+  getCredentials(): { email: string | null, apiKey: string | null, projectPassword: string | null } {
+    return {
+      email: sessionStorage.getItem(this.EMAIL_KEY),
+      apiKey: sessionStorage.getItem(this.API_KEY),
+      projectPassword: sessionStorage.getItem(this.PROJECT_PASSWORD_KEY)
+    };
   }
 
-  clearToken(): void {
-    sessionStorage.removeItem(this.TOKEN_KEY);
-    sessionStorage.removeItem(this.TOKEN_EXPIRY_KEY);
+  clearCredentials(): void {
+    sessionStorage.removeItem(this.EMAIL_KEY);
+    sessionStorage.removeItem(this.API_KEY);
+    sessionStorage.removeItem(this.PROJECT_PASSWORD_KEY);
   }
 
-  isExpired(): boolean {
-    const expiry = sessionStorage.getItem(this.TOKEN_EXPIRY_KEY);
-    if (!expiry) return false;
-    return Date.now() > parseInt(expiry);
-  }
-
-  hasToken(): boolean {
-    const token = sessionStorage.getItem(this.TOKEN_KEY);
-    return token !== null && !this.isExpired();
+  hasCredentials(): boolean {
+    const { email, apiKey, projectPassword } = this.getCredentials();
+    return email !== null && apiKey !== null && projectPassword !== null;
   }
 }
 
 // Global instance
-const tokenStorage = new SessionTokenStorage();
+const apiKeyStorage = new SessionApiKeyStorage();
 
 export class AuthManager {
-  // Get stored token
-  static getToken(): string | null {
-    return tokenStorage.getToken();
+  // Get stored credentials
+  static getCredentials(): { email: string | null, apiKey: string | null, projectPassword: string | null } {
+    return apiKeyStorage.getCredentials();
   }
 
-  // Set token with optional expiry
-  static setToken(token: string, expiresIn?: number): void {
-    tokenStorage.setToken(token, expiresIn);
+  // Set API key credentials
+  static setCredentials(email: string, apiKey: string, projectPassword: string): void {
+    apiKeyStorage.setCredentials(email, apiKey, projectPassword);
   }
 
-  // Remove token
-  static removeToken(): void {
-    tokenStorage.clearToken();
+  // Remove credentials
+  static removeCredentials(): void {
+    apiKeyStorage.clearCredentials();
   }
 
-  // Check if token is expired
-  static isTokenExpired(): boolean {
-    return tokenStorage.isExpired();
+  // Check if credentials exist
+  static hasCredentials(): boolean {
+    return apiKeyStorage.hasCredentials();
   }
 
-  // Get auth headers
+  // Get auth headers for API calls
   static getAuthHeaders(): Record<string, string> {
-    const token = this.getToken();
+    const { email, apiKey, projectPassword } = this.getCredentials();
     
     console.log('🔐 AuthManager.getAuthHeaders() called');
-    console.log('🔑 Token from sessionStorage:', token ? token.substring(0, 20) + '...' : 'NULL');
-    console.log('⏰ Token expired?', this.isTokenExpired());
+    console.log('🔑 API Key from sessionStorage:', apiKey ? apiKey.substring(0, 15) + '...' : 'NULL');
+    console.log('📧 Email from sessionStorage:', email || 'NULL');
+    console.log('🔒 Project Password from sessionStorage:', projectPassword ? 'EXISTS' : 'NULL');
     
-    if (!token || this.isTokenExpired()) {
-      console.log('❌ No valid token, removing expired token');
-      this.removeToken();
+    if (!email || !apiKey || !projectPassword) {
+      console.log('❌ Missing credentials, clearing storage');
+      this.removeCredentials();
       return {};
     }
     
-    console.log('✅ Valid token found, adding Authorization header');
+    console.log('✅ Valid credentials found, adding 3-layer API headers');
     return {
-      'Authorization': `Bearer ${token}`
+      'X-API-Key': apiKey,
+      'X-User-Email': email,
+      'X-Project-Password': projectPassword
     };
+  }
+
+  // Legacy methods for backward compatibility (will be deprecated)
+  static getToken(): string | null {
+    console.warn('⚠️ AuthManager.getToken() is deprecated. Use getCredentials() instead.');
+    return null;
+  }
+
+  static setToken(token: string, expiresIn?: number): void {
+    console.warn('⚠️ AuthManager.setToken() is deprecated. Use setCredentials() instead.');
+  }
+
+  static removeToken(): void {
+    console.warn('⚠️ AuthManager.removeToken() is deprecated. Use removeCredentials() instead.');
+    this.removeCredentials();
+  }
+
+  static isTokenExpired(): boolean {
+    console.warn('⚠️ AuthManager.isTokenExpired() is deprecated. Use hasCredentials() instead.');
+    return !this.hasCredentials();
   }
 } 

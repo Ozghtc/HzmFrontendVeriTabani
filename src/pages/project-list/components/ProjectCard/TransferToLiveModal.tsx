@@ -110,11 +110,11 @@ export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
       
       const tableIds = filteredTestTables.map(table => table.id);
       
-      // Token kontrolü
-      const token = AuthManager.getToken();
-      if (!token) {
-        console.log('❌ No token found, redirecting to login...');
-        AuthManager.removeToken();
+      // API key credentials kontrolü
+      const credentials = AuthManager.getCredentials();
+      if (!credentials.email || !credentials.apiKey || !credentials.projectPassword) {
+        console.log('❌ No API key credentials found, redirecting to login...');
+        AuthManager.removeCredentials();
         navigate('/login');
         return;
       }
@@ -123,7 +123,9 @@ export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'X-API-Key': credentials.apiKey,
+          'X-User-Email': credentials.email,
+          'X-Project-Password': credentials.projectPassword
         },
         body: JSON.stringify({
           testProjectId: testProject.id,
@@ -132,10 +134,10 @@ export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
         })
       });
       
-      // Token expired kontrolü
+      // Authentication error kontrolü
       if (response.status === 401) {
-        console.log('❌ Token expired, redirecting to login...');
-        AuthManager.removeToken();
+        console.log('❌ Authentication error, redirecting to login...');
+        AuthManager.removeCredentials();
         navigate('/login');
         return;
       }

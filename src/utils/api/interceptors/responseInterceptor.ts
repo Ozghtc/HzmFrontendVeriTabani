@@ -37,10 +37,16 @@ export const defaultResponseInterceptor: ResponseInterceptor = {
     switch (error.code) {
       case 'UNAUTHORIZED':
       case 'TOKEN_EXPIRED':
+      case 'INVALID_CREDENTIALS':
+      case 'MISSING_HEADERS':
         // Clear auth and redirect to login
         console.log('🔐 Authentication error, redirecting to login...');
-        // Clear auth token
+        // Clear API key credentials
         if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('auth_email_session');
+          sessionStorage.removeItem('auth_apikey_session');
+          sessionStorage.removeItem('auth_project_password_session');
+          // Also remove any legacy JWT tokens
           sessionStorage.removeItem('auth_token_session');
           sessionStorage.removeItem('auth_token_expiry_session');
           // Redirect to login page

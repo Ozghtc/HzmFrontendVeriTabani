@@ -8,7 +8,7 @@ export const defaultRequestInterceptor: RequestInterceptor = {
     if (!config.skipAuth) {
       const authHeaders = AuthManager.getAuthHeaders();
       console.log('🔐 Auth headers from AuthManager:', authHeaders);
-      console.log('🔑 Has Authorization header:', !!authHeaders.Authorization);
+      console.log('🔑 Has API Key headers:', !!authHeaders['X-API-Key'] && !!authHeaders['X-User-Email'] && !!authHeaders['X-Project-Password']);
       
       config.headers = {
         ...config.headers,
