@@ -29,7 +29,7 @@ const StatisticsCalculator: React.FC = () => {
         throw new Error('Geçerli sayılar girin');
       }
 
-      const response = await fetch('https://hzmbackendveritabani-production.up.railway.app/api/v1/math/statistics', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://hzmbackendveritabani-production.up.railway.app'}/api/v1/math/statistics`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

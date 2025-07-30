@@ -78,7 +78,7 @@ const FinanceCalculator: React.FC = () => {
         data[field.key] = value;
       });
 
-      const response = await fetch('https://hzmbackendveritabani-production.up.railway.app/api/v1/math/finance', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://hzmbackendveritabani-production.up.railway.app'}/api/v1/math/finance`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

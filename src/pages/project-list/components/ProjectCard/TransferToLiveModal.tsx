@@ -119,7 +119,7 @@ export const TransferToLiveModal: React.FC<TransferToLiveModalProps> = ({
         return;
       }
       
-      const response = await fetch('https://hzmbackendveritabani-production.up.railway.app/api/v1/tables/transfer-to-live', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://hzmbackendveritabani-production.up.railway.app'}/api/v1/tables/transfer-to-live`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
