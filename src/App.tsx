@@ -71,9 +71,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <DatabaseProvider>
-        <Layout>
-          <AppRoutes />
-        </Layout>
+        <AppRoutes />
       </DatabaseProvider>
     </BrowserRouter>
   );
