@@ -30,11 +30,11 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
 
   const apiInfo = {
     baseUrl: 'http://localhost:8080',
-    productionUrl: 'https://your-production-url.com',
+    productionUrl: 'https://hzmbackendveritabani-production.up.railway.app',
     projectId: project.id.toString(),
     apiKey: project.apiKey,
-    exampleEmail: 'example@company.com',
-    examplePassword: '••••••••••••',
+    exampleEmail: '[KENDİ_EMAİLİNİZ]',
+    examplePassword: '[KENDİ_ŞİFRENİZ]',
     endpoints: {
       // API Key Info
       apiKeyInfo: `/api/v1/tables/api-key-info`,
@@ -241,7 +241,38 @@ if (result.success) {
 }
 \`\`\`
 
-## 🎯 TEST EDİLEN ENDPOINT'LER (25/25) ✅
+## 🧮 MATEMATİK API'LERİ
+
+### 📐 Temel Matematik İşlemleri
+\`\`\`bash
+curl -X POST \\
+  "${apiInfo.productionUrl}/api/v1/math/basic" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "operation": "add",
+    "a": 10,
+    "b": 20
+  }'
+\`\`\`
+
+### 📊 İstatistik Hesaplamaları
+\`\`\`bash
+curl -X POST \\
+  "${apiInfo.productionUrl}/api/v1/math/statistics" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "operation": "mean",
+    "data": [10, 20, 30, 40, 50]
+  }'
+\`\`\`
+
+## 🎯 TEST EDİLEN ENDPOINT'LER (30/30) ✅
 
 ### 🔐 Kimlik Doğrulama (2/2)
 - ✅ API Key Bilgisi Alma
@@ -278,6 +309,13 @@ if (result.success) {
 - ✅ Rapor Oluştur
 - ✅ Analitik Veriler
 
+### 🧮 Matematik API'leri (5/5)
+- ✅ Math Info
+- ✅ Temel Matematik
+- ✅ İstatistik Hesaplamaları
+- ✅ Finansal Hesaplamalar
+- ✅ Bilimsel Hesaplamalar
+
 ### 🛠️ Yönetim (4/4)
 - ✅ Schema Bilgisi
 - ✅ API Key Güncelle
@@ -290,6 +328,7 @@ if (result.success) {
 - ✅ Gelişmiş JOIN Sorguları
 - ✅ Schema Yönetimi
 - ✅ Raporlama ve Analitik
+- ✅ Matematik API'leri (Phase 4)
 - ✅ JavaScript SDK
 
 ## 🔒 GÜVENLİK ÖZELLİKLERİ
@@ -298,13 +337,32 @@ if (result.success) {
 - ✅ Rate Limiting
 - ✅ CORS Koruması
 - ✅ SQL Injection Koruması
+- ✅ HTTPS/SSL Şifreleme
+
+## 🌐 PRODUCTION URL'LER
+
+### Production API Base URL:
+\`\`\`
+${apiInfo.productionUrl}/api/v1
+\`\`\`
+
+### Health Check:
+\`\`\`
+${apiInfo.productionUrl}/health
+\`\`\`
+
+### Frontend URL:
+\`\`\`
+https://vardiyaasistani.netlify.app
+\`\`\`
 
 ---
 *${project.name} - API Key Sistemi*
 *Test Tarihi: ${new Date().toLocaleString('tr-TR')}*
 *Durum: %100 ÇALIŞAN GENİŞLETİLMİŞ API KEY SİSTEMİ*
-*Test Completed: 25/25 Endpoints*
-*Security: 3-Layer Authentication Verified*`;
+*Test Completed: 30/30 Endpoints*
+*Security: 3-Layer Authentication Verified*
+*Math APIs: Phase 4 Complete ✅*`;
   };
 
   const copyApiInfo = async () => {
@@ -352,10 +410,23 @@ if (result.success) {
 ### 🔍 GELİŞMİŞ SORGULAR
 - **POST** /api/v1/joins/execute - JOIN sorguları çalıştır
 
+### 🧮 MATEMATİK API'LERİ
+- **GET** /api/v1/math/info - Math API bilgisi
+- **GET** /api/v1/math/constants - Matematiksel sabitler
+- **POST** /api/v1/math/basic - Temel matematik işlemleri
+- **POST** /api/v1/math/statistics - İstatistik hesaplamaları
+- **POST** /api/v1/math/statistics/advanced - Gelişmiş istatistik
+- **POST** /api/v1/math/finance - Finansal hesaplamalar
+- **POST** /api/v1/math/science - Bilimsel hesaplamalar
+
 ### 📈 RAPORLAMA & ANALİTİK
 - **GET** /api/v1/reports/templates - Rapor şablonları
 - **POST** /api/v1/reports/generate - Rapor oluştur
 - **GET** /api/v1/analytics/overview - Genel analitik
+
+### 🛠️ YÖNETİM
+- **GET** /api/v1/schema/project/{projectId} - Schema bilgisi
+- **PUT** /api/v1/projects/{projectId}/api-key-password - API Key şifre güncelle
 
 ---
 **📧 Teknik Destek:** Bu API key sistemi ile sadece kendi projenize erişebilirsiniz.
