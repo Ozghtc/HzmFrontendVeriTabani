@@ -1,3 +1,4 @@
+// 🎉 HZMSoft Frontend v1.1.0 - Math System Complete - Production Deploy
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DatabaseProvider } from './context/DatabaseContext';
