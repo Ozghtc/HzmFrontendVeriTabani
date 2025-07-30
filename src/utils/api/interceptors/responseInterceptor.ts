@@ -39,7 +39,13 @@ export const defaultResponseInterceptor: ResponseInterceptor = {
       case 'TOKEN_EXPIRED':
         // Clear auth and redirect to login
         console.log('🔐 Authentication error, redirecting to login...');
-        // You can dispatch an event or call a callback here
+        // Clear auth token
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('auth_token_session');
+          sessionStorage.removeItem('auth_token_expiry_session');
+          // Redirect to login page
+          window.location.href = '/login';
+        }
         break;
       
       case 'RATE_LIMIT_EXCEEDED':
