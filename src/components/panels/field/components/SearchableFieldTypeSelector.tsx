@@ -217,7 +217,7 @@ export const SearchableFieldTypeSelector: React.FC<SearchableFieldTypeSelectorPr
                 {/* 🎨 GRUP BAŞLIĞI - RENK SİSTEMİ + LUCIDE İKONLAR */}
                 <button
                   type="button"
-                  className={`flex items-center justify-between w-full px-5 py-4 sm:py-3.5 text-left font-black ${colors.bg} ${colors.border} border-l-4 hover:shadow-md active:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 touch-manipulation group`}
+                  className={`flex items-center justify-between w-full px-4 py-4 sm:py-3.5 text-left font-black ${colors.bg} ${colors.border} border-l-4 hover:shadow-md active:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 touch-manipulation group`}
                   onClick={() => toggleGroup(key)}
                 >
                   <div className="flex items-center min-w-0 flex-1">
@@ -254,7 +254,7 @@ export const SearchableFieldTypeSelector: React.FC<SearchableFieldTypeSelectorPr
                       <button
                         key={type.value}
                         type="button"
-                        className={`flex items-center w-full pl-8 pr-5 py-3.5 sm:py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 active:from-blue-100 active:to-indigo-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-30 touch-manipulation group ${
+                        className={`flex items-center w-full pl-16 sm:pl-12 pr-5 py-3.5 sm:py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 active:from-blue-100 active:to-indigo-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-30 touch-manipulation group ${
                           selectedType === type.value 
                             ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-r-4 border-blue-500 shadow-sm' 
                             : 'text-gray-700'
