@@ -7,6 +7,7 @@ import { ApiKeyVisibility, ProjectFormData } from '../types/projectListTypes';
 import { validateProjectName } from '../utils/projectValidators';
 import { ApiKeyGenerator } from '../../../utils/apiKeyGenerator';
 import axios from 'axios';
+import { AuthManager } from '../../../utils/api/utils/authUtils';
 
 export const useProjectList = () => {
   const { state, dispatch } = useDatabase();
@@ -288,28 +289,10 @@ export const useProjectList = () => {
       setCreating(true);
       console.log('🧪 Creating test environment for project:', projectId);
       
-      const token = localStorage.getItem('token');
-      console.log('🔑 Token from localStorage:', token ? 'Present' : 'Missing');
+      const { email, apiKey, projectPassword } = AuthManager.getCredentials();
+      console.log('🔑 API key credentials:', email && apiKey && projectPassword ? 'Present' : 'Missing');
       
-      // Token yoksa farklı yerlerden dene
-      let authToken = token;
-      if (!authToken) {
-        // sessionStorage'da dene
-        authToken = sessionStorage.getItem('token');
-        console.log('🔑 Token from sessionStorage:', authToken ? 'Present' : 'Missing');
-      }
-      
-      if (!authToken) {
-        // Diğer token anahtarlarını dene
-        authToken = localStorage.getItem('authToken') || 
-                   localStorage.getItem('access_token') ||
-                   localStorage.getItem('jwt_token');
-        console.log('🔑 Token from alternative keys:', authToken ? 'Present' : 'Missing');
-      }
-      
-      console.log('🔑 Final token status:', authToken ? `Found: ${authToken.substring(0, 20)}...` : 'Not found anywhere');
-      
-      // Backend API'yi her durumda dene (token varsa auth ile, yoksa anonymous)
+      // Backend API'yi her durumda dene (credentials varsa auth ile, yoksa anonymous)
       try {
         console.log('📡 Attempting backend API call...');
         console.log('🔗 API URL:', `https://hzmbackendveritabani-production.up.railway.app/api/v1/projects/${projectId}/create-test-environment`);
@@ -318,11 +301,13 @@ export const useProjectList = () => {
           'Content-Type': 'application/json'
         };
         
-        if (authToken) {
-          headers['Authorization'] = `Bearer ${authToken}`;
-          console.log('🔑 Using Authorization header with token');
+        if (email && apiKey && projectPassword) {
+          headers['X-API-Key'] = apiKey;
+          headers['X-User-Email'] = email;
+          headers['X-Project-Password'] = projectPassword;
+          console.log('🔑 Using API key authentication headers');
         } else {
-          console.log('⚠️ No token found, attempting anonymous request');
+          console.log('⚠️ No API key credentials found, attempting anonymous request');
         }
         
         const response = await fetch(

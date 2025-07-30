@@ -15,10 +15,10 @@ export const useApiUsers = () => {
       
       console.log('👥 Fetching users from API...');
       
-      // ✅ API endpoint fixed - using AuthManager for proper token handling
+      // ✅ API endpoint fixed - using AuthManager for proper API key handling
       const authHeaders = AuthManager.getAuthHeaders();
-      if (!authHeaders.Authorization) {
-        throw new Error('No valid authentication token found');
+      if (!authHeaders['X-API-Key'] || !authHeaders['X-User-Email'] || !authHeaders['X-Project-Password']) {
+        throw new Error('No valid API key credentials found');
       }
       
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/admin/users`, {
@@ -34,7 +34,7 @@ export const useApiUsers = () => {
          setUsers(users);
          console.log('✅ Users loaded successfully:', users.length);
        } else if (response.status === 401) {
-         console.error('🔒 Authentication failed - Invalid or expired token');
+         console.error('🔒 Authentication failed - Invalid or expired API key');
          setError('Authentication failed. Please login again.');
          setUsers([]);
          return; // STOP retrying on auth failure
@@ -50,7 +50,7 @@ export const useApiUsers = () => {
     }
   };
 
-  // ✅ Re-enabled with proper token handling
+  // ✅ Re-enabled with proper API key handling
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -59,10 +59,10 @@ export const useApiUsers = () => {
     try {
       console.log('📝 Updating user:', userId);
       
-      // ✅ API endpoint fixed - using AuthManager for proper token handling
+      // ✅ API endpoint fixed - using AuthManager for proper API key handling
       const authHeaders = AuthManager.getAuthHeaders();
-      if (!authHeaders.Authorization) {
-        throw new Error('No valid authentication token found');
+      if (!authHeaders['X-API-Key'] || !authHeaders['X-User-Email'] || !authHeaders['X-Project-Password']) {
+        throw new Error('No valid API key credentials found');
       }
       
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/admin/users/${userId}`, {
@@ -91,10 +91,10 @@ export const useApiUsers = () => {
     try {
       console.log('🗑️ Deleting user:', userId);
       
-      // ✅ API endpoint fixed - using AuthManager for proper token handling
+      // ✅ API endpoint fixed - using AuthManager for proper API key handling
       const authHeaders = AuthManager.getAuthHeaders();
-      if (!authHeaders.Authorization) {
-        throw new Error('No valid authentication token found');
+      if (!authHeaders['X-API-Key'] || !authHeaders['X-User-Email'] || !authHeaders['X-Project-Password']) {
+        throw new Error('No valid API key credentials found');
       }
       
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/admin/users/${userId}`, {
@@ -191,7 +191,7 @@ export const useApiAdminProjects = () => {
         throw new Error('No valid authentication token found');
       }
       
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/projects/${projectId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://hzmbackendveritabani-production.up.railway.app/api/v1'}/admin/projects/${projectId}`, {
         method: 'DELETE',
         headers: {
           ...authHeaders,

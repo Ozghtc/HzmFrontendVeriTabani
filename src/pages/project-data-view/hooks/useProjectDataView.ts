@@ -28,17 +28,17 @@ export const useProjectDataView = () => {
   // Safe ID comparison - handle both string and number types
   const parsedProjectId = Number(projectId);
 
-  // Get auth token from AuthManager
-  const getAuthToken = () => {
-    return AuthManager.getToken();
+  // Get auth credentials from AuthManager
+  const getAuthCredentials = () => {
+    return AuthManager.getCredentials();
   };
 
   // Load project from API - proper endpoints
   const loadProject = async () => {
     try {
       setProjectLoading(true);
-      const token = getAuthToken();
-      if (!token) {
+      const { email, apiKey, projectPassword } = getAuthCredentials();
+      if (!email || !apiKey || !projectPassword) {
         throw new Error('Authentication required');
       }
       
@@ -50,7 +50,9 @@ export const useProjectDataView = () => {
         console.log('🔐 Admin access detected - using admin endpoint');
         projectResponse = await axios.get(`${API_URL}/admin/projects/${parsedProjectId}`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'X-API-Key': apiKey,
+            'X-User-Email': email,
+            'X-Project-Password': projectPassword,
             'Content-Type': 'application/json'
           }
         });
@@ -58,7 +60,9 @@ export const useProjectDataView = () => {
         console.log('👤 Normal user access - using user endpoint');
         projectResponse = await axios.get(`${API_URL}/projects/${parsedProjectId}`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'X-API-Key': apiKey,
+            'X-User-Email': email,
+            'X-Project-Password': projectPassword,
             'Content-Type': 'application/json'
           }
         });
@@ -78,7 +82,9 @@ export const useProjectDataView = () => {
       // 2. Get project tables
       const tablesResponse = await axios.get(`${API_URL}/tables/project/${parsedProjectId}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'X-API-Key': apiKey,
+          'X-User-Email': email,
+          'X-Project-Password': projectPassword,
           'Content-Type': 'application/json'
         }
       });
@@ -126,14 +132,16 @@ export const useProjectDataView = () => {
       setLoading(true);
       setError(null);
       
-      const token = getAuthToken();
-      if (!token) {
+      const { email, apiKey, projectPassword } = getAuthCredentials();
+      if (!email || !apiKey || !projectPassword) {
         throw new Error('Authentication required');
   }
 
       const response = await axios.get(`${API_URL}/data/table/${tableId}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'X-API-Key': apiKey,
+          'X-User-Email': email,
+          'X-Project-Password': projectPassword,
           'Content-Type': 'application/json'
         }
       });
@@ -174,8 +182,8 @@ export const useProjectDataView = () => {
       setLoading(true);
       setError(null);
       
-      const token = getAuthToken();
-      if (!token) {
+      const { email, apiKey, projectPassword } = getAuthCredentials();
+      if (!email || !apiKey || !projectPassword) {
         throw new Error('Authentication required');
       }
 
@@ -185,7 +193,9 @@ export const useProjectDataView = () => {
         newRowData,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'X-API-Key': apiKey,
+            'X-User-Email': email,
+            'X-Project-Password': projectPassword,
             'Content-Type': 'application/json'
           }
         }
@@ -230,8 +240,8 @@ export const useProjectDataView = () => {
       setLoading(true);
       setError(null);
       
-      const token = getAuthToken();
-      if (!token) {
+      const { email, apiKey, projectPassword } = getAuthCredentials();
+      if (!email || !apiKey || !projectPassword) {
         throw new Error('Authentication required');
       }
 
@@ -244,7 +254,9 @@ export const useProjectDataView = () => {
         updateData,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'X-API-Key': apiKey,
+            'X-User-Email': email,
+            'X-Project-Password': projectPassword,
             'Content-Type': 'application/json'
           }
         }
@@ -294,8 +306,8 @@ export const useProjectDataView = () => {
       setLoading(true);
       setError(null);
       
-      const token = getAuthToken();
-      if (!token) {
+      const { email, apiKey, projectPassword } = getAuthCredentials();
+      if (!email || !apiKey || !projectPassword) {
         throw new Error('Authentication required');
       }
 
@@ -304,7 +316,9 @@ export const useProjectDataView = () => {
         `${API_URL}/data/table/${selectedTable}/rows/${deletingRow.id}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'X-API-Key': apiKey,
+            'X-User-Email': email,
+            'X-Project-Password': projectPassword,
             'Content-Type': 'application/json'
           }
         }

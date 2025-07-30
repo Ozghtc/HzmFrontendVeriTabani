@@ -179,13 +179,13 @@ export const useApiProjects = () => {
 
   // Auto-fetch on mount if user is authenticated
   useEffect(() => {
-    const token = AuthManager.getToken();
-    if (token) {
+    const hasCredentials = AuthManager.hasCredentials();
+    if (hasCredentials) {
       fetchProjects();
     } else {
-      // No token means user logged out, clear projects
+      // No credentials means user logged out, clear projects
       setProjects([]);
-      console.log('🔐 No auth token, clearing projects');
+      console.log('🔐 No API key credentials, clearing projects');
     }
   }, []); // Empty dependency array - only run on mount
 

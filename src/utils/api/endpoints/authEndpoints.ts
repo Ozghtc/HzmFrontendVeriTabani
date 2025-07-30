@@ -21,8 +21,8 @@ export class AuthEndpoints implements IAuthEndpoints {
     });
     
     if (response.success && response.data) {
-      // Store token
-      AuthManager.setToken(response.data.token, response.data.expiresIn);
+      // Note: We don't store JWT tokens anymore - using API key system
+      // AuthManager.setToken(response.data.token, response.data.expiresIn);
       console.log('✅ Login successful');
     } else {
       console.log('❌ Login failed:', response.error);
@@ -54,8 +54,8 @@ export class AuthEndpoints implements IAuthEndpoints {
       method: 'POST',
     });
     
-    // Clear token regardless of response
-    AuthManager.removeToken();
+    // Clear API key credentials
+    AuthManager.removeCredentials();
     
     return response;
   }
