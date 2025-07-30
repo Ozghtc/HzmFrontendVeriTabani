@@ -7,7 +7,8 @@ import { apiClient } from '../../../utils/api';
 import { AuthManager } from '../../../utils/api/utils/authUtils';
 
 export const useProjectData = () => {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { id } = useParams();  // Route'da :id olarak tanımlandığı için
+  const projectId = id; // Backward compatibility için
   const navigate = useNavigate();
   const { state } = useDatabase();
   const { projects, loading: projectsLoading } = useApiProjects();
