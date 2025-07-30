@@ -18,106 +18,64 @@ import DatabaseState from './pages/DatabaseState';
 import DatabasePricing from './pages/DatabasePricing';
 import UpgradePlanPage from './pages/UpgradePlanPage';
 import ApiTest from './pages/ApiTest';
-import ApiProjects from './pages/ApiProjects';
+import MathCalculator from './components/MathCalculator';
+import AdvancedMathCalculator from './components/AdvancedMathCalculator';
+import './pages/ApiProjects';
 
 import './App.css';
 
-function App() {
+const AppRoutes = () => {
   return (
-    <DatabaseProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/api-test" element={<ApiTest />} />
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/admin" element={<AdminPage />} />
+      <Route path="/projects" element={<ProjectList />} />
+      <Route path="/projects/:id" element={<ProjectManagement />} />
+      <Route path="/projects/:id/data" element={<ProjectDataView />} />
+      <Route path="/database-users" element={<DatabaseUsers />} />
+      <Route path="/database-projects" element={<DatabaseProjects />} />
+      <Route path="/database-state" element={<DatabaseState />} />
+      <Route path="/database-pricing" element={<DatabasePricing />} />
+      <Route path="/upgrade-plan" element={<UpgradePlanPage />} />
+      <Route path="/api-test" element={<ApiTest />} />
+      
+      {/* 🧮 PHASE 4 - MATEMATİK CALCULATOR */}
+      <Route path="/math-calculator" element={
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">HZMSoft Matematik Hesaplayıcı</h1>
+              <p className="text-gray-600">Gelişmiş matematik işlemleri için profesyonel hesaplayıcı</p>
+            </div>
+            <MathCalculator />
+          </div>
+        </div>
+      } />
 
-          
-          {/* Protected Routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/upgrade" element={
-            <ProtectedRoute>
-              <UpgradePlanPage />
-            </ProtectedRoute>
-          } />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={
-            <AdminRoute>
-              <AdminPage />
-            </AdminRoute>
-          } />
-          
-          {/* Database Management Routes */}
-          <Route path="/database/users" element={
-            <AdminRoute>
-              <DatabaseUsers />
-            </AdminRoute>
-          } />
-          
-          <Route path="/database/projects" element={
-            <AdminRoute>
-              <DatabaseProjects />
-            </AdminRoute>
-          } />
-          
-          <Route path="/database/state" element={
-            <AdminRoute>
-              <DatabaseState />
-            </AdminRoute>
-          } />
-          
-          <Route path="/database/pricing" element={
-            <AdminRoute>
-              <DatabasePricing />
-            </AdminRoute>
-          } />
-          
-          <Route path="/workspace" element={
-            <ProtectedRoute>
-              <div className="min-h-screen bg-slate-50">
-                <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
-                  <div className="container mx-auto">
-                    <h1 className="text-2xl font-bold">Veri Tabanı Sistemi</h1>
-                  </div>
-                </header>
-                <main className="container mx-auto p-4">
-                  <Layout />
-                </main>
-              </div>
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/projects" element={
-            <ProtectedRoute>
-              <ProjectList />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/projects/:projectId" element={
-            <ProtectedRoute>
-              <ProjectManagement />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/projects/:projectId/data" element={
-            <ProtectedRoute>
-              <ProjectDataView />
-            </ProtectedRoute>
-          } />
-          
-          {/* Redirect old routes */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </DatabaseProvider>
+      {/* 🔬 PHASE 4 - GELİŞMİŞ MATEMATİK HESAPLAYICI */}
+      <Route path="/advanced-math" element={<AdvancedMathCalculator />} />
+
+      {/* Protected routes */}
+      <Route path="/protected" element={<ProtectedRoute><h1>Protected Route</h1></ProtectedRoute>} />
+      <Route path="/admin-only" element={<AdminRoute><h1>Admin Only Route</h1></AdminRoute>} />
+      <Route path="/*" element={<Navigate to="/" />} />
+    </Routes>
   );
-}
+};
 
-export default App;
+const App = () => {
+  return (
+    <BrowserRouter>
+      <DatabaseProvider>
+        <Layout>
+          <AppRoutes />
+        </Layout>
+      </DatabaseProvider>
+    </BrowserRouter>
+  );
+};
+
+export default App; 
