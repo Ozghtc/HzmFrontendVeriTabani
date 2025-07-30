@@ -1,27 +1,27 @@
-// LocalStorage API Key storage (persistent across tabs and page refreshes)
-class LocalStorageApiKeyStorage {
-  private readonly EMAIL_KEY = 'auth_email_hzm';
-  private readonly API_KEY = 'auth_apikey_hzm';
-  private readonly PROJECT_PASSWORD_KEY = 'auth_project_password_hzm';
+// SessionStorage API Key storage (secure + persistent during session)
+class SessionApiKeyStorage {
+  private readonly EMAIL_KEY = 'auth_email_session';
+  private readonly API_KEY = 'auth_apikey_session';
+  private readonly PROJECT_PASSWORD_KEY = 'auth_project_password_session';
 
   setCredentials(email: string, apiKey: string, projectPassword: string): void {
-    localStorage.setItem(this.EMAIL_KEY, email);
-    localStorage.setItem(this.API_KEY, apiKey);
-    localStorage.setItem(this.PROJECT_PASSWORD_KEY, projectPassword);
+    sessionStorage.setItem(this.EMAIL_KEY, email);
+    sessionStorage.setItem(this.API_KEY, apiKey);
+    sessionStorage.setItem(this.PROJECT_PASSWORD_KEY, projectPassword);
   }
 
   getCredentials(): { email: string | null, apiKey: string | null, projectPassword: string | null } {
     return {
-      email: localStorage.getItem(this.EMAIL_KEY),
-      apiKey: localStorage.getItem(this.API_KEY),
-      projectPassword: localStorage.getItem(this.PROJECT_PASSWORD_KEY)
+      email: sessionStorage.getItem(this.EMAIL_KEY),
+      apiKey: sessionStorage.getItem(this.API_KEY),
+      projectPassword: sessionStorage.getItem(this.PROJECT_PASSWORD_KEY)
     };
   }
 
   clearCredentials(): void {
-    localStorage.removeItem(this.EMAIL_KEY);
-    localStorage.removeItem(this.API_KEY);
-    localStorage.removeItem(this.PROJECT_PASSWORD_KEY);
+    sessionStorage.removeItem(this.EMAIL_KEY);
+    sessionStorage.removeItem(this.API_KEY);
+    sessionStorage.removeItem(this.PROJECT_PASSWORD_KEY);
   }
 
   hasCredentials(): boolean {
@@ -31,7 +31,7 @@ class LocalStorageApiKeyStorage {
 }
 
 // Global instance
-const apiKeyStorage = new LocalStorageApiKeyStorage();
+const apiKeyStorage = new SessionApiKeyStorage();
 
 export class AuthManager {
   // Get stored credentials
