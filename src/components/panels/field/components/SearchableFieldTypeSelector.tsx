@@ -217,7 +217,7 @@ export const SearchableFieldTypeSelector: React.FC<SearchableFieldTypeSelectorPr
                 {/* 🎨 GRUP BAŞLIĞI - RENK SİSTEMİ + LUCIDE İKONLAR */}
                 <button
                   type="button"
-                  className={`flex items-center justify-between w-full px-5 py-4 sm:py-3.5 text-left font-bold ${colors.bg} ${colors.border} border-l-4 hover:shadow-md active:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 touch-manipulation group`}
+                  className={`flex items-center justify-between w-full px-5 py-4 sm:py-3.5 text-left font-black ${colors.bg} ${colors.border} border-l-4 hover:shadow-md active:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 touch-manipulation group`}
                   onClick={() => toggleGroup(key)}
                 >
                   <div className="flex items-center min-w-0 flex-1">
@@ -225,10 +225,10 @@ export const SearchableFieldTypeSelector: React.FC<SearchableFieldTypeSelectorPr
                       <span className="text-xl sm:text-lg">{colors.icon}</span>
                       <colors.lucideIcon className={`h-4 w-4 ${colors.text} opacity-70`} />
                     </div>
-                    <span className={`text-base sm:text-sm font-bold ${colors.text} truncate`}>
+                    <span className={`text-lg sm:text-base font-black ${colors.text} truncate tracking-wide`}>
                       {title}
                     </span>
-                    <div className={`ml-3 px-2.5 py-1 text-xs ${colors.text} bg-white bg-opacity-60 rounded-full flex-shrink-0 font-semibold`}>
+                    <div className={`ml-3 px-3 py-1.5 text-xs ${colors.text} bg-white bg-opacity-80 rounded-full flex-shrink-0 font-black shadow-sm border border-white border-opacity-50`}>
                       {count}
                     </div>
                   </div>
@@ -264,7 +264,7 @@ export const SearchableFieldTypeSelector: React.FC<SearchableFieldTypeSelectorPr
                         <span className="mr-3 text-lg sm:text-base flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
                           {type.icon}
                         </span>
-                        <span className="flex-1 text-sm sm:text-xs font-medium min-w-0 truncate pr-2">
+                        <span className="flex-1 text-sm sm:text-xs font-normal min-w-0 truncate pr-2">
                           {type.label}
                         </span>
                         {type.mathCapable && (
