@@ -72,7 +72,11 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose, pr
       reportGenerate: `/api/v1/reports/generate`,
       
       // Analytics
-      analyticsOverview: `/api/v1/analytics/overview`
+      analyticsOverview: `/api/v1/analytics/overview`,
+      
+      // ID Generation (NEW!)
+      generateId: `/api/v1/admin/generate-id`,
+      generateSequentialId: `/api/v1/admin/generate-sequential-id`
     }
   };
 
@@ -241,6 +245,49 @@ if (result.success) {
 }
 \`\`\`
 
+### 🆔 ID Generation JavaScript Örneği
+\`\`\`javascript
+// UUID Tabanlı ID Üretimi
+const idResponse = await fetch(
+  '${apiInfo.productionUrl}/api/v1/admin/generate-id?count=3&prefix=product',
+  {
+    method: 'GET',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'X-User-Email': '[KENDİ_EMAİLİNİZ]',
+      'X-Project-Password': '[KENDİ_ŞİFRENİZ]'
+    }
+  }
+);
+
+const ids = await idResponse.json();
+console.log('Üretilen ID\\'ler:', ids.data.generated_ids);
+// ["product_377c4042827b41f6", "product_29a00032a41d4f27", "product_8a428c2045744f10"]
+
+// Sequential ID Üretimi (Mağaza-Ürün)
+const sequentialResponse = await fetch(
+  '${apiInfo.productionUrl}/api/v1/admin/generate-sequential-id',
+  {
+    method: 'POST',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'X-User-Email': '[KENDİ_EMAİLİNİZ]',
+      'X-Project-Password': '[KENDİ_ŞİFRENİZ]',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      type: 'URUN',
+      parent_id: 'MAGAZA-001',
+      padding: 5
+    })
+  }
+);
+
+const sequentialId = await sequentialResponse.json();
+console.log('Sequential ID:', sequentialId.data.generated_id);
+// "MAGAZA-001-URUN-00001"
+\`\`\`
+
 ## 🧮 MATEMATİK API'LERİ
 
 ### 📐 Temel Matematik İşlemleri
@@ -272,11 +319,88 @@ curl -X POST \\
   }'
 \`\`\`
 
-## 🎯 TEST EDİLEN ENDPOINT'LER (30/30) ✅
+## 🆔 ID GENERATION API'LERİ (YENİ!)
+
+### 🔄 UUID Tabanlı ID Üretimi
+\`\`\`bash
+# Random UUID ID Üret - TEST EDİLDİ ✅
+curl -X GET \\
+  "${apiInfo.productionUrl}/api/v1/admin/generate-id" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]"
+
+# Çoklu ID ve Custom Prefix
+curl -X GET \\
+  "${apiInfo.productionUrl}/api/v1/admin/generate-id?count=5&prefix=product" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]"
+\`\`\`
+
+### 🏪 Sequential & Hierarchical ID Üretimi
+\`\`\`bash
+# Basit Sequential ID - TEST EDİLDİ ✅
+curl -X POST \\
+  "${apiInfo.productionUrl}/api/v1/admin/generate-sequential-id" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "type": "MAGAZA",
+    "prefix": "STORE"
+  }'
+
+# Hierarchical ID (Mağaza-Ürün) - TEST EDİLDİ ✅
+curl -X POST \\
+  "${apiInfo.productionUrl}/api/v1/admin/generate-sequential-id" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "type": "URUN",
+    "parent_id": "MAGAZA-001",
+    "padding": 5
+  }'
+
+# Custom Format Template - TEST EDİLDİ ✅
+curl -X POST \\
+  "${apiInfo.productionUrl}/api/v1/admin/generate-sequential-id" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "format_template": "MZ{seq}-UR{seq}",
+    "type": "PRODUCT",
+    "padding": 5
+  }'
+\`\`\`
+
+### 🏭 ID Generation Kullanım Senaryoları
+\`\`\`bash
+# 🏪 Mağaza Sistemi
+STORE-0001, STORE-0002, STORE-0003...
+MAGAZA-001-URUN-00001, MAGAZA-001-URUN-00002...
+
+# 📦 Ürün Kodları  
+MZ00001-UR00001, MZ00001-UR00002...
+
+# 🎫 Sipariş & Fatura
+ORDER-2025-0001, INVOICE-JAN-0001...
+\`\`\`
+
+## 🎯 TEST EDİLEN ENDPOINT'LER (32/32) ✅
 
 ### 🔐 Kimlik Doğrulama (2/2)
 - ✅ API Key Bilgisi Alma
 - ✅ 3-Katmanlı Doğrulama
+
+### 🆔 ID Generation (2/2) - YENİ!
+- ✅ UUID Tabanlı ID Üretimi
+- ✅ Sequential & Hierarchical ID Üretimi
 
 ### 📊 Tablo Yönetimi (4/4)
 - ✅ Tabloları Listele
@@ -329,6 +453,7 @@ curl -X POST \\
 - ✅ Schema Yönetimi
 - ✅ Raporlama ve Analitik
 - ✅ Matematik API'leri (Phase 4)
+- ✅ ID Generation API'leri (UUID & Sequential)
 - ✅ JavaScript SDK
 
 ## 🔒 GÜVENLİK ÖZELLİKLERİ
@@ -360,7 +485,7 @@ https://vardiyaasistani.netlify.app
 *${project.name} - API Key Sistemi*
 *Test Tarihi: ${new Date().toLocaleString('tr-TR')}*
 *Durum: %100 ÇALIŞAN GENİŞLETİLMİŞ API KEY SİSTEMİ*
-*Test Completed: 30/30 Endpoints*
+*Test Completed: 32/32 Endpoints*
 *Security: 3-Layer Authentication Verified*
 *Math APIs: Phase 4 Complete ✅*`;
   };
@@ -388,6 +513,10 @@ https://vardiyaasistani.netlify.app
 ### 🔐 KİMLİK DOĞRULAMA
 - **POST** /api/v1/auth/login - Giriş yap
 - **POST** /api/v1/auth/register - Kayıt ol
+
+### 🆔 ID GENERATION (YENİ!)
+- **GET** /api/v1/admin/generate-id - UUID tabanlı ID üretimi
+- **POST** /api/v1/admin/generate-sequential-id - Sequential & Hierarchical ID üretimi
 
 ### 📊 TABLO YÖNETİMİ  
 - **GET** /api/v1/tables/project/{projectId} - Tabloları listele
@@ -645,6 +774,48 @@ if (result.success) {
 } else {
   console.error('Hata:', result.error);
 }`}</pre>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-gray-700 mb-2">🆔 ID Generation JavaScript Örneği</h4>
+                    <pre className="bg-gray-800 text-blue-400 p-3 rounded text-xs overflow-x-auto">{`// UUID Tabanlı ID Üretimi
+const idResponse = await fetch(
+  '${apiInfo.productionUrl}/api/v1/admin/generate-id?count=3&prefix=product',
+  {
+    method: 'GET',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'X-User-Email': 'KENDİ_EMAİLİNİZ@domain.com',
+      'X-Project-Password': 'KENDİ_ŞİFRENİZ'
+    }
+  }
+);
+
+const ids = await idResponse.json();
+console.log('Üretilen ID\\'ler:', ids.data.generated_ids);
+
+// Sequential ID Üretimi (Mağaza-Ürün)
+const sequentialResponse = await fetch(
+  '${apiInfo.productionUrl}/api/v1/admin/generate-sequential-id',
+  {
+    method: 'POST',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'X-User-Email': 'KENDİ_EMAİLİNİZ@domain.com',
+      'X-Project-Password': 'KENDİ_ŞİFRENİZ',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      type: 'URUN',
+      parent_id: 'MAGAZA-001',
+      padding: 5
+    })
+  }
+);
+
+const sequentialId = await sequentialResponse.json();
+console.log('Sequential ID:', sequentialId.data.generated_id);
+// "MAGAZA-001-URUN-00001"`}</pre>
                   </div>
                 </div>
               </div>
