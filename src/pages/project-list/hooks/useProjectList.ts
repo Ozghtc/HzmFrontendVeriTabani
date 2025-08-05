@@ -462,7 +462,7 @@ export const useProjectList = () => {
     state,
     projects,
     loading,
-    error,
+    error: apiError,
     creating,
     deletingProject,
     deleteConfirmName,
