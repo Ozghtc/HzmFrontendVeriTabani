@@ -12,7 +12,7 @@ import { AuthManager } from '../../../utils/api/utils/authUtils';
 export const useProjectList = () => {
   const { state, dispatch } = useDatabase();
   const navigate = useNavigate();
-  const { projects, loading, error, createProject, deleteProject, fetchProjects, retryAfterError, enableProjectProtection, removeProjectProtection } = useApiProjects();
+  const { projects, loading, error: apiError, createProject, deleteProject, fetchProjects, retryAfterError, enableProjectProtection, removeProjectProtection } = useApiProjects();
   const { notification, showNotification } = useNotification();
   
   const [deletingProject, setDeletingProject] = useState<number | null>(null);
@@ -239,9 +239,14 @@ export const useProjectList = () => {
     
     try {
       const project = projects.find(p => p.id === protectionProjectId);
-      if (!project) return;
+      if (!project) {
+        showNotification('error', 'Proje bulunamadı');
+        setProtectionLoading(false);
+        return;
+      }
       
       let success = false;
+      let errorMessage = '';
       
       if (newPassword) {
         // Change password mode
@@ -250,32 +255,48 @@ export const useProjectList = () => {
           success = await enableProjectProtection(protectionProjectId.toString(), newPassword);
           if (success) {
             showNotification('success', 'Proje şifresi başarıyla değiştirildi');
+          } else {
+            // Get detailed error from hook
+            errorMessage = apiError || 'Yeni şifre ayarlanırken hata oluştu';
           }
+        } else {
+          // Get detailed error from hook  
+          errorMessage = apiError || 'Mevcut şifre doğrulanamadı';
         }
       } else if ((project as any).isProtected ?? false) {
         // Remove protection
         success = await removeProjectProtection(protectionProjectId.toString(), password);
         if (success) {
           showNotification('success', 'Proje koruması kaldırıldı');
+        } else {
+          // Get detailed error from hook
+          errorMessage = apiError || 'Koruma kaldırılırken hata oluştu';
         }
       } else {
         // Enable protection
         success = await enableProjectProtection(protectionProjectId.toString(), password);
         if (success) {
           showNotification('success', 'Proje koruması etkinleştirildi');
+        } else {
+          // Get detailed error from hook
+          errorMessage = apiError || 'Koruma eklenirken hata oluştu';
         }
       }
       
       if (success) {
         setProtectionModalOpen(false);
         setProtectionProjectId(null);
+      } else if (errorMessage) {
+        console.log('🔍 Showing error to user:', errorMessage);
+        showNotification('error', errorMessage);
       }
-    } catch (error) {
-      showNotification('error', 'Bir hata oluştu');
+    } catch (error: any) {
+      console.log('💥 Unexpected error in protection submit:', error);
+      showNotification('error', error.message || 'Beklenmeyen bir hata oluştu');
     } finally {
       setProtectionLoading(false);
     }
-  }, [protectionProjectId, projects, enableProjectProtection, removeProjectProtection, showNotification]);
+  }, [protectionProjectId, projects, enableProjectProtection, removeProjectProtection, showNotification, apiError]);
 
   const handleProtectionCancel = useCallback(() => {
     setProtectionModalOpen(false);
