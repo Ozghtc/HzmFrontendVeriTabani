@@ -74,42 +74,48 @@ export class ProjectEndpoints implements IProjectEndpoints {
   async enableProjectProtection(projectId: string, password: string): Promise<ApiResponse<void>> {
     console.log('🔒 Enabling project protection:', projectId);
     
-    // KURAL 13: Cache/Sekme kaydi temizleme kontrolü
+    // Sadece proje-specific cache temizle, AUTH bilgilerini DOKUNMA!
     if (typeof window !== 'undefined') {
-      console.log('🧹 Clearing browser cache and session data before API call...');
+      console.log('🧹 Clearing project-specific cache (preserving auth)...');
       
-      // Session storage temizle
+      // Sadece güvenli cache temizleme - AUTH BİLGİLERİNİ KORUMA
       try {
-        const keysToRemove = [];
+        const safeKeysToRemove = [];
         for (let i = 0; i < sessionStorage.length; i++) {
           const key = sessionStorage.key(i);
-          if (key && (key.includes('project') || key.includes('cache') || key.includes('api'))) {
-            keysToRemove.push(key);
+          // SADECE proje cache'lerini sil, auth bilgilerini KORU
+          if (key && (
+            key.includes('projects_cache') || 
+            key.includes(`project_${projectId}_cache`) ||
+            key.includes('protection_cache')
+          )) {
+            safeKeysToRemove.push(key);
           }
         }
-        keysToRemove.forEach(key => sessionStorage.removeItem(key));
-        console.log('✅ Session storage cache cleared:', keysToRemove.length, 'items');
+        safeKeysToRemove.forEach(key => sessionStorage.removeItem(key));
+        console.log('✅ Safe cache cleared:', safeKeysToRemove.length, 'items (auth preserved)');
       } catch (e) {
         console.warn('⚠️ Session storage clear failed:', e);
       }
       
-      // Local storage project cache temizle
+      // Local storage - sadece proje cache'leri
       try {
         const localKeysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
-          if (key && (key.includes('project') || key.includes('protection') || key.includes('cache'))) {
+          if (key && (
+            key.includes('projects_last_fetch') || 
+            key.includes(`project_${projectId}`) ||
+            key.includes('protection_cache')
+          )) {
             localKeysToRemove.push(key);
           }
         }
         localKeysToRemove.forEach(key => localStorage.removeItem(key));
-        console.log('✅ Local storage cache cleared:', localKeysToRemove.length, 'items');
+        console.log('✅ Local project cache cleared:', localKeysToRemove.length, 'items');
       } catch (e) {
         console.warn('⚠️ Local storage clear failed:', e);
       }
-      
-      // Browser cache headers ekle
-      console.log('🔄 Adding cache-busting headers...');
     }
     
     const response = await this.request(ENDPOINTS.projects.enableProtection(projectId), {
@@ -126,10 +132,10 @@ export class ProjectEndpoints implements IProjectEndpoints {
     if (response.success) {
       console.log('✅ Project protection enabled successfully');
       
-      // Başarıdan sonra da cache temizle
+      // Başarıdan sonra sadece proje cache'ini temizle (AUTH KORUMA)
       if (typeof window !== 'undefined') {
-        console.log('🧹 Post-success cache cleanup...');
-        // Tüm project listesi cache'ini temizle
+        console.log('🧹 Post-success project cache cleanup (auth preserved)...');
+        // Sadece proje listesi cache'ini temizle
         sessionStorage.removeItem('projects_cache');
         sessionStorage.removeItem(`project_${projectId}_cache`);
         localStorage.removeItem('projects_last_fetch');
@@ -137,18 +143,15 @@ export class ProjectEndpoints implements IProjectEndpoints {
     } else {
       console.log('❌ Project protection failed:', response.error);
       
-      // 404 hatası alırsa cache temizle ve sayfayı yenile
+      // 404 hatası için DE auth bilgilerini koruma
       if (response.error?.includes('not found') || response.error?.includes('404')) {
-        console.log('🔄 404 Error detected - forcing page reload...');
+        console.log('🔄 404 Error detected - refreshing project data only...');
         if (typeof window !== 'undefined') {
-          // Tüm cache'i temizle
-          sessionStorage.clear();
+          // SADECE proje cache'lerini temizle - AUTH BİLGİLERİNİ KORU!
+          sessionStorage.removeItem('projects_cache');
           localStorage.removeItem('projects_cache');
           
-          // 2 saniye sonra sayfayı yenile
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+          console.log('✅ Auth preserved during 404 handling');
         }
       }
     }
