@@ -25,13 +25,33 @@ export const defaultResponseInterceptor: ResponseInterceptor = {
     // Add timestamp to error
     error.timestamp = new Date().toISOString();
 
-    // Log error
-    console.error('❌ API Error:', {
+    // Log error with MORE details for debugging
+    console.error('❌ API Error intercepted:', {
       error: error.error,
       code: error.code,
+      status: error.status,
+      url: error.url,
+      endpoint: error.endpoint,
       details: error.details,
       timestamp: error.timestamp,
     });
+
+    // PROJE KORUMA ERRORlarını BYPASS et - logout yapma!
+    const isProjectProtectionEndpoint = error.url?.includes('/protection') || 
+                                       error.endpoint?.includes('protection') ||
+                                       error.url?.includes('enable-protection') ||
+                                       error.url?.includes('remove-protection');
+    
+    if (isProjectProtectionEndpoint) {
+      console.log('🔒 PROJECT PROTECTION ERROR - NOT LOGGING OUT USER!');
+      console.log('🔍 Protection error details:', {
+        url: error.url,
+        status: error.status,
+        code: error.code,
+        message: error.error
+      });
+      return error; // Sadece error'u döndür, logout YAPMA!
+    }
 
     // Handle specific error codes
     switch (error.code) {
@@ -39,18 +59,31 @@ export const defaultResponseInterceptor: ResponseInterceptor = {
       case 'TOKEN_EXPIRED':
       case 'INVALID_CREDENTIALS':
       case 'MISSING_HEADERS':
-        // Clear auth and redirect to login
-        console.log('🔐 Authentication error, redirecting to login...');
-        // Clear API key credentials
-        if (typeof window !== 'undefined') {
-          sessionStorage.removeItem('auth_email_session');
-          sessionStorage.removeItem('auth_apikey_session');
-          sessionStorage.removeItem('auth_project_password_session');
-          // Also remove any legacy JWT tokens
-          sessionStorage.removeItem('auth_token_session');
-          sessionStorage.removeItem('auth_token_expiry_session');
-          // Redirect to login page
-          window.location.href = '/login';
+        // EXTRA CHECK: SADECE gerçek auth problemlerinde logout yap
+        const isRealAuthIssue = error.url?.includes('/auth/') || 
+                               error.url?.includes('/login') ||
+                               error.url?.includes('/register') ||
+                               error.status === 401;
+        
+        if (isRealAuthIssue && !isProjectProtectionEndpoint) {
+          console.log('🔐 REAL Authentication error, redirecting to login...');
+          // Clear API key credentials
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('auth_email_session');
+            sessionStorage.removeItem('auth_apikey_session');
+            sessionStorage.removeItem('auth_project_password_session');
+            // Also remove any legacy JWT tokens
+            sessionStorage.removeItem('auth_token_session');
+            sessionStorage.removeItem('auth_token_expiry_session');
+            // Redirect to login page
+            window.location.href = '/login';
+          }
+        } else {
+          console.log('⚠️ Auth-like error but NOT logging out:', {
+            url: error.url,
+            isRealAuth: isRealAuthIssue,
+            isProtection: isProjectProtectionEndpoint
+          });
         }
         break;
       
