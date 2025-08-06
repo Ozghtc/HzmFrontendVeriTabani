@@ -392,6 +392,73 @@ MZ00001-UR00001, MZ00001-UR00002...
 ORDER-2025-0001, INVOICE-JAN-0001...
 \`\`\`
 
+## 🧮 MATEMATİK API'LERİ
+
+### 📐 Temel Matematik İşlemleri
+\`\`\`bash
+curl -X POST \\
+  "${apiInfo.productionUrl}/api/v1/math/basic" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "operation": "add",
+    "a": 10,
+    "b": 20
+  }'
+\`\`\`
+
+### 📊 İstatistik Hesaplamaları
+\`\`\`bash
+curl -X POST \\
+  "${apiInfo.productionUrl}/api/v1/math/statistics" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "operation": "mean",
+    "data": [10, 20, 30, 40, 50]
+  }'
+\`\`\`
+
+### 💰 Finansal Hesaplamalar (Bileşik Faiz)
+\`\`\`bash
+curl -X POST \\
+  "${apiInfo.productionUrl}/api/v1/math/finance" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "operation": "compound_interest",
+    "data": {
+      "principalComp": 1000,
+      "rateComp": 0.05,
+      "timeComp": 12,
+      "compoundFreq": 1
+    }
+  }'
+\`\`\`
+
+### 🔬 Bilimsel Hesaplamalar (Kinetik Enerji)
+\`\`\`bash
+curl -X POST \\
+  "${apiInfo.productionUrl}/api/v1/math/science" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "operation": "physics_energy",
+    "data": {
+      "mass_energy": 10,
+      "velocity": 20
+    }
+  }'
+\`\`\`
+
 ## 🎯 TEST EDİLEN ENDPOINT'LER (32/32) ✅
 
 ### 🔐 Kimlik Doğrulama (2/2)
@@ -721,6 +788,82 @@ https://vardiyaasistani.netlify.app
                     </button>
                   </div>
 
+                  {/* Matematik API Örnekleri */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">3. Matematik API (Finance):</h4>
+                    <div className="bg-gray-900 text-yellow-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
+                      <pre>{`curl -X POST \\
+  ${apiInfo.productionUrl}/api/v1/math/finance \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "operation": "compound_interest",
+    "data": {
+      "principalComp": 1000,
+      "rateComp": 0.05,
+      "timeComp": 12,
+      "compoundFreq": 1
+    }
+  }'`}</pre>
+                    </div>
+                    <button
+                      onClick={() => handleCopy(`curl -X POST \\
+  ${apiInfo.productionUrl}/api/v1/math/finance \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "operation": "compound_interest",
+    "data": {
+      "principalComp": 1000,
+      "rateComp": 0.05,
+      "timeComp": 12,
+      "compoundFreq": 1
+    }
+  }'`, 'financeExample')}
+                      className="mt-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700 transition-colors flex items-center"
+                    >
+                      {copiedItems.financeExample ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
+                      Kodu Kopyala
+                    </button>
+                  </div>
+
+                  {/* Matematik API - İstatistik */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">4. Matematik API (İstatistik):</h4>
+                    <div className="bg-gray-900 text-blue-400 p-3 rounded-md text-sm font-mono overflow-x-auto">
+                      <pre>{`curl -X POST \\
+  ${apiInfo.productionUrl}/api/v1/math/statistics \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "operation": "mean",
+    "data": [10, 20, 30, 40, 50]
+  }'`}</pre>
+                    </div>
+                    <button
+                      onClick={() => handleCopy(`curl -X POST \\
+  ${apiInfo.productionUrl}/api/v1/math/statistics \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "operation": "mean",
+    "data": [10, 20, 30, 40, 50]
+  }'`, 'statisticsExample')}
+                      className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors flex items-center"
+                    >
+                      {copiedItems.statisticsExample ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
+                      Kodu Kopyala
+                    </button>
+                  </div>
+
                   {/* JavaScript Örnekleri */}
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="font-medium text-gray-700 mb-2">💻 JavaScript/Fetch Örneği</h4>
@@ -816,6 +959,78 @@ const sequentialResponse = await fetch(
 const sequentialId = await sequentialResponse.json();
 console.log('Sequential ID:', sequentialId.data.generated_id);
 // "MAGAZA-001-URUN-00001"`}</pre>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-gray-700 mb-2">🧮 Matematik API Örnekleri</h4>
+                    <pre className="bg-gray-800 text-orange-400 p-3 rounded text-xs overflow-x-auto">{`// Temel Matematik İşlemleri
+const mathResponse = await fetch(
+  '${apiInfo.productionUrl}/api/v1/math/basic',
+  {
+    method: 'POST',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'X-User-Email': 'KENDİ_EMAİLİNİZ@domain.com',
+      'X-Project-Password': 'KENDİ_ŞİFRENİZ',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      operation: 'add',
+      a: 10,
+      b: 20
+    })
+  }
+);
+
+const mathResult = await mathResponse.json();
+console.log('Sonuç:', mathResult.data.result); // 30
+
+// Finansal Hesaplamalar (Bileşik Faiz)
+const financeResponse = await fetch(
+  '${apiInfo.productionUrl}/api/v1/math/finance',
+  {
+    method: 'POST',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'X-User-Email': 'KENDİ_EMAİLİNİZ@domain.com',
+      'X-Project-Password': 'KENDİ_ŞİFRENİZ',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      operation: 'compound_interest',
+      data: {
+        principalComp: 1000,
+        rateComp: 0.05,
+        timeComp: 12,
+        compoundFreq: 1
+      }
+    })
+  }
+);
+
+const financeResult = await financeResponse.json();
+console.log('Bileşik Faiz:', financeResult.data.result.totalAmount);
+
+// İstatistik Hesaplamaları
+const statsResponse = await fetch(
+  '${apiInfo.productionUrl}/api/v1/math/statistics',
+  {
+    method: 'POST',
+    headers: {
+      'X-API-Key': '${apiInfo.apiKey}',
+      'X-User-Email': 'KENDİ_EMAİLİNİZ@domain.com',
+      'X-Project-Password': 'KENDİ_ŞİFRENİZ',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      operation: 'mean',
+      data: [10, 20, 30, 40, 50]
+    })
+  }
+);
+
+const statsResult = await statsResponse.json();
+console.log('Ortalama:', statsResult.data.result); // 30`}</pre>
                   </div>
                 </div>
               </div>
