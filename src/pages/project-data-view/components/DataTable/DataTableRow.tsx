@@ -32,7 +32,16 @@ const DataTableRow: React.FC<DataTableRowProps> = ({
   return (
     <tr className="hover:bg-gray-50">
       {fields.map(field => (
-        <td key={field.id} className="px-6 py-4 whitespace-nowrap">
+        <td 
+          key={field.id} 
+          className="px-6 py-4"
+          style={{ 
+            minWidth: '150px',
+            maxWidth: '300px',
+            maxHeight: '120px',
+            overflow: 'hidden'
+          }}
+        >
           {isEditing ? (
             renderInput(
               field,
@@ -41,13 +50,27 @@ const DataTableRow: React.FC<DataTableRowProps> = ({
               field.required
             )
           ) : (
-            <span className="text-sm text-gray-900">
+            <div 
+              className="text-sm text-gray-900 break-words overflow-auto"
+              style={{ 
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word',
+                hyphens: 'auto',
+                lineHeight: '1.5',
+                maxHeight: '90px',
+                overflowY: 'auto',
+                scrollbarWidth: 'thin'
+              }}
+            >
               {formatDisplayValue(row[field.name], field.type)}
-            </span>
+            </div>
           )}
         </td>
       ))}
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td 
+        className="px-6 py-4 whitespace-nowrap"
+        style={{ minWidth: '120px', width: '120px' }}
+      >
         {isEditing ? (
           <div className="flex space-x-2">
             <button

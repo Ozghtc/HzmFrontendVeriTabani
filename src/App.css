@@ -42,3 +42,36 @@
     max-height: 300px;
   }
 }
+
+/* Table improvements */
+.table-cell-content {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.5;
+}
+
+.table-container {
+  overflow-x: auto;
+  min-width: 100%;
+}
+
+/* Improved scrollbar for table cells */
+.table-cell-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.table-cell-scroll::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 3px;
+}
+
+.table-cell-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.table-cell-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}

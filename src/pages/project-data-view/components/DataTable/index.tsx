@@ -140,19 +140,43 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
                 <th
                   key={field.id}
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  style={{ 
+                    minWidth: '150px', 
+                    width: 'auto',
+                    maxWidth: '300px'
+                  }}
                 >
-                  {field.name}
-                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                  <div 
+                    className="break-words"
+                    style={{ 
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word',
+                      hyphens: 'auto'
+                    }}
+                  >
+                    {field.name}
+                    {field.required && <span className="text-red-500 ml-1">*</span>}
+                  </div>
                 </th>
               ))}
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                style={{ minWidth: '120px', width: '120px' }}
+              >
                 İşlemler
               </th>
             </tr>
             {/* Sütun bazlı arama input'ları */}
             <tr className="bg-gray-100">
               {visibleFields.map((field: any) => (
-                <th key={`filter-${field.id}`} className="px-6 py-2">
+                <th 
+                  key={`filter-${field.id}`} 
+                  className="px-6 py-2"
+                  style={{ 
+                    minWidth: '150px',
+                    maxWidth: '300px'
+                  }}
+                >
                   <div className="relative">
                     <Search 
                       size={14} 
