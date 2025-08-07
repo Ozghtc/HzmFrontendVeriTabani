@@ -153,6 +153,49 @@ curl -X POST \\
   }'
 \`\`\`
 
+## ⚡ FIELD YÖNETİMİ
+
+### ➕ Field Ekle
+\`\`\`bash
+curl -X POST \\
+  "${apiInfo.productionUrl}/api/v1/tables/${apiInfo.projectId}/TABLE_ID/fields" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "name": "field_adi",
+    "type": "varchar",
+    "isRequired": true,
+    "description": "Field açıklaması"
+  }'
+\`\`\`
+
+### 🔧 Field Güncelle  
+\`\`\`bash
+curl -X PUT \\
+  "${apiInfo.productionUrl}/api/v1/tables/TABLE_ID/fields/FIELD_ID" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]" \\
+  -d '{
+    "name": "yeni_field_adi",
+    "type": "integer",
+    "isRequired": false,
+    "description": "Güncellenmiş açıklama"
+  }'
+\`\`\`
+
+### 🗑️ Field Sil
+\`\`\`bash
+curl -X DELETE \\
+  "${apiInfo.productionUrl}/api/v1/tables/TABLE_ID/fields/FIELD_ID" \\
+  -H "X-API-Key: ${apiInfo.apiKey}" \\
+  -H "X-User-Email: [KENDİ_EMAİLİNİZ]" \\
+  -H "X-Project-Password: [KENDİ_ŞİFRENİZ]"
+\`\`\`
+
 ## 🔗 İLİŞKİ YÖNETİMİ
 
 ### 📋 İlişkileri Listele
@@ -459,7 +502,7 @@ curl -X POST \\
   }'
 \`\`\`
 
-## 🎯 TEST EDİLEN ENDPOINT'LER (32/32) ✅
+## 🎯 TEST EDİLEN ENDPOINT'LER (35/35) ✅
 
 ### 🔐 Kimlik Doğrulama (2/2)
 - ✅ API Key Bilgisi Alma
@@ -552,7 +595,7 @@ https://vardiyaasistani.netlify.app
 *${project.name} - API Key Sistemi*
 *Test Tarihi: ${new Date().toLocaleString('tr-TR')}*
 *Durum: %100 ÇALIŞAN GENİŞLETİLMİŞ API KEY SİSTEMİ*
-*Test Completed: 32/32 Endpoints*
+*Test Completed: 35/35 Endpoints*
 *Security: 3-Layer Authentication Verified*
 *Math APIs: Phase 4 Complete ✅*`;
   };
@@ -591,7 +634,12 @@ https://vardiyaasistani.netlify.app
 - **PUT** /api/v1/tables/{tableId} - Tablo güncelle
 - **DELETE** /api/v1/tables/{tableId} - Tablo sil
 
-### ⚡ VERİ İŞLEMLERİ
+### ⚡ FIELD YÖNETİMİ
+- **POST** /api/v1/tables/{projectId}/{tableId}/fields - Field ekle
+- **PUT** /api/v1/tables/{tableId}/fields/{fieldId} - Field güncelle
+- **DELETE** /api/v1/tables/{tableId}/fields/{fieldId} - Field sil
+
+### 💾 VERİ İŞLEMLERİ
 - **GET** /api/v1/data/table/{tableId} - Veri oku
 - **POST** /api/v1/data/table/{tableId}/rows - Veri ekle
 - **PUT** /api/v1/data/table/{tableId}/rows/{rowId} - Veri güncelle
