@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { icons } from '../../constants/dataViewConstants';
 import { DataTableProps } from '../../types/dataViewTypes';
+import { turkishSearch } from '../../../../utils/turkishSearch';
 import DataTableHeader from './DataTableHeader';
 import AddRowForm from './AddRowForm';
 import DataTableRow from './DataTableRow';
@@ -49,6 +50,10 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
   // Sütun bazlı arama state'leri
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   
+  // Pagination state'leri
+  const [currentPage, setCurrentPage] = useState(1);
+  const [recordsPerPage, setRecordsPerPage] = useState(50);
+  
   // Sütun filtresi değiştirme fonksiyonu
   const handleColumnFilterChange = (fieldName: string, value: string) => {
     setColumnFilters(prev => ({
@@ -60,7 +65,7 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
   // Filtrelenmiş veri (Türkçe karakter desteği ile)
   const filteredTableData = useMemo(() => {
     if (!tableData || Object.keys(columnFilters).length === 0) {
-      return tableData;
+      return tableData || [];
     }
     
     return tableData.filter(row => {
@@ -77,6 +82,26 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
       });
     });
   }, [tableData, columnFilters]);
+  
+  // Pagination hesaplamaları
+  const totalRecords = filteredTableData.length;
+  const totalPages = Math.ceil(totalRecords / recordsPerPage);
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const endIndex = startIndex + recordsPerPage;
+  const paginatedData = filteredTableData.slice(startIndex, endIndex);
+  
+  // Sayfa değiştiğinde kontrol
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+  
+  // Records per page değiştiğinde sayfa resetle
+  const handleRecordsPerPageChange = (newRecordsPerPage: number) => {
+    setRecordsPerPage(newRecordsPerPage);
+    setCurrentPage(1);
+  };
 
   if (!selectedTable) {
     return <NoTableSelectedState />;
@@ -113,10 +138,14 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
   }
 
   return (
-    <div className="p-6">
+    <div className="h-full flex flex-col">
+      <div className="flex-shrink-0 p-6 pb-0">
       <DataTableHeader
         tableName={table.name}
         onAddNewRow={() => setAddingRow(true)}
+        recordsPerPage={recordsPerPage}
+        onRecordsPerPageChange={handleRecordsPerPageChange}
+        totalRecords={totalRecords}
       />
 
       {error && (
@@ -125,17 +154,26 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
         </div>
       )}
 
-      {loading && (
-        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-blue-600 text-sm">Veriler yükleniyor...</p>
-        </div>
-      )}
+        {loading && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-600 text-sm">Veriler yükleniyor...</p>
+          </div>
+        )}
+      </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+      {/* Scrollable Table Area */}
+      <div className="flex-1 overflow-auto px-6">
+        <div className="overflow-x-auto w-full min-h-0">
+        <table className="w-full divide-y divide-gray-200" style={{ minWidth: '100%' }}>
           <thead className="bg-gray-50">
             {/* Sütun başlıkları */}
             <tr>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                style={{ minWidth: '120px', width: '120px' }}
+              >
+                İşlemler
+              </th>
               {visibleFields.map((field: any) => (
                 <th
                   key={field.id}
@@ -159,15 +197,12 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
                   </div>
                 </th>
               ))}
-              <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ minWidth: '120px', width: '120px' }}
-              >
-                İşlemler
-              </th>
             </tr>
             {/* Sütun bazlı arama input'ları */}
             <tr className="bg-gray-100">
+              <th className="px-6 py-2">
+                <div className="text-xs text-gray-500 text-center">Filtreler</div>
+              </th>
               {visibleFields.map((field: any) => (
                 <th 
                   key={`filter-${field.id}`} 
@@ -192,9 +227,6 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
                   </div>
                 </th>
               ))}
-              <th className="px-6 py-2">
-                <div className="text-xs text-gray-500 text-center">Filtreler</div>
-              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -211,10 +243,10 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
               />
             )}
 
-            {filteredTableData.length === 0 && !addingRow ? (
+            {paginatedData.length === 0 && !addingRow ? (
               <NoDataState onAddRow={() => setAddingRow(true)} />
             ) : (
-              filteredTableData.map((row) => (
+              paginatedData.map((row) => (
                 <DataTableRow
                   key={row.id}
                   row={row}
@@ -231,13 +263,68 @@ const DataTable: React.FC<ExtendedDataTableProps> = ({
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
-      <TableStats 
-        recordCount={filteredTableData.length}
-        totalRecords={tableData.length}
-        hasFilters={Object.values(columnFilters).some(filter => filter.trim() !== '')}
-      />
+      {/* Footer Area - Fixed */}
+      <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 bg-gray-50">
+        {/* Pagination Navigation */}
+        {totalPages > 1 && (
+          <div className="flex flex-wrap justify-center items-center gap-2 mb-4">
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Önceki
+            </button>
+            
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNumber;
+              if (totalPages <= 5) {
+                pageNumber = i + 1;
+              } else if (currentPage <= 3) {
+                pageNumber = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNumber = totalPages - 4 + i;
+              } else {
+                pageNumber = currentPage - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNumber}
+                  onClick={() => setCurrentPage(pageNumber)}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    currentPage === pageNumber
+                      ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
+            
+            <button
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Sonraki
+            </button>
+          </div>
+        )}
+
+        <TableStats 
+          recordCount={paginatedData.length}
+          totalRecords={totalRecords}
+          hasFilters={Object.values(columnFilters).some(filter => filter.trim() !== '')}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          recordsPerPage={recordsPerPage}
+        />
+      </div>
     </div>
   );
 };

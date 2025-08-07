@@ -94,48 +94,55 @@ const ProjectDataView = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <ProjectHeader 
-        project={project} 
-        onNavigateBack={handleNavigateBack} 
-        users={users}
-        currentUser={state.user} // ✅ Admin kullanıcı bilgileri eklendi
-      />
+    <div className="h-screen bg-slate-50 flex flex-col">
+      {/* Header - Fixed Height */}
+      <div className="flex-shrink-0">
+        <ProjectHeader 
+          project={project} 
+          onNavigateBack={handleNavigateBack} 
+          users={users}
+          currentUser={state.user} // ✅ Admin kullanıcı bilgileri eklendi
+        />
+      </div>
 
-      <main className="container mx-auto p-4">
-        <div className="flex gap-6">
-          {/* Tables Sidebar */}
-          <TablesSidebar
-            project={project}
-            selectedTable={selectedTable}
-            onTableSelect={handleTableSelect}
-          />
+      {/* Main Content - Remaining Height with Scroll */}
+      <main className="flex-1 overflow-hidden">
+        <div className="h-full p-4">
+          <div className="flex flex-col lg:flex-row gap-6 h-full">
+            {/* Tables Sidebar - Responsive Width */}
+            <div className="lg:w-80 flex-shrink-0">
+              <TablesSidebar
+                project={project}
+                selectedTable={selectedTable}
+                onTableSelect={handleTableSelect}
+              />
+            </div>
 
-          {/* Data Table */}
-          <div className="flex-1 bg-white rounded-lg shadow-md">
-            <DataTable
-              table={currentTable}
-              tableData={tableData}
-              editingRow={editingRow}
-              addingRow={addingRow}
-              editData={editData}
-              newRowData={newRowData}
-              onAddRow={handleAddRow}
-              onEditRow={handleEditRow}
-              onSaveEdit={handleSaveEdit}
-              onCancelEdit={handleCancelEdit}
-              onDeleteRow={handleDeleteRow}
-              onEditInputChange={handleEditInputChange}
-              onNewRowInputChange={handleNewRowInputChange}
-              setAddingRow={setAddingRow}
-              setNewRowData={setNewRowData}
-              projectId={projectId}
-              navigate={navigate}
-              selectedTable={selectedTable}
-              loading={loading}
-              error={error}
-            />
+            {/* Data Table - Full Width with Scroll */}
+            <div className="flex-1 bg-white rounded-lg shadow-md min-w-0 overflow-hidden">
+              <DataTable
+                table={currentTable}
+                tableData={tableData}
+                editingRow={editingRow}
+                addingRow={addingRow}
+                editData={editData}
+                newRowData={newRowData}
+                onAddRow={handleAddRow}
+                onEditRow={handleEditRow}
+                onSaveEdit={handleSaveEdit}
+                onCancelEdit={handleCancelEdit}
+                onDeleteRow={handleDeleteRow}
+                onEditInputChange={handleEditInputChange}
+                onNewRowInputChange={handleNewRowInputChange}
+                setAddingRow={setAddingRow}
+                setNewRowData={setNewRowData}
+                projectId={projectId}
+                navigate={navigate}
+                selectedTable={selectedTable}
+                loading={loading}
+                error={error}
+              />
+            </div>
           </div>
         </div>
       </main>

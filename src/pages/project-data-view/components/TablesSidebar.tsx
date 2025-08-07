@@ -214,14 +214,26 @@ const TablesSidebar: React.FC<TablesSidebarProps> = ({ project, selectedTable, o
             <button
               key={table.id}
               onClick={() => onTableSelect(table.id)}
-              className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+              className={`w-full text-left px-3 py-3 rounded-md transition-colors min-h-[60px] ${
                 selectedTable === table.id
                   ? 'bg-blue-100 text-blue-800 border border-blue-300'
                   : 'hover:bg-gray-100'
               }`}
+              style={{ minWidth: '280px', maxWidth: '280px' }}
             >
-              <div className="font-medium">{table.name}</div>
-              <div className="text-xs text-gray-500">{table.fields?.length || 0} alan</div>
+              <div 
+                className="font-medium leading-5 break-words"
+                style={{ 
+                  wordWrap: 'break-word',
+                  overflowWrap: 'break-word',
+                  hyphens: 'auto',
+                  lineHeight: '1.25',
+                  maxWidth: '240px'
+                }}
+              >
+                {table.name}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">{table.fields?.length || 0} alan</div>
             </button>
           ))}
         </div>
