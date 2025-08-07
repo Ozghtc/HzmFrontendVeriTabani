@@ -121,123 +121,134 @@ const TablesSidebar: React.FC<TablesSidebarProps> = ({ project, selectedTable, o
   }, [project?.tables, selectedTableFilter, selectedValueFilter]);
   
   return (
-    <div className="w-80 bg-white rounded-lg shadow-md p-4">
-      <h2 className="text-lg font-semibold mb-4 text-gray-700 flex items-center justify-between">
-        <div className="flex items-center">
-          <Table size={20} className="mr-2" />
-          Tablolar
-        </div>
-        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-          {filteredTables.length} / {project?.tables?.length || 0}
-        </span>
-      </h2>
-      
-      {/* Filter Section */}
-      <div className="mb-4 space-y-3">
-        {/* First Filter - Table Selection */}
-        <div className="space-y-2">
-          <label className="block text-xs font-medium text-gray-600">
-            Tablo Seçin:
-          </label>
-          <select
-            value={selectedTableFilter || ''}
-            onChange={(e) => {
-              setSelectedTableFilter(e.target.value || null);
-              setSelectedValueFilter(null); // Reset second filter
-            }}
-            className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Tümünü Göster</option>
-            {availableTables.map((table: any) => (
-              <option key={table.id} value={table.id}>
-                {table.displayName}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="w-80 bg-white rounded-lg shadow-md flex flex-col h-full">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 p-4 pb-0">
+        <h2 className="text-lg font-semibold mb-4 text-gray-700 flex items-center justify-between">
+          <div className="flex items-center">
+            <Table size={20} className="mr-2" />
+            Tablolar
+          </div>
+          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+            {filteredTables.length} / {project?.tables?.length || 0}
+          </span>
+        </h2>
         
-        {/* Second Filter - Value Selection */}
-        {selectedTableFilter && (
+        {/* Filter Section */}
+        <div className="mb-4 space-y-3">
+          {/* First Filter - Table Selection */}
           <div className="space-y-2">
             <label className="block text-xs font-medium text-gray-600">
-              Değer Seçin:
+              Tablo Seçin:
             </label>
             <select
-              value={selectedValueFilter || ''}
-              onChange={(e) => setSelectedValueFilter(e.target.value || null)}
+              value={selectedTableFilter || ''}
+              onChange={(e) => {
+                setSelectedTableFilter(e.target.value || null);
+                setSelectedValueFilter(null); // Reset second filter
+              }}
               className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={loading}
             >
               <option value="">Tümünü Göster</option>
-              {loading ? (
-                <option value="" disabled>Yükleniyor...</option>
-              ) : (
-                tableData.map(item => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))
-              )}
+              {availableTables.map((table: any) => (
+                <option key={table.id} value={table.id}>
+                  {table.displayName}
+                </option>
+              ))}
             </select>
           </div>
-        )}
-        
-        {/* Clear Filter Button */}
-        {(selectedTableFilter || selectedValueFilter) && (
-          <button
-            onClick={() => {
-              setSelectedTableFilter(null);
-              setSelectedValueFilter(null);
-            }}
-            className="w-full flex items-center justify-center px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
-          >
-            <Filter size={14} className="mr-1" />
-            Filtreyi Temizle
-          </button>
-        )}
+          
+          {/* Second Filter - Value Selection */}
+          {selectedTableFilter && (
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-600">
+                Değer Seçin:
+              </label>
+              <select
+                value={selectedValueFilter || ''}
+                onChange={(e) => setSelectedValueFilter(e.target.value || null)}
+                className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={loading}
+              >
+                <option value="">Tümünü Göster</option>
+                {loading ? (
+                  <option value="" disabled>Yükleniyor...</option>
+                ) : (
+                  tableData.map(item => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+          )}
+          
+          {/* Clear Filter Button */}
+          {(selectedTableFilter || selectedValueFilter) && (
+            <button
+              onClick={() => {
+                setSelectedTableFilter(null);
+                setSelectedValueFilter(null);
+              }}
+              className="w-full flex items-center justify-center px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
+            >
+              <Filter size={14} className="mr-1" />
+              Filtreyi Temizle
+            </button>
+          )}
+        </div>
       </div>
       
-      {/* Tables List */}
-      {!filteredTables || filteredTables.length === 0 ? (
-        <div className="text-center text-gray-500 py-4">
-          <Table className="mx-auto mb-2" size={32} />
-                  <p className="text-sm">
-          {selectedTableFilter && selectedValueFilter 
-            ? 'Seçilen filtrelere uygun tablo bulunamadı'
-            : 'Henüz tablo yok'
-          }
-        </p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {filteredTables.map((table: any) => (
-            <button
-              key={table.id}
-              onClick={() => onTableSelect(table.id)}
-              className={`w-full text-left px-3 py-3 rounded-md transition-colors min-h-[60px] ${
-                selectedTable === table.id
-                  ? 'bg-blue-100 text-blue-800 border border-blue-300'
-                  : 'hover:bg-gray-100'
-              }`}
-              style={{ minWidth: '280px', maxWidth: '280px' }}
-            >
-              <div 
-                className="font-medium leading-5 break-words"
-                style={{ 
-                  wordWrap: 'break-word',
-                  overflowWrap: 'break-word',
-                  hyphens: 'auto',
-                  lineHeight: '1.25',
-                  maxWidth: '240px'
-                }}
+      {/* Scrollable Tables List */}
+      <div className="flex-1 overflow-y-auto px-4 pb-4 tables-scrollbar"
+           style={{
+             scrollbarWidth: 'thin',
+             scrollbarColor: '#CBD5E0 #F7FAFC'
+           }}>
+        
+        {/* Tables List */}
+        {!filteredTables || filteredTables.length === 0 ? (
+          <div className="text-center text-gray-500 py-4">
+            <Table className="mx-auto mb-2" size={32} />
+            <p className="text-sm">
+              {selectedTableFilter && selectedValueFilter 
+                ? 'Seçilen filtrelere uygun tablo bulunamadı'
+                : 'Henüz tablo yok'
+              }
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filteredTables.map((table: any) => (
+              <button
+                key={table.id}
+                onClick={() => onTableSelect(table.id)}
+                className={`w-full text-left px-3 py-3 rounded-md transition-colors min-h-[60px] ${
+                  selectedTable === table.id
+                    ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                    : 'hover:bg-gray-100'
+                }`}
+                style={{ minWidth: '240px', maxWidth: '240px' }}
               >
-                {table.name}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">{table.fields?.length || 0} alan</div>
-            </button>
-          ))}
-        </div>
-      )}
+                <div 
+                  className="font-medium leading-5 break-words"
+                  style={{ 
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    hyphens: 'auto',
+                    lineHeight: '1.25',
+                    maxWidth: '220px'
+                  }}
+                >
+                  {table.name}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">{table.fields?.length || 0} alan</div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
